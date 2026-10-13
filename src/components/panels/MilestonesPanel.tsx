@@ -42,34 +42,41 @@ export function MilestonesPanel() {
   return (
     <PanelFrame title={t('milestones.title')} testId="milestones-panel">
       {!current && <p className="all-done">{t('milestones.allDone')}</p>}
-      <ol className="milestone-list">
-        {gameData.milestones.map((milestone) => {
-          const done = completedIds.includes(milestone.id);
-          const isCurrent = current?.id === milestone.id;
-          return (
-            <li
-              key={milestone.id}
-              className={`milestone ${done ? 'done' : isCurrent ? 'current' : 'upcoming'}`}
-              data-milestone-id={milestone.id}
-            >
-              <div className="milestone-header">
-                <strong>{milestone.title}</strong>
-                <span className="tag">
-                  {done
-                    ? t('milestones.completed')
-                    : isCurrent
-                      ? t('milestones.current')
-                      : t('milestones.upcoming')}
-                </span>
-              </div>
-              {isCurrent && <ConditionList milestone={milestone} />}
-              <div className="muted milestone-reward">
-                {t('milestones.reward')}: {rewardLabel(milestone)}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      {gameData.eras.map((era) => (
+        <section key={era.id} className="era-group" data-era-id={era.id}>
+          <h3>{era.name}</h3>
+          <ol className="milestone-list">
+            {gameData.milestones
+              .filter((m) => m.era === era.id)
+              .map((milestone) => {
+                const done = completedIds.includes(milestone.id);
+                const isCurrent = current?.id === milestone.id;
+                return (
+                  <li
+                    key={milestone.id}
+                    className={`milestone ${done ? 'done' : isCurrent ? 'current' : 'upcoming'}`}
+                    data-milestone-id={milestone.id}
+                  >
+                    <div className="milestone-header">
+                      <strong>{milestone.title}</strong>
+                      <span className="tag">
+                        {done
+                          ? t('milestones.completed')
+                          : isCurrent
+                            ? t('milestones.current')
+                            : t('milestones.upcoming')}
+                      </span>
+                    </div>
+                    {isCurrent && <ConditionList milestone={milestone} />}
+                    <div className="muted milestone-reward">
+                      {t('milestones.reward')}: {rewardLabel(milestone)}
+                    </div>
+                  </li>
+                );
+              })}
+          </ol>
+        </section>
+      ))}
     </PanelFrame>
   );
 }

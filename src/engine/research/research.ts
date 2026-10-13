@@ -1,6 +1,7 @@
 import type { CommandResult, GameState } from '@/types';
 import type { CommandFailureReason } from '../core/commandReasons';
 import type { GameData } from '../core/definitions';
+import { isEraUnlocked } from '../milestones/eras';
 
 const fail = (reason: CommandFailureReason): CommandResult => ({ success: false, reason });
 
@@ -15,6 +16,7 @@ export function validateResearch(
   const { research } = state;
   if (research.completedTechnologyIds.includes(technologyId)) return fail('technology_completed');
   if (research.activeTechnologyId === technologyId) return fail('research_active');
+  if (!isEraUnlocked(state, data, technology.era)) return fail('era_locked');
   if (!technology.prerequisites.every((id) => research.completedTechnologyIds.includes(id))) {
     return fail('prerequisites_missing');
   }

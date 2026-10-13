@@ -298,7 +298,7 @@ function finish(pc: PixelCanvas, cx: number, cy: number): PixelSprite {
 }
 
 /** Výška plátna nad políčkom pre všetky budovy (spoločná, aby varianty mohli pridávať detaily). */
-const BUILDING_TOP = 32;
+const BUILDING_TOP = 44;
 
 type Painter = (pc: PixelCanvas, cx: number, cy: number) => void;
 
@@ -526,6 +526,186 @@ const PAINTERS: Record<string, Painter> = {
     pc.fillDiamond(cx - 4, cy - 31, 4, P.purpleShade);
   },
 
+  'house@4': (pc, cx, cy) => {
+    // Vila: biela omietka, stĺporadie, terakotová strecha, záhradka.
+    const hw = 13;
+    pc.fillDiamond(cx, cy + 1, 15, (x, y) => (pixelNoise(x, y, 9) < 0.3 ? P.grassLight : P.grass));
+    isoBox(pc, cx, cy - 1, hw, 12, { top: P.white, left: P.white, right: P.plaster });
+    for (const dx of [2, 6, 10]) {
+      const [x, y] = rightWall(cx, cy - 1, hw, dx, 12);
+      pc.fillRect(x, y, 1, 11, P.plasterShade);
+    }
+    hipRoof(pc, cx, cy - 1, hw, 12, 9, P.brick, P.brickShade);
+    pc.stamp(...leftWall(cx, cy - 1, hw, 4, 9), WINDOW, DETAIL_PAL);
+    pc.stamp(...leftWall(cx, cy - 1, hw, 9, 9), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy - 1, hw, 4, 5), DOOR, DETAIL_PAL);
+    pc.stamp(cx - 14, cy + 1, ['.o.', 'oRo', '.o.'], { o: P.leafDark, R: P.roof });
+  },
+
+  'house@5': (pc, cx, cy) => {
+    // Patricijský dom: trojpodlažný, kamenný sokel, modrá strecha, vežička.
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 7, { top: P.stone, left: P.stone, right: P.stoneDark });
+    isoBox(pc, cx, cy - 7, hw, 14, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    hipRoof(pc, cx, cy, hw, 21, 9, P.waterDeep, P.stoneDeep);
+    for (const up of [11, 18]) {
+      for (const dx of [3, 7, 11]) pc.stamp(...leftWall(cx, cy, hw, dx, up), WINDOW, DETAIL_PAL);
+      for (const dx of [4, 9]) pc.stamp(...rightWall(cx, cy, hw, dx, up), WINDOW, DETAIL_PAL);
+    }
+    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+    isoBox(pc, cx + 6, cy - 22, 3, 8, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    pc.fillDiamond(cx + 6, cy - 31, 4, P.waterDeep);
+    pc.set(cx + 6, cy - 34, P.glow);
+  },
+
+  brickworks: (pc, cx, cy) => {
+    // Tehelňa: hlinená pec s kupolou, komín, kopa tehál.
+    const hw = 11;
+    isoBox(pc, cx, cy, hw, 8, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx, cy, hw, 8, 5, P.soilDark, P.woodDark);
+    const [fx, fy] = leftWall(cx, cy, hw, 4, 5);
+    pc.stamp(fx, fy, ['ooo', 'oGo', 'GGG'], { o: P.stoneDeep, G: P.glow });
+    pc.fillRect(cx + 5, cy - 22, 3, 10, P.brickShade);
+    pc.set(cx + 6, cy - 24, P.smoke);
+    pc.set(cx + 7, cy - 26, P.smoke);
+    pc.stamp(cx - 14, cy, ['rrrr', 'RRRR', 'rrrr', 'RRRR'], { r: P.brick, R: P.brickShade });
+  },
+
+  fishery: (pc, cx, cy) => {
+    // Rybárska chata na mólach nad vodou a loďka.
+    pc.fillDiamond(cx, cy, HW - 2, (x, y) => ((x + y) % 4 === 0 ? P.woodShade : P.wood));
+    for (const [dx, dy] of [
+      [-10, 2],
+      [10, 2],
+      [0, 6],
+    ])
+      pc.fillRect(cx + dx! - 1, cy + dy!, 2, 3, P.woodDark);
+    isoBox(pc, cx - 2, cy - 2, 6, 6, { top: P.wood, left: P.wood, right: P.woodShade });
+    hipRoof(pc, cx - 2, cy - 2, 6, 6, 5, P.waterDeep, P.stoneDeep);
+    pc.stamp(cx + 4, cy - 1, ['.WWWW.', 'WwwwwW', '.WWWW.'], { W: P.woodDark, w: P.wood });
+    pc.fillRect(cx + 6, cy - 7, 1, 6, P.woodDark);
+    pc.stamp(cx + 7, cy - 7, ['ww', 'www', 'ww'], { w: P.plaster });
+  },
+
+  aqueduct: (pc, cx, cy) => {
+    // Kamenné oblúky s vodným žľabom navrchu.
+    isoBox(pc, cx, cy, 13, 12, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    pc.fillDiamond(cx, cy - 12, 9, P.water);
+    for (const dx of [3, 9]) {
+      const [x, y] = leftWall(cx, cy, 13, dx, 8);
+      pc.fillRect(x, y, 3, 8, P.stoneDeep);
+      pc.set(x + 1, y - 1, P.stoneDeep);
+    }
+    for (const dx of [3, 9]) {
+      const [x, y] = rightWall(cx, cy, 13, dx, 8);
+      pc.fillRect(x, y, 3, 8, P.stoneDeep);
+      pc.set(x + 1, y - 1, P.stoneDeep);
+    }
+  },
+
+  temple: (pc, cx, cy) => {
+    // Chrám: podstavec, stĺpy, trojuholníkový štít.
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 3, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    isoBox(pc, cx, cy - 3, hw - 2, 11, { top: P.white, left: P.plaster, right: P.plasterShade });
+    for (const dx of [1, 4, 7, 10]) {
+      const [x, y] = leftWall(cx, cy - 3, hw - 2, dx, 11);
+      pc.fillRect(x, y, 1, 11, P.white);
+      const [rx, ry] = rightWall(cx, cy - 3, hw - 2, dx, 11);
+      pc.fillRect(rx, ry, 1, 11, P.white);
+    }
+    hipRoof(pc, cx, cy - 3, hw - 2, 11, 7, P.white, P.stone);
+    pc.set(cx, cy - 22, P.glow);
+  },
+
+  mine: (pc, cx, cy) => {
+    // Baňa v kopci: vstup do štôlne s výdrevou, vozík s rudou.
+    pc.fillPolygon(
+      [
+        [cx - 13, cy + 2],
+        [cx - 4, cy - 9],
+        [cx + 3, cy - 11],
+        [cx + 13, cy + 2],
+        [cx, cy + 7],
+      ],
+      (x) => (x < cx ? P.hillLight : P.hillDark),
+    );
+    pc.stamp(cx - 4, cy - 6, ['WWWWWWW', 'W.....W', 'W.ooo.W', 'W.ooo.W', 'W.ooo.W'], {
+      W: P.woodDark,
+      o: P.ink,
+    });
+    pc.stamp(cx + 4, cy, ['.ssss.', 'sSDSSs', 'oooooo', '.o..o.'], {
+      s: P.stoneDeep,
+      S: P.stone,
+      D: P.brickShade,
+      o: P.ink,
+    });
+  },
+
+  smelter: (pc, cx, cy) => {
+    // Huta: kamenná pec, vysoký komín, žeravé železo.
+    const hw = 11;
+    isoBox(pc, cx, cy, hw, 10, { top: P.stoneDark, left: P.stoneDark, right: P.stoneDeep });
+    hipRoof(pc, cx, cy, hw, 10, 4, P.stoneDeep, P.ink);
+    pc.fillRect(cx - 4, cy - 30, 4, 18, P.brickShade);
+    pc.fillRect(cx - 4, cy - 30, 4, 1, P.ink);
+    pc.set(cx - 3, cy - 32, P.smoke);
+    pc.set(cx - 2, cy - 33, P.smoke);
+    const [fx, fy] = leftWall(cx, cy, hw, 6, 6);
+    pc.stamp(fx, fy, ['oooo', 'oGGo', 'GGGG'], { o: P.ink, G: P.wheat });
+    pc.stamp(cx + 6, cy + 1, ['.ii.', 'iIIi'], { i: P.stoneDeep, I: P.stoneLight });
+  },
+
+  university: (pc, cx, cy) => {
+    // Univerzita: veľká budova s kupolou a hodinami.
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 14, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx, cy, hw, 14, 6, P.stoneDark, P.stoneDeep);
+    for (const dx of [3, 7, 11]) pc.stamp(...leftWall(cx, cy, hw, dx, 11), WINDOW, DETAIL_PAL);
+    for (const dx of [6, 10]) pc.stamp(...rightWall(cx, cy, hw, dx, 11), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 3, 5), DOOR, DETAIL_PAL);
+    isoBox(pc, cx, cy - 18, 5, 7, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    pc.fillDiamond(cx, cy - 27, 5, P.grass);
+    pc.fillDiamond(cx, cy - 29, 3, P.grassLight);
+    pc.set(cx - 3, cy - 21, P.glow);
+  },
+
+  cathedral: (pc, cx, cy) => {
+    // Katedrála: loď, dve veže so špicami, ružicové okno.
+    const hw = 15;
+    isoBox(pc, cx, cy, hw, 16, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    hipRoof(pc, cx, cy, hw, 16, 8, P.stoneDeep, P.ink);
+    for (const dx of [3, 7, 11]) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 13);
+      pc.fillRect(x, y, 2, 6, P.waterDeep);
+      pc.set(x, y - 1, P.waterDeep);
+    }
+    pc.stamp(
+      ...rightWall(cx, cy, hw, 4, 7),
+      ['dddd', 'dDDd', 'dDDd', 'dDDd', 'dDDd', 'dDDd'],
+      DETAIL_PAL,
+    );
+    pc.stamp(...rightWall(cx, cy, hw, 4, 13), ['.ww.', 'wgww', '.ww.'], {
+      w: P.waterDeep,
+      g: P.glow,
+    });
+    for (const ox of [-9, 9]) {
+      isoBox(pc, cx + ox, cy - 2 + Math.abs(ox) / 3, 4, 26, {
+        top: P.stoneLight,
+        left: P.stoneLight,
+        right: P.stone,
+      });
+      pc.fillPolygon(
+        [
+          [cx + ox - 4, cy - 28 + Math.abs(ox) / 3],
+          [cx + ox + 4, cy - 28 + Math.abs(ox) / 3],
+          [cx + ox, cy - 40 + Math.abs(ox) / 3],
+        ],
+        (x) => (x < cx + ox ? P.stoneDark : P.stoneDeep),
+      );
+    }
+  },
+
   market: paintMarket(2),
   'market+': (pc, cx, cy) => {
     paintMarket(3)(pc, cx, cy);
@@ -645,4 +825,122 @@ export function drawMarker(kind: MarkerKind): PixelSprite {
   );
   pc.stamp(2, 1, glyph, { w: P.white, y: P.glow, o: P.ink });
   return { canvas: pc, anchorX: 4, anchorY: 9 };
+}
+
+// --- Ikony surovín (8 × 8) ------------------------------------------------------------
+
+export type IconKind =
+  'food' | 'wood' | 'stone' | 'tools' | 'knowledge' | 'bricks' | 'iron' | 'money';
+
+const ICONS: Record<IconKind, { rows: string[]; pal: Record<string, Rgb> }> = {
+  food: {
+    rows: [
+      '..y.y...',
+      '.yYyYy..',
+      '..yYy...',
+      '.yYyYy..',
+      '..yYy...',
+      '...g....',
+      '...g....',
+      '..ggg...',
+    ],
+    pal: { y: P.wheat, Y: P.wheatLight, g: P.soilDark },
+  },
+  wood: {
+    rows: [
+      '........',
+      '..oooo..',
+      '.oWWWWo.',
+      'oWwWWwWo',
+      'oWWWWWWo',
+      '.oWwwWo.',
+      '..oooo..',
+      '........',
+    ],
+    pal: { o: P.woodDark, W: P.wood, w: P.soilLight },
+  },
+  stone: {
+    rows: [
+      '........',
+      '...oo...',
+      '..oLSo..',
+      '.oLSSDo.',
+      'oLSSSDDo',
+      'oSSDDDDo',
+      '.oooooo.',
+      '........',
+    ],
+    pal: { o: P.stoneDeep, L: P.stoneLight, S: P.stone, D: P.stoneDark },
+  },
+  tools: {
+    rows: [
+      '.ssss...',
+      'sSSSSs..',
+      '.ss.Ss..',
+      '....w...',
+      '...w....',
+      '..w.....',
+      '.w......',
+      'w.......',
+    ],
+    pal: { s: P.stoneDeep, S: P.stoneLight, w: P.wood },
+  },
+  knowledge: {
+    rows: [
+      '.pppppp.',
+      'pPPPPPPp',
+      '.PllllP.',
+      '.PPPPPP.',
+      '.PllllP.',
+      '.PPPPPP.',
+      'pPPPPPPp',
+      '.pppppp.',
+    ],
+    pal: { p: P.plasterDark, P: P.plaster, l: P.woodShade },
+  },
+  bricks: {
+    rows: [
+      '........',
+      'rrrRrrrR',
+      'RRRRRRRR',
+      'rRrrrRrr',
+      'RRRRRRRR',
+      'rrrRrrrR',
+      'RRRRRRRR',
+      '........',
+    ],
+    pal: { r: P.brick, R: P.brickShade },
+  },
+  iron: {
+    rows: [
+      '........',
+      '........',
+      '..LLLL..',
+      '.LSSSSL.',
+      'LSSSSSSD',
+      'DDDDDDDD',
+      '........',
+      '........',
+    ],
+    pal: { L: P.stoneLight, S: P.stone, D: P.stoneDeep },
+  },
+  money: {
+    rows: [
+      '..oooo..',
+      '.oyyyyo.',
+      'oyYyyyyo',
+      'oyYyyyyo',
+      'oyyyyyyo',
+      'oyyyyyYo',
+      '.oyyyyo.',
+      '..oooo..',
+    ],
+    pal: { o: 0xb86f00, y: P.wheat, Y: P.wheatLight },
+  },
+};
+
+export function drawIcon(kind: IconKind): PixelCanvas {
+  const pc = new PixelCanvas(8, 8);
+  pc.stamp(0, 0, ICONS[kind].rows, ICONS[kind].pal);
+  return pc;
 }

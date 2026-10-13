@@ -37,7 +37,15 @@ function buildDenseCity(): GameState {
     for (let x = 0; x < 64 && n < 500; x++) place(kinds[(x + y) % kinds.length]!, x, y + 1);
   }
   state.city.population.total = 2000;
-  state.city.economy.resources = { food: 200, wood: 200, stone: 200, tools: 200, knowledge: 0 };
+  state.city.economy.resources = {
+    food: 200,
+    wood: 200,
+    stone: 200,
+    tools: 200,
+    knowledge: 0,
+    bricks: 0,
+    iron: 0,
+  };
   state.city.economy.money = 1e6;
   return state;
 }

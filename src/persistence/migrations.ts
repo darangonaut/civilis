@@ -9,14 +9,36 @@ export type Migration = (raw: Record<string, unknown>) => Record<string, unknown
  * Registrované migrácie: kľúč = zdrojová verzia. Pri zmene `GameState` zvýš SCHEMA_VERSION
  * a pridaj sem funkciu, ktorá prevedie staré dáta na nové.
  */
+type RawCity = {
+  buildings?: Record<string, unknown>[];
+  population?: Record<string, unknown>;
+  economy?: { resources?: Record<string, unknown> } & Record<string, unknown>;
+} & Record<string, unknown>;
+
 export const MIGRATIONS: Readonly<Record<number, Migration>> = {
-  /** v1 → v2: budovy dostali úroveň (všetky doterajšie sú na úrovni 1). */
+  /** v1 → v2: budovy dostali úroveň (doterajšie sú na úrovni 1), populácia rozpracovaný prírastok. */
   1: (raw) => {
-    const city = raw.city as { buildings?: Record<string, unknown>[] } | undefined;
+    const city = raw.city as RawCity | undefined;
     if (!city || !Array.isArray(city.buildings)) return raw;
     return {
       ...raw,
-      city: { ...city, buildings: city.buildings.map((b) => ({ level: 1, ...b })) },
+      city: {
+        ...city,
+        buildings: city.buildings.map((b) => ({ level: 1, ...b })),
+        population: { growthProgress: 0, ...city.population },
+      },
+    };
+  },
+  /** v2 → v3: nové suroviny tehly a železo (éry Starovek a Stredovek). */
+  2: (raw) => {
+    const city = raw.city as RawCity | undefined;
+    if (!city?.economy?.resources) return raw;
+    return {
+      ...raw,
+      city: {
+        ...city,
+        economy: { ...city.economy, resources: { bricks: 0, iron: 0, ...city.economy.resources } },
+      },
     };
   },
 };

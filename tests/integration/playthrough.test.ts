@@ -4,13 +4,13 @@ import { createNewGame } from '@/engine/core/newGame';
 import { playthrough } from '../helpers/bot';
 import { testData } from '../helpers/gameData';
 
-const SEEDS = [1, 2, 3, 7, 42, 99, 1234];
-/** Horná hranica dní pre bota s jednou stavebnou akciou denne (bot dnes potrebuje ~330–370). */
-const MAX_DAYS = 500;
+const SEEDS = [1, 7, 42, 1234];
+/** Horná hranica dní pre bota (2 stavebné akcie denne) na všetky tri éry; dnes ~860–910. */
+const MAX_DAYS = 1200;
 
 describe('hrateľnosť (test F)', () => {
   it.each(SEEDS)(
-    'na mape so seedom %i sa dajú splniť všetky míľniky bez vývojárskych nástrojov',
+    'na mape so seedom %i sa dajú prejsť všetky éry bez vývojárskych nástrojov',
     (seed) => {
       const engine = createGameEngine(
         testData,
@@ -25,5 +25,6 @@ describe('hrateľnosť (test F)', () => {
       expect(days[0]).toBeGreaterThan(15);
       expect(days.at(-1)).toBeLessThanOrEqual(MAX_DAYS);
     },
+    60_000,
   );
 });

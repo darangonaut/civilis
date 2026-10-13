@@ -56,6 +56,7 @@ function applyLoadedState(state: GameState, message: string): void {
   ui.selectInstance(null);
   ui.setBuildMode(null);
   ui.setVictoryOpen(false);
+  ui.setNewEra(null);
   ui.showNotice(message, 'success');
 }
 

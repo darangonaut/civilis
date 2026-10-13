@@ -3,6 +3,7 @@ import { BuildingCatalog } from '@/components/BuildingCatalog';
 import { DetailPanel } from '@/components/DetailPanel';
 import { MapView } from '@/components/MapView';
 import { TopBar } from '@/components/TopBar';
+import { NewEraDialog } from '@/components/NewEraDialog';
 import { VictoryDialog } from '@/components/VictoryDialog';
 import { useEffect } from 'react';
 import { controller } from './game';
@@ -30,6 +31,7 @@ export function App() {
       <MapView />
       <DetailPanel />
       <BottomBar />
+      <NewEraDialog />
       <VictoryDialog />
     </div>
   );

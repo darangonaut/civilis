@@ -149,7 +149,14 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
     const producesSomething =
       definition.moneyOutput > 0 || RESOURCE_IDS.some((id) => (definition.outputs[id] ?? 0) > 0);
     if (!producesSomething) {
-      status.efficiency = 1;
+      // Služby bez výroby (chrám, katedrála) fungujú podľa obsadenia pracovníkmi.
+      if (status.workersRequired > 0) {
+        status.efficiency = status.workersAssigned / status.workersRequired;
+        if (status.workersAssigned === 0) status.problems.push({ code: 'no_workers' });
+        else if (status.efficiency < 1) status.problems.push({ code: 'understaffed' });
+      } else {
+        status.efficiency = 1;
+      }
       continue;
     }
 

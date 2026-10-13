@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { GameDataError, loadGameData, type RawGameData } from '@/engine/core/definitions';
 import balance from '@/data/balance.json';
 import buildings from '@/data/buildings.json';
+import eras from '@/data/eras.json';
 import milestones from '@/data/milestones.json';
 import technologies from '@/data/technologies.json';
 
 const validRaw = (): RawGameData =>
-  structuredClone({ buildings, technologies, milestones, balance });
+  structuredClone({ eras, buildings, technologies, milestones, balance });
 
 function expectIssue(raw: RawGameData, pattern: RegExp) {
   try {
@@ -22,9 +23,11 @@ function expectIssue(raw: RawGameData, pattern: RegExp) {
 describe('herné dáta', () => {
   it('súbory v src/data prejdú validáciou', () => {
     const data = loadGameData(validRaw());
-    expect(data.buildings).toHaveLength(10);
-    expect(data.technologies).toHaveLength(6);
-    expect(data.milestones).toHaveLength(5);
+    expect(data.eras.map((e) => e.id)).toEqual(['settlement', 'antiquity', 'middle_ages']);
+    // Prvá éra zodpovedá špecifikácii: 10 budov, 6 technológií, 5 míľnikov.
+    expect(data.technologies.filter((t) => t.era === 'settlement')).toHaveLength(6);
+    expect(data.milestones.filter((m) => m.era === 'settlement')).toHaveLength(5);
+    expect(data.buildings.filter((b) => !b.requiredTechnologyId)).toHaveLength(10);
   });
 
   it('zodpovedajú katalógu budov zo špecifikácie', () => {
@@ -47,7 +50,8 @@ describe('herné dáta', () => {
     expect(b('well').requiresRoad).toBe(false);
     for (const building of data.buildings) {
       expect(building.size).toEqual({ width: 1, height: 1 });
-      if (!['road', 'well'].includes(building.id)) expect(building.requiresRoad).toBe(true);
+      if (!['road', 'well', 'aqueduct'].includes(building.id))
+        expect(building.requiresRoad).toBe(true);
     }
   });
 
@@ -55,7 +59,7 @@ describe('herné dáta', () => {
     const { startingState } = loadGameData(validRaw()).balance;
     expect(startingState).toEqual({
       population: 10,
-      resources: { food: 100, wood: 80, stone: 30, tools: 10, knowledge: 0 },
+      resources: { food: 100, wood: 80, stone: 30, tools: 10, knowledge: 0, bricks: 0, iron: 0 },
       money: 500,
       happiness: 70,
     });

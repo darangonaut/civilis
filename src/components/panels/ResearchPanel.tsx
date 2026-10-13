@@ -3,7 +3,7 @@ import { controller } from '@/app/game';
 import { commandReasonLabel, effectLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { validateResearch } from '@/engine';
+import { currentEraIndex, validateResearch } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import type { TechnologyDefinition } from '@/types';
 import { PanelFrame } from './PanelFrame';
@@ -15,6 +15,7 @@ export function ResearchPanel() {
   const research = useGameState((s) => s.research);
   const knowledge = useGameState((s) => s.city.economy.resources.knowledge);
   const knowledgeRate = useGameState((s) => s.city.economy.dailyProduction.knowledge ?? 0);
+  const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
   const active = research.activeTechnologyId
     ? gameData.technologiesById.get(research.activeTechnologyId)
     : undefined;
@@ -46,16 +47,27 @@ export function ResearchPanel() {
           <p className="muted">{t('research.noneActive')}</p>
         )}
       </div>
-      <ul className="tech-list">
-        {gameData.technologies.map((tech) => (
-          <TechCard
-            key={tech.id}
-            tech={tech}
-            status={statusOf(tech)}
-            hasActive={active !== undefined}
-          />
-        ))}
-      </ul>
+      {gameData.eras.map((era, index) => (
+        <section key={era.id} className="era-group" data-era-id={era.id}>
+          <h3>{era.name}</h3>
+          {index > eraIndex ? (
+            <p className="muted hint">{t('research.eraLocked', { era: era.name })}</p>
+          ) : (
+            <ul className="tech-list">
+              {gameData.technologies
+                .filter((tech) => tech.era === era.id)
+                .map((tech) => (
+                  <TechCard
+                    key={tech.id}
+                    tech={tech}
+                    status={statusOf(tech)}
+                    hasActive={active !== undefined}
+                  />
+                ))}
+            </ul>
+          )}
+        </section>
+      ))}
     </PanelFrame>
   );
 }

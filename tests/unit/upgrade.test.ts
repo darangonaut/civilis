@@ -59,7 +59,7 @@ describe('úrovne budov', () => {
     expect(state.city.population.housingCapacity).toBe(L2.housingCapacity);
   });
 
-  it('meštiansky dom navyše vyžaduje fungujúcu školu v dosahu a potom je na maxime', () => {
+  it('meštiansky dom navyše vyžaduje fungujúcu školu v dosahu', () => {
     const { engine, id } = cityWithHouse();
     setCity(engine, {
       completedTechnologyIds: [L2.requiredTechnologyId!, L3.requiredTechnologyId!],
@@ -73,7 +73,8 @@ describe('úrovne budov', () => {
     expect(upgrade(engine, id)).toEqual({ success: true });
     expect(level(engine, id)).toBe(3);
     expect(engine.getState().city.population.housingCapacity).toBe(L3.housingCapacity);
-    expectRejected(engine, id, 'max_level');
+    // Vila je ďalšia úroveň, potrebuje Architektúru.
+    expectRejected(engine, id, 'technology_required');
   });
 
   it('veľký sklad zvýši kapacitu skladu', () => {
@@ -97,15 +98,37 @@ describe('úrovne budov', () => {
   });
 });
 
-describe('migrácia uložených hier v1 → v2', () => {
-  it('doplní budovám úroveň 1', () => {
+describe('migrácia uložených hier', () => {
+  it('v1 → aktuálna: úroveň budov, rozpracovaný prírastok a nové suroviny', () => {
     const { engine } = cityWithHouse();
     const v1 = structuredClone(engine.serialize()) as unknown as Record<string, unknown>;
     v1.schemaVersion = 1;
-    const city = v1.city as { buildings: Record<string, unknown>[] };
+    const city = v1.city as {
+      buildings: Record<string, unknown>[];
+      population: Record<string, unknown>;
+      economy: { resources: Record<string, unknown> };
+    };
     for (const b of city.buildings) delete b.level;
+    delete city.population.growthProgress;
+    delete city.economy.resources.bricks;
+    delete city.economy.resources.iron;
+
     const migrated = migrateGameState(v1);
-    expect(migrated.schemaVersion).toBe(2);
+    expect(migrated.schemaVersion).toBe(3);
     expect(migrated.city.buildings.every((b) => b.level === 1)).toBe(true);
+    expect(migrated.city.population.growthProgress).toBe(0);
+    expect(migrated.city.economy.resources.bricks).toBe(0);
+    expect(migrated.city.economy.resources.iron).toBe(0);
+  });
+});
+
+describe('najvyššia úroveň', () => {
+  it('posledná úroveň domu sa už nedá vylepšiť', () => {
+    const engine = createTestCity({ population: 10 });
+    const id = build(engine, 'house', { x: 3, y: 3 });
+    const state = engine.serialize();
+    state.city.buildings.find((b) => b.id === id)!.level = 1 + house.levels!.length;
+    engine.load(state);
+    expectRejected(engine, id, 'max_level');
   });
 });

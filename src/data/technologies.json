@@ -10,7 +10,8 @@
         "target": "wood",
         "multiplier": 1.2
       }
-    ]
+    ],
+    "era": "settlement"
   },
   {
     "id": "irrigation",
@@ -23,7 +24,8 @@
         "target": "food",
         "multiplier": 1.2
       }
-    ]
+    ],
+    "era": "settlement"
   },
   {
     "id": "masonry",
@@ -36,7 +38,8 @@
         "target": "stone",
         "multiplier": 1.2
       }
-    ]
+    ],
+    "era": "settlement"
   },
   {
     "id": "labor_organization",
@@ -49,7 +52,8 @@
         "target": "all",
         "multiplier": 1.1
       }
-    ]
+    ],
+    "era": "settlement"
   },
   {
     "id": "education",
@@ -62,7 +66,8 @@
         "target": "knowledge",
         "multiplier": 1.5
       }
-    ]
+    ],
+    "era": "settlement"
   },
   {
     "id": "city_administration",
@@ -74,6 +79,147 @@
         "type": "maintenance_multiplier",
         "target": "all",
         "multiplier": 0.8
+      }
+    ],
+    "era": "settlement"
+  },
+  {
+    "id": "pottery",
+    "name": "Tehliarstvo",
+    "era": "antiquity",
+    "cost": 80,
+    "prerequisites": ["masonry"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "bricks",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "fishing",
+    "name": "Rybárstvo",
+    "era": "antiquity",
+    "cost": 70,
+    "prerequisites": ["irrigation"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "mythology",
+    "name": "Mytológia",
+    "era": "antiquity",
+    "cost": 100,
+    "prerequisites": ["education"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "aqueducts",
+    "name": "Akvadukty",
+    "era": "antiquity",
+    "cost": 120,
+    "prerequisites": ["pottery"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "architecture",
+    "name": "Architektúra",
+    "era": "antiquity",
+    "cost": 150,
+    "prerequisites": ["pottery", "mythology"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.9
+      }
+    ]
+  },
+  {
+    "id": "mining",
+    "name": "Baníctvo",
+    "era": "middle_ages",
+    "cost": 200,
+    "prerequisites": ["architecture"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "stone",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "metallurgy",
+    "name": "Hutníctvo",
+    "era": "middle_ages",
+    "cost": 250,
+    "prerequisites": ["mining"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "tools",
+        "multiplier": 1.25
+      }
+    ]
+  },
+  {
+    "id": "scholasticism",
+    "name": "Univerzity",
+    "era": "middle_ages",
+    "cost": 300,
+    "prerequisites": ["architecture"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.25
+      }
+    ]
+  },
+  {
+    "id": "banking",
+    "name": "Bankovníctvo",
+    "era": "middle_ages",
+    "cost": 280,
+    "prerequisites": ["scholasticism"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.85
+      }
+    ]
+  },
+  {
+    "id": "theology",
+    "name": "Teológia",
+    "era": "middle_ages",
+    "cost": 400,
+    "prerequisites": ["scholasticism", "metallurgy"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
       }
     ]
   }

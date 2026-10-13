@@ -1,11 +1,13 @@
 import { analyzeCity } from '@/engine/economy/analysis';
 import { validatePlacement } from '@/engine/core/commands';
 import { upgradableBuildings } from '@/engine/core/upgrade';
+import { computeRoadNetwork } from '@/engine/world/connectivity';
+import { serviceCoverage, serviceCoverageGrid } from '@/engine/population/population';
 import { validateResearch } from '@/engine/research/research';
 import type { CivilisEngine } from '@/engine/core/engine';
 import type { GameData } from '@/engine/core/definitions';
 import { getTile, neighbors4, tileIndex } from '@/engine/world/grid';
-import type { GameState, Position, TerrainType } from '@/types';
+import { RESOURCE_IDS, type GameState, type Position, type TerrainType } from '@/types';
 
 /**
  * Jednoduchý „hráč“ pre test hrateľnosti (test F). Používa výhradne herné príkazy
@@ -59,7 +61,7 @@ export class Bot {
   }
 
   private networkRoads(): Set<number> {
-    return analyzeCity(this.state, this.data).roadNetwork as Set<number>;
+    return computeRoadNetwork(this.state, this.data);
   }
 
   /** Voľné políčka pre budovu susediace s cestnou sieťou, zoradené od stredu mesta. */
@@ -176,9 +178,50 @@ export class Bot {
   }
 
   private affordable(buildingId: string, reserveStone = 0): boolean {
-    const cost = this.data.buildingsById.get(buildingId)!.constructionCost;
+    const definition = this.data.buildingsById.get(buildingId)!;
+    if (
+      definition.requiredTechnologyId &&
+      !this.state.research.completedTechnologyIds.includes(definition.requiredTechnologyId)
+    ) {
+      return false;
+    }
     const r = this.state.city.economy.resources;
-    return (cost.wood ?? 0) <= r.wood && (cost.stone ?? 0) + reserveStone <= r.stone;
+    return RESOURCE_IDS.every(
+      (id) => (definition.constructionCost[id] ?? 0) + (id === 'stone' ? reserveStone : 0) <= r[id],
+    );
+  }
+
+  /**
+   * Postaví budovu služby pri dome, ktorý nie je v jej dosahu: najprv pri ceste v dosahu
+   * domu, inak (služby bez cesty) na ľubovoľné voľné políčko bloku.
+   */
+  private buildServiceNear(buildingId: string): boolean {
+    const definition = this.data.buildingsById.get(buildingId)!;
+    const service = definition.service!;
+    const analysis = analyzeCity(this.state, this.data);
+    const grid = serviceCoverageGrid(this.state, this.data, analysis, service.type);
+    const world = this.state.world;
+    const network = this.networkRoads();
+    const roadside = new Set(
+      this.roadsideSpots(buildingId, network).map((p) => tileIndex(world, p.x, p.y)),
+    );
+    const houses = this.state.city.buildings.filter(
+      (b) => b.definitionId === 'house' && grid[tileIndex(world, b.position.x, b.position.y)] !== 1,
+    );
+    for (const house of houses) {
+      for (let d = 1; d < service.radius; d++) {
+        for (let dy = -d; dy <= d; dy++) {
+          for (let dx = -d; dx <= d; dx++) {
+            const p = { x: house.position.x + dx, y: house.position.y + dy };
+            if (!getTile(world, p.x, p.y) || this.isStreet(p) || !this.canPlace(buildingId, p))
+              continue;
+            if (definition.requiresRoad && !roadside.has(tileIndex(world, p.x, p.y))) continue;
+            return this.place(buildingId, p);
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /** Studňa pri dome mimo dosahu vody (studňa nepotrebuje cestu). */
@@ -215,10 +258,13 @@ export class Bot {
     if (next) this.engine.execute({ type: 'START_RESEARCH', technologyId: next.id });
   }
 
-  /** Jeden herný deň rozhodovania — najviac jedna stavebná akcia, ako by stihol človek. */
+  /**
+   * Jeden herný deň rozhodovania — najviac dve stavebné akcie (človek s ťahaním stihne
+   * za 2 sekundy hry aj viac).
+   */
   act(): void {
     this.chooseResearch();
-    this.actOnce();
+    for (let i = 0; i < 2; i++) if (!this.actOnce()) break;
   }
 
   private actOnce(): boolean {
@@ -265,7 +311,9 @@ export class Bot {
         this.data.buildingsById.get(building.definitionId)!.toolUsePerWorker;
     }
     const toolDeficit = toolsNeeded - (economy.dailyProduction.tools ?? 0);
+    const workshopsIdle = city.buildings.some((b) => b.definitionId === 'workshop' && !b.enabled);
     if (
+      !workshopsIdle &&
       toolDeficit > 0 &&
       r.tools / toolDeficit < 15 &&
       balance('wood') > 2 &&
@@ -333,10 +381,72 @@ export class Bot {
       if (this.build('quarry')) return true;
     }
 
-    // 8. Škola pre vedomosti a vzdelanie.
+    // 8. Škola pre vedomosti a vzdelanie (aj pri domoch mimo dosahu — meštianske domy ju potrebujú).
     const schoolsWanted = population.total >= 20 ? 1 + Math.floor(population.total / 120) : 0;
     if (this.count('school') < schoolsWanted && freeWorkers >= 3 && this.affordable('school', 2)) {
       if (this.build('school')) return true;
+    }
+    if (
+      population.happinessFactors.education < 90 &&
+      population.total >= 60 &&
+      freeWorkers >= 3 &&
+      this.affordable('school', 2)
+    ) {
+      if (this.buildServiceNear('school')) return true;
+    }
+
+    // --- Starovek ---
+    const need = (id: 'bricks' | 'iron' | 'tools') =>
+      (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
+    if (
+      this.affordable('brickworks', 2) &&
+      need('bricks') < 2 + population.total / 150 &&
+      r.bricks < 150 &&
+      freeWorkers >= 4
+    ) {
+      if (this.build('brickworks')) return true;
+    }
+    if (
+      this.affordable('fishery') &&
+      this.count('fishery') < 1 + Math.floor(population.total / 200) &&
+      freeWorkers >= 2
+    ) {
+      if (this.build('fishery')) return true;
+    }
+    if (this.affordable('aqueduct') && this.count('aqueduct') === 0) {
+      if (this.buildServiceNear('aqueduct') || this.build('aqueduct')) return true;
+    }
+    if (this.affordable('temple', 2) && freeWorkers >= 2 && this.count('house') > 0) {
+      const culture = serviceCoverage(this.state, this.data, analysis, 'culture');
+      if (
+        culture < 0.9 &&
+        (this.buildServiceNear('temple') || (this.count('temple') === 0 && this.build('temple')))
+      )
+        return true;
+    }
+
+    // --- Stredovek ---
+    if (
+      this.affordable('mine', 2) &&
+      (this.count('mine') < 2 || need('iron') < 2) &&
+      r.iron < 150 &&
+      freeWorkers >= 4
+    ) {
+      if (this.build('mine')) return true;
+    }
+    if (
+      this.affordable('smelter', 2) &&
+      this.count('smelter') < 1 + Math.floor(population.total / 600) &&
+      r.iron >= 10 &&
+      freeWorkers >= 4
+    ) {
+      if (this.build('smelter')) return true;
+    }
+    if (this.affordable('university', 2) && this.count('university') === 0 && freeWorkers >= 5) {
+      if (this.build('university')) return true;
+    }
+    if (this.affordable('cathedral', 2) && this.count('cathedral') === 0 && freeWorkers >= 6) {
+      if (this.build('cathedral')) return true;
     }
     return false;
   }

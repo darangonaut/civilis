@@ -2,7 +2,12 @@ import { formatDelta } from '@/app/format';
 import { controller } from '@/app/game';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
+import { resourceVisible } from '@/app/eras';
+import { gameData } from '@/data';
+import { currentEraIndex } from '@/engine';
+import type { IconKind } from '@/renderer/pixel/sprites';
 import { RESOURCE_IDS, type SimulationSpeed } from '@/types';
+import { ResourceIcon } from './ResourceIcon';
 
 const SPEED_BUTTONS: { speed: SimulationSpeed; label: string }[] = [
   { speed: 0, label: t('topbar.pause') },
@@ -16,10 +21,17 @@ export function TopBar() {
   const speed = useGameState((s) => s.simulation.speed);
   const population = useGameState((s) => s.city.population);
   const economy = useGameState((s) => s.city.economy);
+  const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
+  const era = gameData.eras[eraIndex]!;
 
   return (
     <header className="top-bar" data-testid="top-bar">
-      <span className="brand">{t('app.title')}</span>
+      <span className="brand">
+        {t('app.title')}
+        <span className="era-name" data-testid="era-name">
+          {era.name}
+        </span>
+      </span>
       <Stat label={t('topbar.day')} value={day} testId="day" />
       <Stat
         label={t('topbar.population')}
@@ -38,26 +50,34 @@ export function TopBar() {
           .join(', ')}`}
         testId="happiness"
       />
-      {RESOURCE_IDS.map((id) => {
-        const delta = (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
-        const capped = id !== 'knowledge';
-        return (
-          <Stat
-            key={id}
-            label={resourceLabel(id)}
-            value={Math.floor(economy.resources[id])}
-            delta={day > 0 ? delta : undefined}
-            warn={
-              (capped && economy.resources[id] >= economy.storageCapacity) ||
-              (id === 'food' && economy.resources.food <= 0)
-            }
-            title={capped ? `${t('topbar.storage')}: ${economy.storageCapacity}` : undefined}
-            testId={`resource-${id}`}
-          />
-        );
-      })}
+      {RESOURCE_IDS.filter((id) => resourceVisible(id, eraIndex, economy.resources[id])).map(
+        (id) => {
+          const delta = (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
+          const capped = id !== 'knowledge';
+          return (
+            <Stat
+              key={id}
+              label={resourceLabel(id)}
+              icon={id}
+              value={Math.floor(economy.resources[id])}
+              delta={day > 0 ? delta : undefined}
+              warn={
+                (capped && economy.resources[id] >= economy.storageCapacity) ||
+                (id === 'food' && economy.resources.food <= 0)
+              }
+              title={
+                capped
+                  ? `${resourceLabel(id)} · ${t('topbar.storage')}: ${economy.storageCapacity}`
+                  : resourceLabel(id)
+              }
+              testId={`resource-${id}`}
+            />
+          );
+        },
+      )}
       <Stat
         label={t('topbar.money')}
+        icon="money"
         value={Math.floor(economy.money)}
         delta={day > 0 ? economy.dailyIncome - economy.dailyExpenses : undefined}
         testId="money"
@@ -82,6 +102,7 @@ export function TopBar() {
 
 function Stat({
   label,
+  icon,
   value,
   delta,
   warn,
@@ -89,6 +110,7 @@ function Stat({
   testId,
 }: {
   label: string;
+  icon?: IconKind;
   value: string | number;
   delta?: number | undefined;
   warn?: boolean;
@@ -96,8 +118,12 @@ function Stat({
   testId?: string;
 }) {
   return (
-    <div className={`stat${warn ? ' warn' : ''}`} title={title} data-testid={testId}>
-      <span className="stat-label">{label}</span>
+    <div
+      className={`stat${warn ? ' warn' : ''}${icon ? ' with-icon' : ''}`}
+      title={title ?? label}
+      data-testid={testId}
+    >
+      {icon ? <ResourceIcon kind={icon} /> : <span className="stat-label">{label}</span>}
       <span className="stat-value">
         {value}
         {delta !== undefined && (

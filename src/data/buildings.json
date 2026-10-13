@@ -29,7 +29,7 @@
         },
         "requiredTechnologyId": "masonry",
         "requiredServices": ["water"],
-        "housingCapacity": 20
+        "housingCapacity": 16
       },
       {
         "name": "Meštiansky dom",
@@ -40,7 +40,29 @@
         },
         "requiredTechnologyId": "city_administration",
         "requiredServices": ["water", "education"],
-        "housingCapacity": 35
+        "housingCapacity": 24
+      },
+      {
+        "name": "Vila",
+        "upgradeCost": {
+          "stone": 20,
+          "bricks": 30,
+          "tools": 10
+        },
+        "requiredTechnologyId": "architecture",
+        "requiredServices": ["water", "education", "culture"],
+        "housingCapacity": 32
+      },
+      {
+        "name": "Patricijský dom",
+        "upgradeCost": {
+          "bricks": 50,
+          "iron": 20,
+          "tools": 20
+        },
+        "requiredTechnologyId": "banking",
+        "requiredServices": ["water", "education", "culture"],
+        "housingCapacity": 40
       }
     ]
   },
@@ -288,5 +310,234 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0
+  },
+  {
+    "id": "brickworks",
+    "name": "Tehelňa",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 40,
+      "stone": 30
+    },
+    "inputs": {
+      "stone": 2,
+      "wood": 1
+    },
+    "outputs": {
+      "bricks": 3
+    },
+    "workersRequired": 4,
+    "housingCapacity": 0,
+    "maintenanceCost": 1.5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0.05,
+    "requiredTechnologyId": "pottery"
+  },
+  {
+    "id": "fishery",
+    "name": "Rybárska chata",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 30
+    },
+    "inputs": {},
+    "outputs": {
+      "food": 10
+    },
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 0.5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["water"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "fishing"
+  },
+  {
+    "id": "aqueduct",
+    "name": "Akvadukt",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 40,
+      "bricks": 20
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "water",
+      "radius": 9
+    },
+    "requiredTechnologyId": "aqueducts"
+  },
+  {
+    "id": "temple",
+    "name": "Chrám",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 20,
+      "stone": 60,
+      "bricks": 40
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 7
+    },
+    "requiredTechnologyId": "mythology"
+  },
+  {
+    "id": "mine",
+    "name": "Baňa",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 60,
+      "stone": 40
+    },
+    "inputs": {},
+    "outputs": {
+      "iron": 3
+    },
+    "workersRequired": 4,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "connectsAdjacent": true,
+    "allowedTerrain": ["hill"],
+    "toolUsePerWorker": 0.05,
+    "requiredTechnologyId": "mining"
+  },
+  {
+    "id": "smelter",
+    "name": "Huta",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 40,
+      "bricks": 40
+    },
+    "inputs": {
+      "iron": 2,
+      "wood": 2
+    },
+    "outputs": {
+      "tools": 6
+    },
+    "workersRequired": 4,
+    "housingCapacity": 0,
+    "maintenanceCost": 2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "metallurgy"
+  },
+  {
+    "id": "university",
+    "name": "Univerzita",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 60,
+      "bricks": 80,
+      "tools": 20
+    },
+    "inputs": {},
+    "outputs": {
+      "knowledge": 8
+    },
+    "workersRequired": 5,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "education",
+      "radius": 10
+    },
+    "requiredTechnologyId": "scholasticism"
+  },
+  {
+    "id": "cathedral",
+    "name": "Katedrála",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 150,
+      "stone": 200,
+      "bricks": 200,
+      "iron": 80,
+      "tools": 40
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 6,
+    "housingCapacity": 0,
+    "maintenanceCost": 6,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 14
+    },
+    "requiredTechnologyId": "theology"
   }
 ]

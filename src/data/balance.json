@@ -1,7 +1,15 @@
 {
   "startingState": {
     "population": 10,
-    "resources": { "food": 100, "wood": 80, "stone": 30, "tools": 10, "knowledge": 0 },
+    "resources": {
+      "food": 100,
+      "wood": 80,
+      "stone": 30,
+      "tools": 10,
+      "knowledge": 0,
+      "bricks": 0,
+      "iron": 0
+    },
     "money": 500,
     "happiness": 70
   },
@@ -21,5 +29,6 @@
   "housingComfortMargin": 0.1,
   "populationBaseGrowth": 0.3,
   "populationGrowthRate": 0.005,
+  "populationMaxGrowth": 5,
   "populationDeclineRate": 0.03
 }

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "settlement",
+    "name": "Osada",
+    "description": "Z hŕstky osadníkov vybuduj sebestačnú dedinu."
+  },
+  {
+    "id": "antiquity",
+    "name": "Starovek",
+    "description": "Tehly, chrámy a akvadukty. Mesto rastie do výšky aj do šírky — rybári lovia na vode, vily potrebujú kultúru."
+  },
+  {
+    "id": "middle_ages",
+    "name": "Stredovek",
+    "description": "Baníctvo na kopcoch, huty a univerzity. Korunou mesta bude katedrála."
+  }
+]

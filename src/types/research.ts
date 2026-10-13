@@ -10,9 +10,18 @@ export interface TechnologyEffect {
   multiplier: number;
 }
 
+export interface EraDefinition {
+  id: string;
+  name: string;
+  /** Krátky popis pre obrazovku novej éry. */
+  description: string;
+}
+
 export interface TechnologyDefinition {
   id: string;
   name: string;
+  /** Éra, v ktorej sa technológia dá skúmať (rozšírenie oproti špecifikácii). */
+  era: string;
   cost: number;
   prerequisites: string[];
 
@@ -38,6 +47,8 @@ export type MilestoneCondition =
 export interface MilestoneDefinition {
   id: string;
   title: string;
+  /** Éra míľnika; splnenie posledného míľnika éry odomkne ďalšiu (rozšírenie). */
+  era: string;
   conditions: MilestoneCondition[];
   rewards: {
     resources?: Partial<Resources>;

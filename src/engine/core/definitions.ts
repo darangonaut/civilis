@@ -6,6 +6,7 @@ import {
   TECHNOLOGY_EFFECT_TYPES,
   TERRAIN_TYPES,
   type BuildingDefinition,
+  type EraDefinition,
   type MilestoneCondition,
   type MilestoneDefinition,
   type Resources,
@@ -24,6 +25,8 @@ export const resourcesSchema = z.strictObject({
   stone: nonNegative,
   tools: nonNegative,
   knowledge: nonNegative,
+  bricks: nonNegative,
+  iron: nonNegative,
 }) satisfies z.ZodType<Resources>;
 
 export const partialResourcesSchema = resourcesSchema.partial();
@@ -63,9 +66,16 @@ export const buildingDefinitionSchema = z.strictObject({
   levels: z.array(buildingLevelSchema).optional(),
 }) satisfies z.ZodType<BuildingDefinition>;
 
+export const eraDefinitionSchema = z.strictObject({
+  id,
+  name: z.string().min(1),
+  description: z.string(),
+}) satisfies z.ZodType<EraDefinition>;
+
 export const technologyDefinitionSchema = z.strictObject({
   id,
   name: z.string().min(1),
+  era: id,
   cost: z.number().positive(),
   prerequisites: z.array(id),
   effects: z
@@ -111,6 +121,7 @@ const milestoneConditionSchema = z.discriminatedUnion('type', [
 export const milestoneDefinitionSchema = z.strictObject({
   id,
   title: z.string().min(1),
+  era: id,
   conditions: z.array(milestoneConditionSchema).min(1),
   rewards: z.strictObject({
     resources: partialResourcesSchema.optional(),
@@ -151,6 +162,8 @@ export const balanceSchema = z.strictObject({
   housingComfortMargin: z.number().positive().max(1),
   populationBaseGrowth: nonNegative,
   populationGrowthRate: z.number().min(0).max(1),
+  /** Najviac nových obyvateľov za deň. */
+  populationMaxGrowth: z.number().int().positive(),
   populationDeclineRate: z.number().min(0).max(1),
   happinessDeclineThreshold: z.number().min(0).max(100),
 });
@@ -158,6 +171,7 @@ export const balanceSchema = z.strictObject({
 export type BalanceConfig = z.infer<typeof balanceSchema>;
 
 export interface GameData {
+  eras: readonly EraDefinition[];
   buildings: readonly BuildingDefinition[];
   technologies: readonly TechnologyDefinition[];
   milestones: readonly MilestoneDefinition[];
@@ -167,6 +181,7 @@ export interface GameData {
 }
 
 export interface RawGameData {
+  eras: unknown;
   buildings: unknown;
   technologies: unknown;
   milestones: unknown;
@@ -228,23 +243,51 @@ function findPrerequisiteCycle(technologies: readonly TechnologyDefinition[]): s
  * Pri akejkoľvek chybe vyhodí GameDataError so zoznamom všetkých problémov.
  */
 export function loadGameData(raw: RawGameData): GameData {
+  const eras = z.array(eraDefinitionSchema).min(1).safeParse(raw.eras);
   const buildings = z.array(buildingDefinitionSchema).safeParse(raw.buildings);
   const technologies = z.array(technologyDefinitionSchema).safeParse(raw.technologies);
   const milestones = z.array(milestoneDefinitionSchema).safeParse(raw.milestones);
   const balance = balanceSchema.safeParse(raw.balance);
 
   const schemaIssues = [
+    ...(eras.success ? [] : formatZodIssues('eras', eras.error)),
     ...(buildings.success ? [] : formatZodIssues('buildings', buildings.error)),
     ...(technologies.success ? [] : formatZodIssues('technologies', technologies.error)),
     ...(milestones.success ? [] : formatZodIssues('milestones', milestones.error)),
     ...(balance.success ? [] : formatZodIssues('balance', balance.error)),
   ];
-  if (!buildings.success || !technologies.success || !milestones.success || !balance.success) {
+  if (
+    !eras.success ||
+    !buildings.success ||
+    !technologies.success ||
+    !milestones.success ||
+    !balance.success
+  ) {
     throw new GameDataError(schemaIssues);
   }
 
   const issues: string[] = [];
   const buildingIds = new Set(buildings.data.map((b) => b.id));
+  const eraIndex = new Map(eras.data.map((e, i) => [e.id, i]));
+  for (const duplicate of findDuplicates(eras.data.map((e) => e.id))) {
+    issues.push(`eras: duplicitné ID "${duplicate}"`);
+  }
+  for (const tech of technologies.data) {
+    if (!eraIndex.has(tech.era)) issues.push(`technologies[${tech.id}]: neznáma éra "${tech.era}"`);
+  }
+  let lastMilestoneEra = 0;
+  for (const milestone of milestones.data) {
+    const index = eraIndex.get(milestone.era);
+    if (index === undefined)
+      issues.push(`milestones[${milestone.id}]: neznáma éra "${milestone.era}"`);
+    else if (index < lastMilestoneEra)
+      issues.push(`milestones[${milestone.id}]: míľniky musia ísť v poradí ér`);
+    else lastMilestoneEra = index;
+  }
+  for (const era of eras.data) {
+    if (!milestones.data.some((m) => m.era === era.id))
+      issues.push(`eras[${era.id}]: éra nemá žiadny míľnik`);
+  }
   const technologyIds = new Set(technologies.data.map((t) => t.id));
 
   for (const duplicate of findDuplicates(buildings.data.map((b) => b.id))) {
@@ -284,6 +327,10 @@ export function loadGameData(raw: RawGameData): GameData {
 
   for (const tech of technologies.data) {
     for (const prerequisite of tech.prerequisites) {
+      const pre = technologies.data.find((t) => t.id === prerequisite);
+      if (pre && (eraIndex.get(pre.era) ?? 0) > (eraIndex.get(tech.era) ?? 0)) {
+        issues.push(`technologies[${tech.id}]: prerekvizita "${prerequisite}" je z neskoršej éry`);
+      }
       if (!technologyIds.has(prerequisite)) {
         issues.push(`technologies[${tech.id}]: neznáma prerekvizita "${prerequisite}"`);
       }
@@ -329,6 +376,7 @@ export function loadGameData(raw: RawGameData): GameData {
   if (issues.length > 0) throw new GameDataError(issues);
 
   return {
+    eras: eras.data,
     buildings: buildings.data,
     technologies: technologies.data,
     milestones: milestones.data,

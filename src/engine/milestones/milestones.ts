@@ -30,7 +30,19 @@ export interface ConditionProgress {
   requiredDays: number;
 }
 
-function conditionValue(state: Readonly<GameState>, data: GameData, condition: MilestoneCondition) {
+/** Technológie dostupné do éry míľnika vrátane (bez éry = všetky). */
+function technologiesUpTo(data: GameData, eraId: string | undefined) {
+  if (!eraId) return data.technologies;
+  const limit = data.eras.findIndex((e) => e.id === eraId);
+  return data.technologies.filter((t) => data.eras.findIndex((e) => e.id === t.era) <= limit);
+}
+
+function conditionValue(
+  state: Readonly<GameState>,
+  data: GameData,
+  condition: MilestoneCondition,
+  eraId?: string,
+) {
   const { city, research } = state;
   switch (condition.type) {
     case 'population':
@@ -51,12 +63,14 @@ function conditionValue(state: Readonly<GameState>, data: GameData, condition: M
       };
     case 'completed_research':
       return { current: research.completedTechnologyIds.length, target: condition.minimum };
-    case 'all_research_completed':
+    case 'all_research_completed': {
+      // „Všetky“ = všetky technológie až po éru míľnika (budúce éry sa ešte nedajú skúmať).
+      const technologies = technologiesUpTo(data, eraId);
       return {
-        current: data.technologies.filter((t) => research.completedTechnologyIds.includes(t.id))
-          .length,
-        target: data.technologies.length,
+        current: technologies.filter((t) => research.completedTechnologyIds.includes(t.id)).length,
+        target: technologies.length,
       };
+    }
     case 'resource_balance':
       return {
         current:
@@ -77,8 +91,9 @@ export function isConditionMetToday(
   state: Readonly<GameState>,
   data: GameData,
   condition: MilestoneCondition,
+  eraId?: string,
 ): boolean {
-  const { current, target } = conditionValue(state, data, condition);
+  const { current, target } = conditionValue(state, data, condition, eraId);
   return current >= target;
 }
 
@@ -90,7 +105,8 @@ export function conditionProgress(
   conditionIndex: number,
   condition: MilestoneCondition,
 ): ConditionProgress {
-  const metToday = isConditionMetToday(state, data, condition);
+  const eraId = data.milestones.find((m) => m.id === milestoneId)?.era;
+  const metToday = isConditionMetToday(state, data, condition, eraId);
   const required = requiredDays(condition);
   const days =
     required > 1
@@ -98,7 +114,12 @@ export function conditionProgress(
       : metToday
         ? 1
         : 0;
-  return { ...conditionValue(state, data, condition), metToday, days, requiredDays: required };
+  return {
+    ...conditionValue(state, data, condition, eraId),
+    metToday,
+    days,
+    requiredDays: required,
+  };
 }
 
 /** Počet po sebe idúcich dní, ktoré podmienka vyžaduje (1 = stačí splniť raz). */
@@ -120,7 +141,9 @@ export function evaluateMilestones(state: GameState, data: GameData): string | n
   let allMet = true;
   milestone.conditions.forEach((condition, index) => {
     const key = progressKey(milestone.id, index);
-    const days = isConditionMetToday(state, data, condition) ? (progress[key] ?? 0) + 1 : 0;
+    const days = isConditionMetToday(state, data, condition, milestone.era)
+      ? (progress[key] ?? 0) + 1
+      : 0;
     if (requiredDays(condition) > 1) progress[key] = days;
     if (days < requiredDays(condition)) allMet = false;
   });

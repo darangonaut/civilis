@@ -91,3 +91,25 @@ Bublina so symbolom ukazuje najvážnejší problém: cesta (chýba napojenie), 
 málo pracovníkov — oranžová), debnička (chýba surovina alebo nástroje), minca (prázdna pokladnica),
 žltá debna (plný sklad), zelená šípka (budovu možno vylepšiť). Dôvod sa zobrazí aj pri prejdení
 myšou nad budovou; legenda je v Nastaveniach.
+
+## Éry (2026-10-13, na želanie)
+
+- Tri éry (`eras.json`): **Osada** (pôvodná špecifikácia), **Starovek**, **Stredovek**. Technológie
+  a míľniky majú pole `era`; éra sa odomkne splnením posledného míľnika predchádzajúcej éry.
+  Technológie budúcich ér sa nedajú skúmať, budovy budúcich ér sa v katalógu nezobrazujú.
+- Nové suroviny **tehly** (Tehelňa) a **železo** (Baňa na kopcoch). Nová služba **kultúra**
+  (Chrám, Katedrála) — potrebuje ju Vila a Patricijský dom.
+- Nové budovy: Tehelňa, Rybárska chata (stavia sa na vodu), Akvadukt (voda s dosahom 9),
+  Chrám, Baňa, Huta (železo + drevo → nástroje), Univerzita, Katedrála (záverečný div).
+- Úrovne domu: Dom 10 → Murovaný 16 → Meštiansky 24 → Vila 32 → Patricijský dom 40.
+- Podmienka „všetky technológie“ sa vzťahuje na technológie po éru daného míľnika.
+- Po dosiahnutí éry sa hra pozastaví a zobrazí obrazovku s novými budovami a technológiami;
+  po poslednom míľniku (Zlatý vek) obrazovka víťazstva a sandbox.
+
+## Ovládanie stavby (2026-10-13)
+
+- Ťahanie v režime stavby: cesta ako lomená čiara (najprv x, potom y), ostatné budovy vyplnia
+  obdĺžnik (max. 256 políčok). Mapu posúva pravé tlačidlo, šípky alebo WASD.
+- **Bloky polí:** farma, drevorubač, kameňolom a baňa sú pripojené aj cez susednú pripojenú
+  budovu rovnakého typu — blok stačí napojiť na cestu v jednom bode.
+- **Recyklácia:** zbúranie vráti 50 % surovín investovaných do stavby a vylepšení.

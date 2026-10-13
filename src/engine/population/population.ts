@@ -146,9 +146,11 @@ export function simulatePopulation(
         population.growthProgress +
         balance.populationBaseGrowth +
         total * balance.populationGrowthRate;
-      const arrivals = Math.min(free, Math.floor(progress));
+      const arrivals = Math.min(free, balance.populationMaxGrowth, Math.floor(progress));
       total += arrivals;
-      population.growthProgress = arrivals === free ? 0 : progress - Math.floor(progress);
+      // Pri strope rastu alebo plnom bývaní sa nadbytok nesčítava donekonečna.
+      population.growthProgress =
+        arrivals === free || arrivals < Math.floor(progress) ? 0 : progress - Math.floor(progress);
     }
   } else if (population.happiness < balance.happinessDeclineThreshold) {
     total -= Math.max(1, Math.floor(total * balance.populationDeclineRate));

@@ -18,6 +18,7 @@ export const COMMAND_FAILURE_REASONS = [
   'technology_completed',
   'research_active',
   'prerequisites_missing',
+  'era_locked',
 ] as const;
 
 export type CommandFailureReason = (typeof COMMAND_FAILURE_REASONS)[number];

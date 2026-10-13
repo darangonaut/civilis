@@ -19,6 +19,8 @@ describe('nová hra', () => {
       stone: 30,
       tools: 10,
       knowledge: 0,
+      bricks: 0,
+      iron: 0,
     });
     expect(state.city.economy.money).toBe(500);
     expect(state.simulation.day).toBe(0);

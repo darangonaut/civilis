@@ -30,3 +30,4 @@ export {
   validateUpgrade,
   type UpgradeRequirements,
 } from './core/upgrade';
+export { buildingEraIndex, currentEra, currentEraIndex, isEraUnlocked } from './milestones/eras';

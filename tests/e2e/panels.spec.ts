@@ -107,3 +107,20 @@ test('nastavenia obsahujú legendu značiek', async ({ page }) => {
   await expect(legend).toContainText('Chýba cesta');
   await expect(legend).toContainText('vylepšiť');
 });
+
+test('éry: aktuálna éra v lište, budúce technológie a budovy sú zamknuté', async ({ page }) => {
+  await openGame(page);
+  await expect(page.getByTestId('era-name')).toHaveText('Osada');
+  // Budovy Staroveku sa v katalógu Osady nezobrazujú.
+  await expect(
+    page.getByTestId('building-catalog').locator('[data-building-id="brickworks"]'),
+  ).toHaveCount(0);
+  await page.getByTestId('open-research').click();
+  const antiquity = page.getByTestId('research-panel').locator('[data-era-id="antiquity"]');
+  await expect(antiquity).toContainText('Odomkne sa');
+  await expect(antiquity.locator('[data-tech-id]')).toHaveCount(0);
+  await page.getByTestId('open-milestones').click();
+  await expect(
+    page.getByTestId('milestones-panel').locator('[data-era-id="middle_ages"]'),
+  ).toContainText('Zlatý vek');
+});

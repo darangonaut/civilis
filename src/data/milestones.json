@@ -2,6 +2,7 @@
   {
     "id": "settlement_founded",
     "title": "Založená osada",
+    "era": "settlement",
     "conditions": [
       {
         "type": "population",
@@ -25,6 +26,7 @@
   {
     "id": "self_sufficient_village",
     "title": "Sebestačná dedina",
+    "era": "settlement",
     "conditions": [
       {
         "type": "population",
@@ -51,6 +53,7 @@
   {
     "id": "educated_society",
     "title": "Vzdelaná spoločnosť",
+    "era": "settlement",
     "conditions": [
       {
         "type": "building_count",
@@ -78,6 +81,7 @@
   {
     "id": "prosperous_town",
     "title": "Prosperujúce mesto",
+    "era": "settlement",
     "conditions": [
       {
         "type": "population",
@@ -107,6 +111,7 @@
   {
     "id": "birth_of_civilization",
     "title": "Zrod civilizácie",
+    "era": "settlement",
     "conditions": [
       {
         "type": "population",
@@ -129,6 +134,167 @@
     ],
     "rewards": {
       "badgeId": "era_1_complete"
+    }
+  },
+  {
+    "id": "ancient_city",
+    "title": "Staroveké mesto",
+    "era": "antiquity",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 500
+      },
+      {
+        "type": "building_count",
+        "buildingId": "brickworks",
+        "minimum": 1
+      },
+      {
+        "type": "building_count",
+        "buildingId": "fishery",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 300,
+      "resources": {
+        "bricks": 30
+      }
+    }
+  },
+  {
+    "id": "temples_and_aqueducts",
+    "title": "Chrámy a akvadukty",
+    "era": "antiquity",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "temple",
+        "minimum": 1
+      },
+      {
+        "type": "building_count",
+        "buildingId": "aqueduct",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 4,
+        "minimum": 5
+      }
+    ],
+    "rewards": {
+      "money": 500
+    }
+  },
+  {
+    "id": "ancient_metropolis",
+    "title": "Staroveká metropola",
+    "era": "antiquity",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 900
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 4,
+        "minimum": 15
+      },
+      {
+        "type": "completed_research",
+        "minimum": 11
+      },
+      {
+        "type": "happiness",
+        "minimum": 75,
+        "consecutiveDays": 20
+      }
+    ],
+    "rewards": {
+      "badgeId": "era_2_complete"
+    }
+  },
+  {
+    "id": "crafts_and_mining",
+    "title": "Remeslá a baníctvo",
+    "era": "middle_ages",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 1300
+      },
+      {
+        "type": "building_count",
+        "buildingId": "mine",
+        "minimum": 2
+      },
+      {
+        "type": "building_count",
+        "buildingId": "smelter",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 500,
+      "resources": {
+        "iron": 30
+      }
+    }
+  },
+  {
+    "id": "city_of_scholars",
+    "title": "Mesto učencov",
+    "era": "middle_ages",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "university",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 5,
+        "minimum": 10
+      },
+      {
+        "type": "completed_research",
+        "minimum": 14
+      }
+    ],
+    "rewards": {
+      "money": 800
+    }
+  },
+  {
+    "id": "golden_age",
+    "title": "Zlatý vek",
+    "era": "middle_ages",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 2000
+      },
+      {
+        "type": "building_count",
+        "buildingId": "cathedral",
+        "minimum": 1
+      },
+      {
+        "type": "all_research_completed"
+      },
+      {
+        "type": "happiness",
+        "minimum": 80,
+        "consecutiveDays": 30
+      }
+    ],
+    "rewards": {
+      "badgeId": "era_3_complete"
     }
   }
 ]

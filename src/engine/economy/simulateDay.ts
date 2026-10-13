@@ -1,6 +1,7 @@
 import { RESOURCE_IDS, type GameState, type Resources } from '@/types';
 import type { GameEvent } from '../core/events';
 import type { GameData } from '../core/definitions';
+import { currentEraIndex } from '../milestones/eras';
 import { evaluateMilestones } from '../milestones/milestones';
 import { simulatePopulation } from '../population/population';
 import { advanceResearch } from '../research/research';
@@ -68,8 +69,11 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   if (technologyId) events.push({ type: 'research_completed', technologyId });
 
   // 10. Civilizačné míľniky.
+  const eraBefore = currentEraIndex(state, data);
   const milestoneId = evaluateMilestones(state, data);
   if (milestoneId) events.push({ type: 'milestone_completed', milestoneId });
+  const eraAfter = currentEraIndex(state, data);
+  if (eraAfter > eraBefore) events.push({ type: 'era_reached', eraId: data.eras[eraAfter]!.id });
 
   state.simulation.day += 1;
   refreshDerivedState(state, data);

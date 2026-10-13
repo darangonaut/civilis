@@ -47,7 +47,7 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
         growthProgress: 0,
       },
       economy: {
-        resources: { food: 0, wood: 0, stone: 0, tools: 0, knowledge: 0 },
+        resources: { food: 0, wood: 0, stone: 0, tools: 0, knowledge: 0, bricks: 0, iron: 0 },
         money: 0,
         storageCapacity: 0,
         dailyIncome: 0,
@@ -76,7 +76,15 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
 export function build(engine: GameEngine, buildingId: string, position: Position): string {
   const state = engine.serialize();
   const saved = { ...state.city.economy.resources };
-  state.city.economy.resources = { food: 1e6, wood: 1e6, stone: 1e6, tools: 1e6, knowledge: 1e6 };
+  state.city.economy.resources = {
+    food: 1e6,
+    wood: 1e6,
+    stone: 1e6,
+    tools: 1e6,
+    knowledge: 1e6,
+    bricks: 1e6,
+    iron: 1e6,
+  };
   engine.load(state);
   const result = engine.execute({ type: 'PLACE_BUILDING', buildingId, position });
   if (!result.success) throw new Error(`Nepodarilo sa postaviť ${buildingId}: ${result.reason}`);
@@ -105,6 +113,8 @@ export function setCity(
       stone: 0,
       tools: 0,
       knowledge: 0,
+      bricks: 0,
+      iron: 0,
       ...values.resources,
     };
   }

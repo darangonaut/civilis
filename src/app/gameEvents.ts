@@ -32,6 +32,9 @@ export function installGameEventNotifications(): () => void {
       if (event.type === 'research_completed') {
         const name = gameData.technologiesById.get(event.technologyId)?.name ?? event.technologyId;
         ui.showNotice(`${t('events.researchCompleted')}: ${name}`, 'success');
+      } else if (event.type === 'era_reached') {
+        controller.setSpeed(0);
+        ui.setNewEra(event.eraId);
       } else if (event.type === 'milestone_completed') {
         const title =
           gameData.milestones.find((m) => m.id === event.milestoneId)?.title ?? event.milestoneId;
