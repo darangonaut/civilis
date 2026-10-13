@@ -17,8 +17,8 @@ Konkrétne čísla sú v `docs/BALANCING.md`.
 - **Peniaze a sklad v definícii budovy:** `BuildingDefinition` má navyše `moneyOutput`
   (trhovisko) a `storageCapacity` (sklad), lebo peniaze nie sú `ResourceId` a kapacitu skladu
   model zo špecifikácie nevie vyjadriť.
-- **Nástroje** (schválené 2026-10-13): drevorubač, farma a kameňolom spotrebúvajú 0,1 nástroja
-  na zamestnaného pracovníka za deň. Bez nástrojov bežia na 50 % (pri čiastočnom nedostatku
+- **Nástroje** (schválené 2026-10-13): drevorubač, farma a kameňolom spotrebúvajú 0,05 nástroja
+  na zamestnaného pracovníka za deň (pôvodne 0,1, znížené pri vyvažovaní). Bez nástrojov bežia na 50 % (pri čiastočnom nedostatku
   pomerne). Dielňa ich vyrába.
 - **Peniaze** (schválené): používajú sa len na údržbu, nie na výstavbu. Pokladnica neklesne pod
   nulu; ak nepokryje dennú údržbu, budovy s údržbou bežia pomerne slabšie (až na 50 %) a hlásia
@@ -52,3 +52,19 @@ Konkrétne čísla sú v `docs/BALANCING.md`.
   (kľúč `<míľnik>:<index podmienky>`), ktoré sa pri nesplnení vynuluje. Odmena sa pripíše
   raz pri splnení; suroviny z odmeny nie sú obmedzené kapacitou skladu. Po poslednom míľniku
   sa hra pozastaví, zobrazí obrazovku úspechu a pokračuje ako sandbox.
+
+## Ochrana pred neobnoviteľným stavom (etapa 6)
+
+- **Základný zber:** mesto bez akýchkoľvek budov denne nazbiera +1 drevo a +0,5 kameňa
+  (`balance.baseProduction`). Bez neho sa dalo zaseknúť natrvalo — minúť drevo pred postavením
+  drevorubača (drevo sa potom nedá vyrobiť) alebo kameň pred cestou ku kamenistému terénu.
+- Populácia neklesne pod 5, pokladnica pod 0 (budovy len bežia slabšie), posledný sklad sa nedá
+  zbúrať.
+
+## Ukladanie (etapa 6)
+
+- 3 manuálne pozície + automatické uloženie každých 30 dní a pri skrytí/zatvorení stránky.
+- Pri zatváraní stránky sa stav synchronne zapíše aj do `localStorage` — asynchrónny zápis do
+  IndexedDB by prehliadač nemusel dokončiť. Pri ďalšom štarte sa táto záloha prednostne načíta
+  a presunie do automatického uloženia.
+- Pri štarte sa automaticky obnoví rozohraná hra. `?seed=N` alebo `?new` vždy založí novú hru.

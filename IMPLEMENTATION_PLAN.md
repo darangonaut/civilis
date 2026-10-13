@@ -16,7 +16,7 @@ Zadanie: `docs/SPEC.md` · Architektúra: `docs/ARCHITECTURE.md` · Doplnenia pr
 | 3 – Ekonomický engine          | ✅ hotovo |
 | 4 – Populácia, výskum, míľniky | ✅ hotovo |
 | 5 – Používateľské rozhranie    | ✅ hotovo |
-| 6 – Ukladanie a dokončenie     | ⏳ ďalšia |
+| 6 – Ukladanie a dokončenie     | ✅ hotovo |
 
 ## Etapa 1 – Inicializácia projektu ✅
 
@@ -100,41 +100,63 @@ Testy: 11 unit (validácia dát, zhoda so špecifikáciou), 2 E2E (layout, katal
 - [x] Spodná lišta: prepínanie panelov, aktuálny výskum a míľnik; Escape zatvára panel
 - [x] Testy: 93 unit/integration, 15 E2E (výskum, míľniky, štatistiky, Escape, dostupnosť v katalógu)
 
-## Etapa 6 – Ukladanie a dokončenie
+## Etapa 6 – Ukladanie a dokončenie ✅
 
-- [ ] Dexie: 3 manuálne sloty + autosave (každých 30 dní, `pagehide`), Ctrl/Cmd+S
-- [ ] Zod schéma `GameState`, `schemaVersion`, migrácie, transakčný zápis
-- [ ] Export / import JSON
-- [ ] E2E: test D, kompletný herný priebeh; test F (simulovaný „bot“ hráč v integration teste)
-- [ ] Balancing, výkonnostný test (500 budov, tick < 20 ms), produkčný build, README
+- [x] Dexie (`persistence/`): 3 manuálne pozície + automatické uloženie každých 30 dní
+      a pri skrytí/zatvorení stránky; Ctrl/Cmd+S; ukladanie funguje aj v pauze
+- [x] Zod schéma `GameState`, `schemaVersion`, migrácie (`migrateGameState`), validácia pred
+      zápisom, zápis v jednej transakcii; kontrola odkazov na budovy a technológie
+- [x] Synchronná záloha do `localStorage` pri `pagehide` — obnovenie stránky nestratí hru
+- [x] Export / import JSON, panel Uložené hry, panel Nastavenia (nová hra so seedom, ovládanie)
+- [x] Test D (uloženie → akcie → načítanie), migrácie, poškodené súbory, neúspešná transakcia
+- [x] Test F: bot (`tests/helpers/bot.ts`) dohrá všetkých 5 míľnikov na 7 mapách iba hernými
+      príkazmi; vyvažovanie podľa jeho výsledkov (`docs/BALANCING.md`)
+- [x] Ochrana pred neobnoviteľným stavom: základný zber dreva a kameňa
+- [x] Renderer: terén v blokoch 16 × 16 s cullingom celých blokov (škáluje na 256 × 256)
+- [x] E2E v Chromiu a Firefoxe (42 testov); WebKit voliteľne (`PW_WEBKIT=1`, potrebuje systémové knižnice)
+- [x] Produkčný build, README s návodom na hru, aktualizovaná dokumentácia
+
+Testy: 112 unit/integration, 21 E2E scenárov × 2 prehliadače.
+
+## Možné ďalšie kroky (mimo MVP)
+
+- Overiť v Safari (WebKit) a na Windows/Edge; zmerať FPS na bežnom notebooku.
+- Hrateľnostné testy s ľuďmi — bot je dokonalý hráč, čas človeka je odhad.
+- Ďalšia éra (špecifikácia 3.2: „prechod do ďalšej historickej éry“).
+- Zvukové efekty, animácie, prehľadnejšie zobrazenie dosahu studní a škôl pri stavbe.
 
 ## Log rozhodnutí a odchýlok od špecifikácie
 
-| Dátum      | Rozhodnutie / odchýlka                                                                                                                                                                                  |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-13 | **TypeScript 6.0** namiesto najnovšieho 7.0 — typescript-eslint zatiaľ podporuje len `<6.1`.                                                                                                            |
-| 2026-10-13 | `exactOptionalPropertyTypes` vypnuté — nekompatibilné s inferenciou voliteľných polí v Zod.                                                                                                             |
-| 2026-10-13 | `BuildingDefinition` rozšírená o `moneyOutput` a `storageCapacity` (model zo špecifikácie nevie vyjadriť „+8 peňazí/deň“ ani „+200 kapacita skladu“).                                                   |
-| 2026-10-13 | Pridaný `src/data/balance.json` (počiatočný stav + konštanty simulácie), aby žiadne herné číslo nebolo natvrdo v kóde.                                                                                  |
-| 2026-10-13 | ID v dátach sú anglické `snake_case` (`lumberjack`, `woodworking`…), zobrazované názvy slovenské. UI texty v `src/app/i18n.ts`.                                                                         |
-| 2026-10-13 | Doplnené hodnoty, ktoré špecifikácia nedefinuje (pracovníci, údržba, terén, dosahy služieb, spotreba potravín, prerekvizity) — viď `docs/BALANCING.md`.                                                 |
-| 2026-10-13 | Interpretácie pravidiel (aditívne bonusy, sekvenčné míľniky, kopce) a otvorené otázky (nástroje, peniaze) — viď `docs/GAME_DESIGN.md`.                                                                  |
-| 2026-10-13 | **Dôvody zlyhania príkazov sú kódy** (`tile_occupied`, `insufficient_resources`…, `engine/core/commandReasons.ts`), UI ich prekladá cez `command.<kód>`. Pole `reason: string` zo špecifikácie zostáva. |
-| 2026-10-13 | ID inštancií budov sú `b<n>`, kde n = najväčšie existujúce + 1 — deterministické a bez nového poľa v `GameState`.                                                                                       |
-| 2026-10-13 | Zbúranie nevracia suroviny. Posledný sklad sa zbúrať nedá (od neho sa počíta cestná sieť).                                                                                                              |
-| 2026-10-13 | Priorita budovy je celé číslo 1–3 (predvolene 2).                                                                                                                                                       |
-| 2026-10-13 | Z `balance.json` odstránené `startingState.housingCapacity` (odvodí sa z počiatočného domu), pridané `mapSize`.                                                                                         |
-| 2026-10-13 | Engine nevolá `Date.now()` ani `crypto` — `gameId` a `createdAt` dodáva Game Controller pri vytvorení hry.                                                                                              |
-| 2026-10-13 | Seed mapy sa dá zadať cez `?seed=N`. Parameter `?e2e` sprístupní `window.__civilis` (čítanie stavu, `canPlace`, `tileToClient`) pre Playwright testy.                                                   |
-| 2026-10-13 | `tick()` zatiaľ iba posúva deň a nie je napojený na čas — ekonomika a herná slučka prídu v etape 3.                                                                                                     |
-| 2026-10-13 | Príkaz `SET_SPEED` (rozšírenie `GameCommand`) — rýchlosť je súčasť `GameState`, takže aj jej zmena ide cez validovaný príkaz.                                                                           |
-| 2026-10-13 | `BuildingDefinition` rozšírená o `toolUsePerWorker` a voliteľné `terrainEfficiency`; `balance.json` o `noToolsEfficiency` a `noFundsEfficiency`.                                                        |
-| 2026-10-13 | Schválené: nástroje spotrebúvajú výrobné budovy, peniaze slúžia len na údržbu — detaily v `docs/GAME_DESIGN.md`.                                                                                        |
-| 2026-10-13 | Cestná sieť začína pri akomkoľvek sklade, nielen pri prvom.                                                                                                                                             |
-| 2026-10-13 | Odvodené hodnoty (`housingCapacity`, `storageCapacity`, `availableWorkers`, `employedWorkers`) sa prepočítavajú po každom príkaze, ticku a `load()` (`refreshDerivedState`).                            |
-| 2026-10-13 | `?paused` spustí hru v pauze; test hook má `advanceDays(n)` (len pre E2E).                                                                                                                              |
-| 2026-10-13 | `PopulationState.happinessFactors` — zložky spokojnosti z posledného dňa (rozšírenie modelu, potrebné pre UI a štatistiky).                                                                             |
-| 2026-10-13 | Spokojnosť sa mení postupne (max. 5 bodov/deň), nie skokom na vážený priemer — dôvod v `docs/GAME_DESIGN.md`.                                                                                           |
-| 2026-10-13 | `GameEngine` rozšírený na `CivilisEngine` o `takeEvents()`; `tick()` ostáva `void` podľa špecifikácie.                                                                                                  |
-| 2026-10-13 | Prepnutie výskumu vráti investované vedomosti (špecifikácia prepínanie nerieši).                                                                                                                        |
-| 2026-10-13 | `t()` podporuje parametre (`{days}`); priebeh podmienok míľnikov počíta engine (`conditionProgress`), `isConditionMetToday` je z neho odvodené.                                                         |
+| Dátum      | Rozhodnutie / odchýlka                                                                                                                                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-10-13 | **TypeScript 6.0** namiesto najnovšieho 7.0 — typescript-eslint zatiaľ podporuje len `<6.1`.                                                                                                                                 |
+| 2026-10-13 | `exactOptionalPropertyTypes` vypnuté — nekompatibilné s inferenciou voliteľných polí v Zod.                                                                                                                                  |
+| 2026-10-13 | `BuildingDefinition` rozšírená o `moneyOutput` a `storageCapacity` (model zo špecifikácie nevie vyjadriť „+8 peňazí/deň“ ani „+200 kapacita skladu“).                                                                        |
+| 2026-10-13 | Pridaný `src/data/balance.json` (počiatočný stav + konštanty simulácie), aby žiadne herné číslo nebolo natvrdo v kóde.                                                                                                       |
+| 2026-10-13 | ID v dátach sú anglické `snake_case` (`lumberjack`, `woodworking`…), zobrazované názvy slovenské. UI texty v `src/app/i18n.ts`.                                                                                              |
+| 2026-10-13 | Doplnené hodnoty, ktoré špecifikácia nedefinuje (pracovníci, údržba, terén, dosahy služieb, spotreba potravín, prerekvizity) — viď `docs/BALANCING.md`.                                                                      |
+| 2026-10-13 | Interpretácie pravidiel (aditívne bonusy, sekvenčné míľniky, kopce) a otvorené otázky (nástroje, peniaze) — viď `docs/GAME_DESIGN.md`.                                                                                       |
+| 2026-10-13 | **Dôvody zlyhania príkazov sú kódy** (`tile_occupied`, `insufficient_resources`…, `engine/core/commandReasons.ts`), UI ich prekladá cez `command.<kód>`. Pole `reason: string` zo špecifikácie zostáva.                      |
+| 2026-10-13 | ID inštancií budov sú `b<n>`, kde n = najväčšie existujúce + 1 — deterministické a bez nového poľa v `GameState`.                                                                                                            |
+| 2026-10-13 | Zbúranie nevracia suroviny. Posledný sklad sa zbúrať nedá (od neho sa počíta cestná sieť).                                                                                                                                   |
+| 2026-10-13 | Priorita budovy je celé číslo 1–3 (predvolene 2).                                                                                                                                                                            |
+| 2026-10-13 | Z `balance.json` odstránené `startingState.housingCapacity` (odvodí sa z počiatočného domu), pridané `mapSize`.                                                                                                              |
+| 2026-10-13 | Engine nevolá `Date.now()` ani `crypto` — `gameId` a `createdAt` dodáva Game Controller pri vytvorení hry.                                                                                                                   |
+| 2026-10-13 | Seed mapy sa dá zadať cez `?seed=N`. Parameter `?e2e` sprístupní `window.__civilis` (čítanie stavu, `canPlace`, `tileToClient`) pre Playwright testy.                                                                        |
+| 2026-10-13 | `tick()` zatiaľ iba posúva deň a nie je napojený na čas — ekonomika a herná slučka prídu v etape 3.                                                                                                                          |
+| 2026-10-13 | Príkaz `SET_SPEED` (rozšírenie `GameCommand`) — rýchlosť je súčasť `GameState`, takže aj jej zmena ide cez validovaný príkaz.                                                                                                |
+| 2026-10-13 | `BuildingDefinition` rozšírená o `toolUsePerWorker` a voliteľné `terrainEfficiency`; `balance.json` o `noToolsEfficiency` a `noFundsEfficiency`.                                                                             |
+| 2026-10-13 | Schválené: nástroje spotrebúvajú výrobné budovy, peniaze slúžia len na údržbu — detaily v `docs/GAME_DESIGN.md`.                                                                                                             |
+| 2026-10-13 | Cestná sieť začína pri akomkoľvek sklade, nielen pri prvom.                                                                                                                                                                  |
+| 2026-10-13 | Odvodené hodnoty (`housingCapacity`, `storageCapacity`, `availableWorkers`, `employedWorkers`) sa prepočítavajú po každom príkaze, ticku a `load()` (`refreshDerivedState`).                                                 |
+| 2026-10-13 | `?paused` spustí hru v pauze; test hook má `advanceDays(n)` (len pre E2E).                                                                                                                                                   |
+| 2026-10-13 | `PopulationState.happinessFactors` — zložky spokojnosti z posledného dňa (rozšírenie modelu, potrebné pre UI a štatistiky).                                                                                                  |
+| 2026-10-13 | Spokojnosť sa mení postupne (max. 5 bodov/deň), nie skokom na vážený priemer — dôvod v `docs/GAME_DESIGN.md`.                                                                                                                |
+| 2026-10-13 | `GameEngine` rozšírený na `CivilisEngine` o `takeEvents()`; `tick()` ostáva `void` podľa špecifikácie.                                                                                                                       |
+| 2026-10-13 | Prepnutie výskumu vráti investované vedomosti (špecifikácia prepínanie nerieši).                                                                                                                                             |
+| 2026-10-13 | `t()` podporuje parametre (`{days}`); priebeh podmienok míľnikov počíta engine (`conditionProgress`), `isConditionMetToday` je z neho odvodené.                                                                              |
+| 2026-10-13 | Pridaná dev závislosť `fake-indexeddb` (len pre unit testy ukladania).                                                                                                                                                       |
+| 2026-10-13 | Synchronná záloha do `localStorage` pri zatváraní stránky — IndexedDB zápis v `pagehide` sa nemusí dokončiť (overené E2E testom, ktorý bez zálohy zlyhal).                                                                   |
+| 2026-10-13 | Pri štarte sa obnoví automatické uloženie; `?seed=N` alebo `?new` založí novú hru.                                                                                                                                           |
+| 2026-10-13 | Vyvažovanie: rast 2 %, výrobné budovy 3 pracovníci, nástroje 0,05/pracovník, údržba na polovicu; nový `balance.baseProduction` (+1 drevo, +0,5 kameňa) proti neobnoviteľnému stavu. Ceny a výroba zo špecifikácie nezmenené. |
+| 2026-10-13 | Ekonomické unit testy bežia nad dátami bez základného zberu (`economyTestData`) a ladiace hodnoty čítajú z dát, aby ďalšie vyvažovanie nerozbíjalo testy.                                                                    |

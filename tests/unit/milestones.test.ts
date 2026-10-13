@@ -50,10 +50,11 @@ describe('civilizačné míľniky (test E)', () => {
     setCity(engine, { population: 20, money: 1000 });
     engine.tick();
     const economy = engine.getState().city.economy;
-    // 1000 − údržba (sklad 1 + farma 1 + drevorubač 1) + odmena 100.
-    expect(economy.money).toBe(1000 - 3 + 100);
+    const upkeep = economy.dailyExpenses;
+    // 1000 − denná údržba + odmena 100.
+    expect(economy.money).toBe(1000 - upkeep + 100);
     for (let i = 0; i < 5; i++) engine.tick();
-    expect(engine.getState().city.economy.money).toBe(1097 - 5 * 3);
+    expect(engine.getState().city.economy.money).toBe(1000 - 6 * upkeep + 100);
     expect(milestones(engine).completedIds).toEqual(['settlement_founded']);
   });
 

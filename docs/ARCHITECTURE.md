@@ -50,3 +50,26 @@ Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslin
    ID inštancie) a Zustand `revision` sa zvýši, takže React komponenty cez `useGameState` prečítajú
    nový stav.
 4. Pri neúspechu sa kód dôvodu preloží (`commandReasonLabel`) a zobrazí v hlásení nad mapou.
+
+## Ukladanie (etapa 6)
+
+- `persistence/gameStateSchema.ts` — Zod schéma `GameState` (`satisfies z.ZodType<GameState>`).
+- `persistence/migrations.ts` — `migrateGameState(raw)`: podľa `schemaVersion` postupne aplikuje
+  migrácie z `MIGRATIONS` a výsledok zvaliduje. Novšia verzia / chýbajúca migrácia / poškodený
+  stav → `SaveError` s kódom, ktorý UI preloží.
+- `persistence/db.ts` — Dexie databáza `civilis`, tabuľka `saves` (pozície `slot-1..3`, `autosave`).
+- `persistence/saveService.ts` — uloženie (validácia pred zápisom, jedna transakcia), načítanie
+  (migrácia + kontrola odkazov na budovy a technológie), export/import JSON.
+- `persistence/unloadSnapshot.ts` — synchronná záloha do `localStorage` pri `pagehide`.
+- `app/saving.ts` — akcie pre UI (pozície, Ctrl/Cmd+S, export/import, nová hra) a automatické
+  ukladanie; zápisy idú cez frontu, aby sa neprekrývali.
+- `main.tsx` pred prvým vykreslením zavolá `initializeGame()` (obnova rozohranej hry).
+
+## Testovanie
+
+- `tests/unit` — pravidlá enginu, dáta, ukladanie (fake-indexeddb).
+- `tests/integration` — determinizmus (test A), výkon (500 budov), hrateľnosť (test F: bot
+  v `tests/helpers/bot.ts` dohrá hru na 7 mapách iba hernými príkazmi).
+- `tests/e2e` — Playwright v Chromiu a Firefoxe; `PW_WEBKIT=1` pridá WebKit (potrebuje
+  `sudo npx playwright install-deps webkit`). Testy používajú `?seed=42&e2e&paused`; `?e2e`
+  sprístupní `window.__civilis` (čítanie stavu, `canPlace`, `tileToClient`, `advanceDays`).

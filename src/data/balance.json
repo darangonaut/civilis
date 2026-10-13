@@ -10,6 +10,7 @@
   "workforceShare": 0.5,
   "minimumPopulation": 5,
   "foodPerCapita": 0.25,
+  "baseProduction": { "wood": 1, "stone": 0.5 },
   "noToolsEfficiency": 0.5,
   "noFundsEfficiency": 0.5,
   "happinessWeights": { "food": 0.4, "housing": 0.25, "water": 0.2, "education": 0.15 },
@@ -17,6 +18,6 @@
   "happinessDeclineThreshold": 40,
   "happinessChangePerDay": 5,
   "housingComfortMargin": 0.1,
-  "populationGrowthRate": 0.05,
+  "populationGrowthRate": 0.02,
   "populationDeclineRate": 0.03
 }

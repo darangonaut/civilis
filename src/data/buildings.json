@@ -58,14 +58,14 @@
     "outputs": {
       "wood": 6
     },
-    "workersRequired": 2,
+    "workersRequired": 3,
     "housingCapacity": 0,
-    "maintenanceCost": 1,
+    "maintenanceCost": 0.5,
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
     "allowedTerrain": ["forest"],
-    "toolUsePerWorker": 0.1
+    "toolUsePerWorker": 0.05
   },
   {
     "id": "farm",
@@ -82,14 +82,14 @@
     "outputs": {
       "food": 8
     },
-    "workersRequired": 2,
+    "workersRequired": 3,
     "housingCapacity": 0,
-    "maintenanceCost": 1,
+    "maintenanceCost": 0.5,
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
     "allowedTerrain": ["fertile", "grass"],
-    "toolUsePerWorker": 0.1,
+    "toolUsePerWorker": 0.05,
     "terrainEfficiency": {
       "grass": 0.5
     }
@@ -111,12 +111,12 @@
     },
     "workersRequired": 3,
     "housingCapacity": 0,
-    "maintenanceCost": 1,
+    "maintenanceCost": 0.5,
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
     "allowedTerrain": ["rock"],
-    "toolUsePerWorker": 0.1
+    "toolUsePerWorker": 0.05
   },
   {
     "id": "well",
@@ -161,7 +161,7 @@
     "outputs": {},
     "workersRequired": 0,
     "housingCapacity": 0,
-    "maintenanceCost": 1,
+    "maintenanceCost": 0.5,
     "moneyOutput": 0,
     "storageCapacity": 200,
     "requiresRoad": true,
@@ -189,7 +189,7 @@
     },
     "workersRequired": 3,
     "housingCapacity": 0,
-    "maintenanceCost": 2,
+    "maintenanceCost": 1,
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
@@ -212,9 +212,9 @@
     "outputs": {
       "knowledge": 3
     },
-    "workersRequired": 2,
+    "workersRequired": 3,
     "housingCapacity": 0,
-    "maintenanceCost": 3,
+    "maintenanceCost": 1.5,
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
@@ -241,7 +241,7 @@
       "food": 2
     },
     "outputs": {},
-    "workersRequired": 2,
+    "workersRequired": 3,
     "housingCapacity": 0,
     "maintenanceCost": 0,
     "moneyOutput": 8,

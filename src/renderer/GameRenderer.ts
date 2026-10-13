@@ -19,6 +19,8 @@ const DRAG_THRESHOLD = 5;
 const PREVIEW_VALID = 0x8cff8c;
 const PREVIEW_INVALID = 0xff6b6b;
 const SELECTION_COLOR = 0xffd75e;
+/** Strana bloku terénu pre culling. */
+const TERRAIN_CHUNK = 16;
 /** Výška výstražnej značky nad stredom políčka. */
 const MARKER_OFFSET = 26;
 
@@ -179,20 +181,47 @@ export class GameRenderer {
     };
   }
 
+  /**
+   * Terén je rozdelený do blokov TERRAIN_CHUNK × TERRAIN_CHUNK políčok. Culling vyradí
+   * celý blok mimo obrazovky naraz, takže cena nerastie s veľkosťou mapy (až 256 × 256).
+   * Bloky aj políčka v nich sa kreslia odzadu dopredu (podľa x + y), aby stromy správne
+   * prekrývali políčka za sebou.
+   */
   private buildTerrain(world: GameState['world']): void {
-    this.terrainLayer.removeChildren().forEach((child) => child.destroy());
-    for (let y = 0; y < world.height; y++) {
-      for (let x = 0; x < world.width; x++) {
-        const tile = world.tiles[y * world.width + x]!;
-        // Variant je odvodený zo súradníc, takže je stabilný medzi prekresleniami.
-        const variant = terrainVariant(x, y, world.seed);
-        const sprite = new Sprite();
-        applyTexture(sprite, this.atlas.terrain[tile.terrain][variant]!);
-        placeOnTile(sprite, { x, y });
-        sprite.cullable = true;
-        this.terrainLayer.addChild(sprite);
+    this.terrainLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
+    const chunksX = Math.ceil(world.width / TERRAIN_CHUNK);
+    const chunksY = Math.ceil(world.height / TERRAIN_CHUNK);
+    const chunks: { order: number; container: Container }[] = [];
+    for (let cy = 0; cy < chunksY; cy++) {
+      for (let cx = 0; cx < chunksX; cx++) {
+        const container = new Container({ cullable: true, cullableChildren: false });
+        for (let depth = 0; depth < 2 * TERRAIN_CHUNK - 1; depth++) {
+          for (let dy = 0; dy <= depth; dy++) {
+            const x = cx * TERRAIN_CHUNK + depth - dy;
+            const y = cy * TERRAIN_CHUNK + dy;
+            if (
+              depth - dy >= TERRAIN_CHUNK ||
+              dy >= TERRAIN_CHUNK ||
+              x >= world.width ||
+              y >= world.height
+            )
+              continue;
+            const tile = world.tiles[y * world.width + x]!;
+            const sprite = new Sprite();
+            applyTexture(
+              sprite,
+              this.atlas.terrain[tile.terrain][terrainVariant(x, y, world.seed)]!,
+            );
+            placeOnTile(sprite, { x, y });
+            container.addChild(sprite);
+          }
+        }
+        chunks.push({ order: cx + cy, container });
       }
     }
+    chunks
+      .sort((a, b) => a.order - b.order)
+      .forEach(({ container }) => this.terrainLayer.addChild(container));
     this.renderedWorld = world;
   }
 

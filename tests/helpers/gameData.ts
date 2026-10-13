@@ -4,4 +4,18 @@ import buildings from '@/data/buildings.json';
 import milestones from '@/data/milestones.json';
 import technologies from '@/data/technologies.json';
 
+/** Skutočné herné dáta zo `src/data`. */
 export const testData = loadGameData({ buildings, technologies, milestones, balance });
+
+/**
+ * Herné dáta bez základného zberu — ekonomické testy tak merajú iba výrobu budov.
+ * Ostatné hodnoty sú skutočné, testy ich čítajú z dát.
+ */
+export const economyTestData = loadGameData({
+  buildings,
+  technologies,
+  milestones,
+  balance: { ...balance, baseProduction: {} },
+});
+
+export const def = (id: string) => economyTestData.buildingsById.get(id)!;

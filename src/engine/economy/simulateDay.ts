@@ -25,6 +25,7 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const consumption: Partial<Resources> = {};
 
   // 5. Výroba, orezaná kapacitou skladu (už preplnený sklad sa neznižuje).
+  addTo(production, data.balance.baseProduction);
   for (const status of analysis.statuses.values()) {
     addTo(consumption, status.consumed);
     addTo(production, status.produced);

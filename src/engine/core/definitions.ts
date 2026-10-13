@@ -114,6 +114,8 @@ export const balanceSchema = z.strictObject({
   workforceShare: z.number().min(0).max(1),
   minimumPopulation: z.number().int().nonnegative(),
   foodPerCapita: nonNegative,
+  /** Základný zber bez budov — zabraňuje neobnoviteľnému stavu (žiadne drevo ani kameň). */
+  baseProduction: partialResourcesSchema,
   noToolsEfficiency: z.number().min(0).max(1),
   noFundsEfficiency: z.number().min(0).max(1),
   happinessWeights: z.strictObject({

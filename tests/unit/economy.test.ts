@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { analyzeCity } from '@/engine/economy/analysis';
 import type { GameEngine, ResourceId, TerrainType } from '@/types';
 import { build, createTestCity, setCity } from '../helpers/fixtures';
-import { testData } from '../helpers/gameData';
+import { def, economyTestData as testData } from '../helpers/gameData';
 
 const status = (engine: GameEngine, id: string) =>
   analyzeCity(engine.getState(), testData).statuses.get(id)!;
@@ -28,13 +28,16 @@ describe('ekonomika (test B)', () => {
     expect(resource(engine, 'food')).toBe(50 + 8 - 2.5);
   });
 
-  it('farma s polovicou pracovníkov vyrobí polovicu', () => {
+  it('farma s časťou pracovníkov vyrobí pomerne menej', () => {
+    // 2 obyvatelia = 1 pracovník.
     const engine = createTestCity({ terrain: fertileRow, population: 2, resources: { tools: 10 } });
     const farm = build(engine, 'farm', { x: 3, y: 3 });
     expect(status(engine, farm).workersAssigned).toBe(1);
     expect(problems(engine, farm)).toContain('understaffed');
     engine.tick();
-    expect(engine.getState().city.economy.dailyProduction.food).toBe(4);
+    expect(engine.getState().city.economy.dailyProduction.food).toBeCloseTo(
+      8 / def('farm').workersRequired,
+    );
   });
 
   it('farma bez pracovníkov nevyrába', () => {
@@ -92,16 +95,21 @@ describe('ekonomika (test B)', () => {
   });
 
   it('pracovníkov dostane najprv budova s vyššou prioritou, pri zhode staršia', () => {
-    // 6 obyvateľov = 3 pracovníci.
-    const engine = createTestCity({ terrain: fertileRow, population: 6, resources: { tools: 10 } });
+    const required = def('farm').workersRequired;
+    // Pracovníkov je o jedného viac, ako potrebuje jedna farma.
+    const engine = createTestCity({
+      terrain: fertileRow,
+      population: (required + 1) * 2,
+      resources: { tools: 10 },
+    });
     const a = build(engine, 'farm', { x: 3, y: 3 });
     const b = build(engine, 'farm', { x: 5, y: 3 });
-    expect(status(engine, a).workersAssigned).toBe(2);
+    expect(status(engine, a).workersAssigned).toBe(required);
     expect(status(engine, b).workersAssigned).toBe(1);
     engine.execute({ type: 'SET_BUILDING_PRIORITY', instanceId: b, priority: 3 });
-    expect(status(engine, b).workersAssigned).toBe(2);
+    expect(status(engine, b).workersAssigned).toBe(required);
     expect(status(engine, a).workersAssigned).toBe(1);
-    expect(engine.getState().city.population.employedWorkers).toBe(3);
+    expect(engine.getState().city.population.employedWorkers).toBe(required + 1);
   });
 
   it('kapacita skladu obmedzuje suroviny, vedomosti nie', () => {
@@ -124,11 +132,13 @@ describe('ekonomika (test B)', () => {
     const engine = createTestCity({
       terrain: (x, y) => (y === 3 && x === 3 ? 'forest' : 'grass'),
       population: 10,
-      resources: { tools: 0.2 },
+      resources: { tools: def('lumberjack').workersRequired * def('lumberjack').toolUsePerWorker },
     });
     const lumberjack = build(engine, 'lumberjack', { x: 3, y: 3 });
+    build(engine, 'house', { x: 5, y: 3 }); // aby obyvatelia neodišli
+    const toolsPerDay = def('lumberjack').workersRequired * def('lumberjack').toolUsePerWorker;
     engine.tick();
-    expect(engine.getState().city.economy.dailyConsumption.tools).toBeCloseTo(0.2);
+    expect(engine.getState().city.economy.dailyConsumption.tools).toBeCloseTo(toolsPerDay);
     expect(engine.getState().city.economy.dailyProduction.wood).toBe(6);
     expect(problems(engine, lumberjack)).toContain('no_tools');
     engine.tick();
@@ -140,10 +150,10 @@ describe('ekonomika (test B)', () => {
     build(engine, 'market', { x: 3, y: 3 });
     engine.tick();
     const economy = engine.getState().city.economy;
-    // Sklad má údržbu 1, trhovisko 0.
-    expect(economy.dailyExpenses).toBe(1);
+    const maintenance = def('warehouse').maintenanceCost + def('market').maintenanceCost;
+    expect(economy.dailyExpenses).toBe(maintenance);
     expect(economy.dailyIncome).toBe(8);
-    expect(economy.money).toBe(107);
+    expect(economy.money).toBe(100 + 8 - maintenance);
     expect(economy.dailyConsumption.food).toBe(2 + 2.5);
   });
 
@@ -174,8 +184,10 @@ describe('ekonomika (test B)', () => {
     engine.tick();
     const economy = engine.getState().city.economy;
     expect(economy.dailyProduction.wood).toBeCloseTo(6 * 1.3);
-    // Sklad 1 + drevorubač 1, −20 %.
-    expect(economy.dailyExpenses).toBeCloseTo(1.6);
+    // Mestská správa: −20 % údržby skladu a drevorubača.
+    expect(economy.dailyExpenses).toBeCloseTo(
+      (def('warehouse').maintenanceCost + def('lumberjack').maintenanceCost) * 0.8,
+    );
   });
 
   it('potraviny pri hlade klesnú na nulu, nie pod ňu', () => {

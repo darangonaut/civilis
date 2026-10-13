@@ -2,7 +2,7 @@ import { createGameEngine } from '@/engine/core/engine';
 import { SCHEMA_VERSION } from '@/engine/core/constants';
 import type { CivilisEngine } from '@/engine/core/engine';
 import type { GameEngine, GameState, Position, Resources, TerrainType, Tile } from '@/types';
-import { testData } from './gameData';
+import { economyTestData as testData } from './gameData';
 
 export interface TestCityOptions {
   width?: number;

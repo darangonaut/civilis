@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CivilisEngine } from '@/engine/core/engine';
 import { build, createTestCity, setCity } from '../helpers/fixtures';
+import { economyTestData } from '../helpers/gameData';
 
 const population = (engine: CivilisEngine) => engine.getState().city.population;
 
@@ -82,11 +83,12 @@ describe('populácia', () => {
     expect(engine.takeEvents()).toContainEqual({ type: 'population_changed', delta: 1 });
   });
 
-  it('rast je 5 % populácie a neprekročí kapacitu bývania', () => {
+  it('rast je percento populácie (min. 1) a neprekročí kapacitu bývania', () => {
     const engine = cityWithHouses(5, { population: 45 });
     setCity(engine, { happiness: 100 });
     engine.tick();
-    expect(population(engine).total).toBe(47);
+    const rate = economyTestData.balance.populationGrowthRate;
+    expect(population(engine).total).toBe(45 + Math.max(1, Math.floor(45 * rate)));
     for (let i = 0; i < 10; i++) engine.tick();
     expect(population(engine).total).toBe(50);
   });
