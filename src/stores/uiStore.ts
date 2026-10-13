@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { BuildingCategory, Position } from '@/types';
 
+export type PanelId = 'research' | 'milestones' | 'statistics';
+
 export type NoticeKind = 'info' | 'success' | 'warning';
 
 export interface Notice {
@@ -20,6 +22,8 @@ interface UiState {
   selectedInstanceId: string | null;
   hoveredTile: Position | null;
   notices: Notice[];
+  /** Panel otvorený zo spodnej lišty. */
+  openPanel: PanelId | null;
   /** Obrazovka úspechu po poslednom míľniku prvej éry. */
   victoryOpen: boolean;
 
@@ -29,8 +33,9 @@ interface UiState {
   setHoveredTile: (position: Position | null) => void;
   showNotice: (text: string, kind?: NoticeKind) => void;
   setVictoryOpen: (open: boolean) => void;
+  togglePanel: (panel: PanelId | null) => void;
   dismissNotice: (id: number) => void;
-  /** Escape: najprv zruší režim výstavby, potom výber. */
+  /** Escape: postupne zruší režim výstavby, panel a výber. */
   cancel: () => void;
 }
 
@@ -42,6 +47,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   selectedInstanceId: null,
   hoveredTile: null,
   notices: [],
+  openPanel: null,
   victoryOpen: false,
 
   setCatalogCategory: (catalogCategory) => set({ catalogCategory }),
@@ -52,9 +58,11 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set((s) => ({ notices: [...s.notices, { id: ++noticeSeq, text, kind }].slice(-MAX_NOTICES) })),
   dismissNotice: (id) => set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })),
   setVictoryOpen: (victoryOpen) => set({ victoryOpen }),
+  togglePanel: (panel) => set((s) => ({ openPanel: s.openPanel === panel ? null : panel })),
   cancel: () => {
-    const { buildModeId, selectedInstanceId } = get();
+    const { buildModeId, openPanel, selectedInstanceId } = get();
     if (buildModeId) set({ buildModeId: null });
+    else if (openPanel) set({ openPanel: null });
     else if (selectedInstanceId) set({ selectedInstanceId: null });
   },
 }));

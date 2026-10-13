@@ -15,8 +15,8 @@ Zadanie: `docs/SPEC.md` · Architektúra: `docs/ARCHITECTURE.md` · Doplnenia pr
 | 2 – Herná mapa a renderer      | ✅ hotovo |
 | 3 – Ekonomický engine          | ✅ hotovo |
 | 4 – Populácia, výskum, míľniky | ✅ hotovo |
-| 5 – Používateľské rozhranie    | ⏳ ďalšia |
-| 6 – Ukladanie a dokončenie     | —         |
+| 5 – Používateľské rozhranie    | ✅ hotovo |
+| 6 – Ukladanie a dokončenie     | ⏳ ďalšia |
 
 ## Etapa 1 – Inicializácia projektu ✅
 
@@ -84,12 +84,21 @@ Testy: 11 unit (validácia dát, zhoda so špecifikáciou), 2 E2E (layout, katal
       (`app/gameEvents.ts`), obrazovka úspechu po 5. míľniku (pauza → sandbox)
 - [x] Testy: 92 unit/integration (spokojnosť, rast/pokles, výskum, test E), 10 E2E (hlad)
 
-## Etapa 5 – UI
+## Etapa 5 – UI ✅
 
-- [ ] Horná lišta napojená na stav + ovládanie rýchlosti (medzerník, 1/2/3)
-- [ ] Katalóg: dostupnosť podľa surovín a technológií, režim výstavby
-- [ ] Detail inštancie budovy: výroba, spotreba, pracovníci, problémy, priorita, zbúranie
-- [ ] Obrazovka výskumu, panel míľnikov, štatistiky (obrazovka úspechu je hotová z etapy 4)
+- [x] Horná lišta: deň, populácia, pracovníci, spokojnosť (rozpis zložiek v tooltipe), suroviny
+      s dennou bilanciou a varovaním (plný sklad, nula potravín), peniaze, rýchlosť
+- [x] Katalóg: cena pri každej budove, nedostupné budovy (suroviny / technológia) zošednuté
+      s dôvodom v tooltipe, režim výstavby
+- [x] Detail inštancie budovy: stav a problémy, pracovníci, výkon, výroba, spotreba, priorita,
+      zbúranie (z etáp 2–3)
+- [x] Panel výskumu (`components/panels/ResearchPanel.tsx`): stav technológií (preskúmaná /
+      skúma sa / dostupná / zamknutá), efekty, prerekvizity, priebeh a odhad dní, prepínanie
+- [x] Panel míľnikov: aktuálny cieľ s priebehom každej podmienky a počítadlom dní, odmeny
+- [x] Panel štatistík: obyvateľstvo, zložky spokojnosti s váhami, denná tabuľka surovín
+      a peňazí, počty budov a budov s problémom
+- [x] Spodná lišta: prepínanie panelov, aktuálny výskum a míľnik; Escape zatvára panel
+- [x] Testy: 93 unit/integration, 15 E2E (výskum, míľniky, štatistiky, Escape, dostupnosť v katalógu)
 
 ## Etapa 6 – Ukladanie a dokončenie
 
@@ -128,3 +137,4 @@ Testy: 11 unit (validácia dát, zhoda so špecifikáciou), 2 E2E (layout, katal
 | 2026-10-13 | Spokojnosť sa mení postupne (max. 5 bodov/deň), nie skokom na vážený priemer — dôvod v `docs/GAME_DESIGN.md`.                                                                                           |
 | 2026-10-13 | `GameEngine` rozšírený na `CivilisEngine` o `takeEvents()`; `tick()` ostáva `void` podľa špecifikácie.                                                                                                  |
 | 2026-10-13 | Prepnutie výskumu vráti investované vedomosti (špecifikácia prepínanie nerieši).                                                                                                                        |
+| 2026-10-13 | `t()` podporuje parametre (`{days}`); priebeh podmienok míľnikov počíta engine (`conditionProgress`), `isConditionMetToday` je z neho odvodené.                                                         |

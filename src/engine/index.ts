@@ -2,6 +2,8 @@ export { createGameEngine, type CivilisEngine } from './core/engine';
 export type { GameEvent } from './core/events';
 export { validateResearch } from './research/research';
 export {
+  conditionProgress,
+  type ConditionProgress,
   currentMilestone,
   isConditionMetToday,
   progressKey,

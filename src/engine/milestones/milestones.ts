@@ -19,36 +19,79 @@ export function currentMilestone(
   return data.milestones.find((m) => !state.milestones.completedIds.includes(m.id)) ?? null;
 }
 
+export interface ConditionProgress {
+  /** Aktuálna hodnota sledovanej veličiny. */
+  current: number;
+  /** Požadovaná hodnota. */
+  target: number;
+  metToday: boolean;
+  /** Koľko po sebe idúcich dní je podmienka splnená / koľko treba. */
+  days: number;
+  requiredDays: number;
+}
+
+function conditionValue(state: Readonly<GameState>, data: GameData, condition: MilestoneCondition) {
+  const { city, research } = state;
+  switch (condition.type) {
+    case 'population':
+      return { current: city.population.total, target: condition.minimum };
+    case 'happiness':
+      return { current: city.population.happiness, target: condition.minimum };
+    case 'building_count':
+      return {
+        current: city.buildings.filter((b) => b.definitionId === condition.buildingId).length,
+        target: condition.minimum,
+      };
+    case 'completed_research':
+      return { current: research.completedTechnologyIds.length, target: condition.minimum };
+    case 'all_research_completed':
+      return {
+        current: data.technologies.filter((t) => research.completedTechnologyIds.includes(t.id))
+          .length,
+        target: data.technologies.length,
+      };
+    case 'resource_balance':
+      return {
+        current:
+          (city.economy.dailyProduction[condition.resource] ?? 0) -
+          (city.economy.dailyConsumption[condition.resource] ?? 0),
+        target: condition.minimum,
+      };
+    case 'money_balance':
+      return {
+        current: city.economy.dailyIncome - city.economy.dailyExpenses,
+        target: condition.minimum,
+      };
+  }
+}
+
 /** Či je podmienka splnená práve dnes (bez ohľadu na počet dní). */
 export function isConditionMetToday(
   state: Readonly<GameState>,
   data: GameData,
   condition: MilestoneCondition,
 ): boolean {
-  const { city, research } = state;
-  switch (condition.type) {
-    case 'population':
-      return city.population.total >= condition.minimum;
-    case 'happiness':
-      return city.population.happiness >= condition.minimum;
-    case 'building_count':
-      return (
-        city.buildings.filter((b) => b.definitionId === condition.buildingId).length >=
-        condition.minimum
-      );
-    case 'completed_research':
-      return research.completedTechnologyIds.length >= condition.minimum;
-    case 'all_research_completed':
-      return data.technologies.every((t) => research.completedTechnologyIds.includes(t.id));
-    case 'resource_balance': {
-      const { dailyProduction, dailyConsumption } = city.economy;
-      const balance =
-        (dailyProduction[condition.resource] ?? 0) - (dailyConsumption[condition.resource] ?? 0);
-      return balance >= condition.minimum;
-    }
-    case 'money_balance':
-      return city.economy.dailyIncome - city.economy.dailyExpenses >= condition.minimum;
-  }
+  const { current, target } = conditionValue(state, data, condition);
+  return current >= target;
+}
+
+/** Priebeh podmienky míľnika pre UI. */
+export function conditionProgress(
+  state: Readonly<GameState>,
+  data: GameData,
+  milestoneId: string,
+  conditionIndex: number,
+  condition: MilestoneCondition,
+): ConditionProgress {
+  const metToday = isConditionMetToday(state, data, condition);
+  const required = requiredDays(condition);
+  const days =
+    required > 1
+      ? (state.milestones.progressDays[progressKey(milestoneId, conditionIndex)] ?? 0)
+      : metToday
+        ? 1
+        : 0;
+  return { ...conditionValue(state, data, condition), metToday, days, requiredDays: required };
 }
 
 /** Počet po sebe idúcich dní, ktoré podmienka vyžaduje (1 = stačí splniť raz). */

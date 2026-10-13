@@ -125,3 +125,30 @@ describe('civilizačné míľniky (test E)', () => {
     expect(engine.takeEvents().filter((e) => e.type === 'milestone_completed')).toEqual([]);
   });
 });
+
+describe('priebeh podmienok pre UI', () => {
+  it('vracia aktuálnu hodnotu, cieľ a dni', async () => {
+    const { conditionProgress } = await import('@/engine/milestones/milestones');
+    const { testData } = await import('../helpers/gameData');
+    const engine = createTestCity({ population: 12 });
+    const state = engine.getState();
+    const [population] = testData.milestones[0]!.conditions;
+    expect(conditionProgress(state, testData, 'settlement_founded', 0, population!)).toEqual({
+      current: 12,
+      target: 20,
+      metToday: false,
+      days: 0,
+      requiredDays: 1,
+    });
+
+    const snapshot = engine.serialize();
+    snapshot.milestones.progressDays['self_sufficient_village:1'] = 4;
+    const balance = testData.milestones[1]!.conditions[1]!;
+    expect(
+      conditionProgress(snapshot, testData, 'self_sufficient_village', 1, balance),
+    ).toMatchObject({
+      days: 4,
+      requiredDays: 10,
+    });
+  });
+});

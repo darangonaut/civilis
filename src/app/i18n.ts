@@ -1,5 +1,10 @@
 import { COMMAND_FAILURE_REASONS, type BuildingProblem, type CommandFailureReason } from '@/engine';
-import type { BuildingCategory, ResourceId } from '@/types';
+import {
+  RESOURCE_IDS,
+  type BuildingCategory,
+  type ResourceId,
+  type TechnologyEffect,
+} from '@/types';
 
 /**
  * Všetky texty UI sú tu, aby sa dala neskôr doplniť ďalšia lokalizácia.
@@ -69,6 +74,59 @@ const sk = {
   'bottom.save': 'Uložiť',
   'bottom.settings': 'Nastavenia',
   'common.notYetAvailable': 'Zatiaľ nedostupné',
+  'common.close': 'Zavrieť',
+  'catalog.locked': 'Vyžaduje technológiu',
+  'catalog.unaffordable': 'Nedostatok surovín',
+  'research.title': 'Výskum',
+  'research.knowledge': 'Vedomosti',
+  'research.knowledgeRate': 'Produkcia vedomostí',
+  'research.cost': 'Cena',
+  'research.requires': 'Vyžaduje',
+  'research.start': 'Skúmať',
+  'research.switch': 'Prepnúť sem',
+  'research.active': 'Skúma sa',
+  'research.completed': 'Preskúmané',
+  'research.locked': 'Zamknuté',
+  'research.noneActive': 'Nič sa neskúma — vyber technológiu.',
+  'research.noSchool': 'Vedomosti produkuje škola.',
+  'research.daysLeft': 'zostáva približne {days} dní',
+  'research.switchHint': 'Pri prepnutí sa investované vedomosti vrátia.',
+  'milestones.title': 'Civilizačné míľniky',
+  'milestones.current': 'Aktuálny cieľ',
+  'milestones.completed': 'Splnené',
+  'milestones.upcoming': 'Čaká',
+  'milestones.reward': 'Odmena',
+  'milestones.days': 'dní',
+  'milestones.allDone': 'Všetky míľniky prvej éry sú splnené. Hra pokračuje v režime sandbox.',
+  'condition.population': 'Obyvatelia',
+  'condition.happiness': 'Spokojnosť',
+  'condition.building_count': 'Postaviť',
+  'condition.completed_research': 'Preskúmané technológie',
+  'condition.all_research_completed': 'Všetky technológie',
+  'condition.resource_balance': 'Denná bilancia',
+  'condition.money_balance': 'Denná bilancia peňazí',
+  'stats.title': 'Štatistiky',
+  'stats.population': 'Obyvateľstvo',
+  'stats.housing': 'Bývanie',
+  'stats.workers': 'Pracovníci',
+  'stats.employed': 'zamestnaní',
+  'stats.happiness': 'Spokojnosť',
+  'stats.economy': 'Suroviny za deň',
+  'stats.resource': 'Surovina',
+  'stats.stock': 'Zásoba',
+  'stats.production': 'Výroba',
+  'stats.consumption': 'Spotreba',
+  'stats.balance': 'Bilancia',
+  'stats.money': 'Peniaze',
+  'stats.income': 'Príjem',
+  'stats.expenses': 'Údržba',
+  'stats.buildings': 'Budovy',
+  'stats.problems': 'Budovy s problémom',
+  'stats.storage': 'Kapacita skladu',
+  'stats.history': 'Posledných {days} dní',
+  'effect.production': '+{percent} % produkcia {resource}',
+  'effect.productionAll': '+{percent} % všetka produkcia',
+  'effect.maintenance': '−{percent} % údržba budov',
   'events.foodShortage': 'Obyvatelia hladujú — postav farmy.',
   'events.researchCompleted': 'Výskum dokončený',
   'events.milestoneCompleted': 'Míľnik splnený',
@@ -122,8 +180,12 @@ const sk = {
 
 export type TranslationKey = keyof typeof sk;
 
-export function t(key: TranslationKey): string {
-  return sk[key];
+/** Preloží kľúč; `{názov}` v texte nahradí hodnotou z `params`. */
+export function t(key: TranslationKey, params?: Record<string, string | number>): string {
+  const text: string = sk[key];
+  return params
+    ? text.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? `{${name}}`))
+    : text;
 }
 
 /** Preloží kód dôvodu zlyhania príkazu z enginu. */
@@ -141,6 +203,17 @@ export function problemLabel(problem: BuildingProblem): string {
   if (problem.code === 'storage_full')
     return `${t('problem.storage_full')} (${resourceLabel(problem.resource).toLowerCase()})`;
   return t(`problem.${problem.code}`);
+}
+
+/** Popis efektu technológie, napr. „+20 % produkcia dreva“. */
+export function effectLabel(effect: TechnologyEffect): string {
+  const percent = Math.round(Math.abs(effect.multiplier - 1) * 100);
+  if (effect.type === 'maintenance_multiplier') return t('effect.maintenance', { percent });
+  if (effect.target === 'all') return t('effect.productionAll', { percent });
+  const resource = (RESOURCE_IDS as readonly string[]).includes(effect.target)
+    ? t(`resourceGenitive.${effect.target as ResourceId}`)
+    : effect.target;
+  return t('effect.production', { percent, resource });
 }
 
 export const resourceLabel = (id: ResourceId): string => t(`resource.${id}`);

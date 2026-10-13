@@ -8,6 +8,7 @@ import { useUiStore } from '@/stores/uiStore';
 import type { Position } from '@/types';
 import { MapInfo } from './MapInfo';
 import { Notice } from './Notice';
+import { PanelHost } from './panels/PanelHost';
 
 function handleTileClick(position: Position): void {
   const ui = useUiStore.getState();
@@ -92,6 +93,7 @@ export function MapView() {
       <div ref={hostRef} className="map-host" />
       {!ready && <p className="map-loading muted">{t('map.loading')}</p>}
       <MapInfo />
+      <PanelHost />
       <Notice />
     </main>
   );

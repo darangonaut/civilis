@@ -1,0 +1,100 @@
+import { expect, test, type Page } from '@playwright/test';
+import '../../src/types/testHook';
+
+async function openGame(page: Page) {
+  await page.goto('/?seed=42&e2e&paused');
+  await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
+}
+
+test('výskum: spustenie technológie a stav zamknutých technológií', async ({ page }) => {
+  await openGame(page);
+  await page.getByTestId('open-research').click();
+  const panel = page.getByTestId('research-panel');
+  await expect(panel).toContainText('Nič sa neskúma');
+  await expect(panel.locator('[data-tech-id="labor_organization"]')).toHaveAttribute(
+    'data-status',
+    'locked',
+  );
+
+  await panel.locator('[data-tech-id="woodworking"]').getByRole('button').click();
+  await expect(panel.locator('[data-tech-id="woodworking"]')).toHaveAttribute(
+    'data-status',
+    'active',
+  );
+  await expect(panel).toContainText('Skúma sa: Spracovanie dreva');
+  await expect(page.getByTestId('bottom-bar')).toContainText('Spracovanie dreva');
+  const research = await page.evaluate(() => window.__civilis!.getState().research);
+  expect(research.activeTechnologyId).toBe('woodworking');
+
+  // Prepnutie na inú technológiu.
+  await panel
+    .locator('[data-tech-id="masonry"]')
+    .getByRole('button', { name: 'Prepnúť sem' })
+    .click();
+  await expect(panel.locator('[data-tech-id="masonry"]')).toHaveAttribute('data-status', 'active');
+  await expect(panel.locator('[data-tech-id="woodworking"]')).toHaveAttribute(
+    'data-status',
+    'available',
+  );
+});
+
+test('míľniky: aktuálny cieľ s priebehom podmienok', async ({ page }) => {
+  await openGame(page);
+  await page.getByTestId('open-milestones').click();
+  const current = page
+    .getByTestId('milestones-panel')
+    .locator('[data-milestone-id="settlement_founded"]');
+  await expect(current).toHaveClass(/current/);
+  const conditions = current.getByTestId('milestone-condition');
+  await expect(conditions).toHaveCount(3);
+  await expect(conditions.first()).toContainText('Obyvatelia');
+  await expect(conditions.first()).toContainText('10 / 20');
+  await expect(current).toContainText('Peniaze +100');
+});
+
+test('štatistiky ukazujú populáciu, spokojnosť a bilanciu', async ({ page }) => {
+  await openGame(page);
+  await page.evaluate(() => window.__civilis!.advanceDays(1));
+  await page.getByTestId('open-statistics').click();
+  const panel = page.getByTestId('statistics-panel');
+  await expect(panel).toContainText('Obyvateľstvo');
+  await expect(panel).toContainText('−2,5');
+  await expect(panel).toContainText('Kapacita skladu: 300');
+});
+
+test('Escape a opätovný klik panel zatvoria', async ({ page }) => {
+  await openGame(page);
+  await page.getByTestId('open-statistics').click();
+  await expect(page.getByTestId('statistics-panel')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('statistics-panel')).toBeHidden();
+  await page.getByTestId('open-research').click();
+  await page.getByTestId('open-research').click();
+  await expect(page.getByTestId('research-panel')).toBeHidden();
+});
+
+test('katalóg ukazuje cenu a nedostupnosť pri nedostatku surovín', async ({ page }) => {
+  await openGame(page);
+  const catalog = page.getByTestId('building-catalog');
+  await expect(catalog.locator('[data-building-id="school"]')).toContainText('30');
+  await expect(catalog.locator('[data-building-id="school"]')).toHaveAttribute(
+    'data-available',
+    'true',
+  );
+
+  // Škola stojí 20 kameňa z 30, druhá sa už nedá zaplatiť.
+  await catalog.locator('[data-building-id="school"]').click();
+  const spot = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    for (const road of hook.getState().city.buildings.filter((b) => b.definitionId === 'road')) {
+      const tile = { x: road.position.x, y: road.position.y + 1 };
+      if (hook.canPlace('school', tile)) return hook.tileToClient(tile);
+    }
+    throw new Error('Žiadne miesto pre školu');
+  });
+  await page.mouse.click(spot.x, spot.y);
+  await expect(catalog.locator('[data-building-id="school"]')).toHaveAttribute(
+    'data-available',
+    'false',
+  );
+});
