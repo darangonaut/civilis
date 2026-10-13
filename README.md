@@ -50,12 +50,13 @@ export a import JSON. Konkrétnu mapu otvoríš cez `?seed=123`, novú hru cez `
 
 ## Vývoj
 
-| Príkaz                            | Popis                                                         |
-| --------------------------------- | ------------------------------------------------------------- |
-| `npm run typecheck`               | TypeScript                                                    |
-| `npm run lint` / `npm run format` | ESLint / Prettier                                             |
-| `npm test`                        | unit + integration (Vitest), vrátane testu hrateľnosti        |
-| `npm run test:e2e`                | E2E (Playwright, Chromium + Firefox; `PW_WEBKIT=1` aj WebKit) |
+| Príkaz                            | Popis                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------- |
+| `npm run typecheck`               | TypeScript                                                              |
+| `npm run lint` / `npm run format` | ESLint / Prettier                                                       |
+| `npm test`                        | unit + integration (Vitest), vrátane rýchleho testu hrateľnosti (3 éry) |
+| `npm run test:full`               | test hrateľnosti celej hry (8 ér, ~2,5 min)                             |
+| `npm run test:e2e`                | E2E (Playwright, Chromium + Firefox; `PW_WEBKIT=1` aj WebKit)           |
 
 Pred prvým E2E: `npx playwright install chromium firefox`.
 
