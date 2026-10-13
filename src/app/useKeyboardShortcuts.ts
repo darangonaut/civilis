@@ -1,13 +1,20 @@
 import { useEffect } from 'react';
 import { useUiStore } from '@/stores/uiStore';
 import { controller } from './game';
+import { quickSave } from './saving';
 
 const SPEED_KEYS = { '1': 1, '2': 2, '3': 4 } as const;
 
-/** Globálne klávesové skratky (špecifikácia 7.1). Ukladanie pribudne v etape 6. */
+/** Globálne klávesové skratky (špecifikácia 7.1). */
 export function useKeyboardShortcuts(): void {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        // Ukladanie funguje aj počas pauzy a prebije uloženie stránky prehliadačom.
+        e.preventDefault();
+        void quickSave();
+        return;
+      }
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === 'Escape') {

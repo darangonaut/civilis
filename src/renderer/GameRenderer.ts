@@ -149,12 +149,13 @@ export class GameRenderer {
    * `problemIds` sú budovy, nad ktorými sa zobrazí výstražná značka.
    */
   sync(state: Readonly<GameState>, problemIds: ReadonlySet<string> = new Set()): void {
-    const firstSync = this.state === null;
+    const worldChanged = this.renderedWorld !== state.world;
     this.state = state;
-    if (this.renderedWorld !== state.world) this.buildTerrain(state.world);
+    if (worldChanged) this.buildTerrain(state.world);
     this.syncBuildings(state);
     this.syncMarkers(state, problemIds);
-    if (firstSync) this.centerOnStart();
+    // Nová alebo načítaná hra: kamera späť na mesto.
+    if (worldChanged) this.centerOnStart();
     this.refreshOverlay();
   }
 

@@ -8,6 +8,8 @@ const PANELS: { id: PanelId; label: TranslationKey }[] = [
   { id: 'research', label: 'bottom.research' },
   { id: 'milestones', label: 'bottom.milestones' },
   { id: 'statistics', label: 'bottom.statistics' },
+  { id: 'saves', label: 'bottom.save' },
+  { id: 'settings', label: 'bottom.settings' },
 ];
 
 export function BottomBar() {
@@ -29,13 +31,6 @@ export function BottomBar() {
           {t(panel.label)}
         </button>
       ))}
-      {/* Ukladanie a nastavenia pribudnú v etape 6. */}
-      <button disabled title={t('common.notYetAvailable')}>
-        {t('bottom.save')}
-      </button>
-      <button disabled title={t('common.notYetAvailable')}>
-        {t('bottom.settings')}
-      </button>
       <div className="bottom-status">
         <span>
           <span className="muted">{t('research.title')}:</span>{' '}

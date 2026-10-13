@@ -18,7 +18,7 @@ const nonNegative = z.number().finite().nonnegative();
 const positiveInt = z.number().int().positive();
 const resourceId = z.enum(RESOURCE_IDS);
 
-const resourcesSchema = z.strictObject({
+export const resourcesSchema = z.strictObject({
   food: nonNegative,
   wood: nonNegative,
   stone: nonNegative,
@@ -26,7 +26,7 @@ const resourcesSchema = z.strictObject({
   knowledge: nonNegative,
 }) satisfies z.ZodType<Resources>;
 
-const partialResourcesSchema = resourcesSchema.partial();
+export const partialResourcesSchema = resourcesSchema.partial();
 
 export const buildingDefinitionSchema = z.strictObject({
   id,

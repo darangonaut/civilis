@@ -725,3 +725,68 @@ button.primary {
   gap: 20px;
   font-size: 13px;
 }
+
+/* Uložené hry a nastavenia */
+.slot-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+}
+
+.slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.slot-buttons,
+.save-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.save-actions {
+  margin-bottom: 12px;
+}
+
+.new-game-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.new-game-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.new-game-form input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  width: 180px;
+}
+
+.new-game-form input[aria-invalid='true'] {
+  border-color: #d9534f;
+}

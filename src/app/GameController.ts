@@ -12,6 +12,7 @@ import { GameLoop } from './gameLoop';
 
 type Listener = () => void;
 type EventListener = (events: GameEvent[]) => void;
+type DayListener = (day: number) => void;
 
 /**
  * Jediný vstupný bod UI a renderera do enginu. Posiela príkazy, riadi hernú slučku
@@ -21,6 +22,7 @@ export class GameController {
   private readonly engine: CivilisEngine;
   private readonly listeners = new Set<Listener>();
   private readonly eventListeners = new Set<EventListener>();
+  private readonly dayListeners = new Set<DayListener>();
   private readonly loop: GameLoop;
   private cachedAnalysis: CityAnalysis | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
@@ -66,11 +68,31 @@ export class GameController {
     this.setSpeed(this.state.simulation.speed === 0 ? this.resumeSpeed : 0);
   }
 
+  /** Nahradí aktuálnu hru iným stavom (načítanie, import, nová hra). */
+  load(state: GameState): void {
+    this.engine.load(state);
+    this.resumeSpeed = state.simulation.speed === 0 ? this.resumeSpeed : state.simulation.speed;
+    this.notify();
+  }
+
+  /** Kópia stavu na uloženie. */
+  serialize(): GameState {
+    return this.engine.serialize();
+  }
+
   tick(): void {
     this.engine.tick();
     this.notify();
     const events = this.engine.takeEvents();
     if (events.length > 0) this.eventListeners.forEach((listener) => listener(events));
+    const day = this.state.simulation.day;
+    this.dayListeners.forEach((listener) => listener(day));
+  }
+
+  /** Odber konca každého herného dňa (napr. automatické ukladanie). */
+  onDayAdvanced(listener: DayListener): () => void {
+    this.dayListeners.add(listener);
+    return () => this.dayListeners.delete(listener);
   }
 
   /** Odber udalostí zo simulácie (dokončený výskum, míľnik, hlad…). */

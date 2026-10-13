@@ -7,16 +7,19 @@ import { VictoryDialog } from '@/components/VictoryDialog';
 import { useEffect } from 'react';
 import { controller } from './game';
 import { installGameEventNotifications } from './gameEvents';
+import { installAutosave } from './saving';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 export function App() {
   useKeyboardShortcuts();
   useEffect(() => {
-    const uninstall = installGameEventNotifications();
+    const uninstallNotifications = installGameEventNotifications();
+    const uninstallAutosave = installAutosave();
     controller.startLoop();
     return () => {
       controller.stopLoop();
-      uninstall();
+      uninstallAutosave();
+      uninstallNotifications();
     };
   }, []);
 
