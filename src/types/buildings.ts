@@ -4,7 +4,7 @@ import type { Position, TerrainType } from './world';
 export const BUILDING_CATEGORIES = ['housing', 'production', 'service', 'infrastructure'] as const;
 export type BuildingCategory = (typeof BUILDING_CATEGORIES)[number];
 
-export const SERVICE_TYPES = ['water', 'education', 'culture'] as const;
+export const SERVICE_TYPES = ['water', 'education', 'culture', 'health'] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
 /** Vyššia úroveň budovy (2, 3, …). Neuvedené hodnoty sa preberú z predchádzajúcej úrovne. */

@@ -63,6 +63,64 @@
         "requiredTechnologyId": "banking",
         "requiredServices": ["water", "education", "culture"],
         "housingCapacity": 40
+      },
+      {
+        "name": "Renesančný palác",
+        "upgradeCost": {
+          "bricks": 40,
+          "tools": 20,
+          "cloth": 30
+        },
+        "requiredTechnologyId": "arts",
+        "requiredServices": ["water", "education", "culture"],
+        "housingCapacity": 48
+      },
+      {
+        "name": "Mestský činžiak",
+        "upgradeCost": {
+          "bricks": 60,
+          "iron": 30,
+          "cloth": 20,
+          "coal": 20
+        },
+        "requiredTechnologyId": "urbanism",
+        "requiredServices": ["water", "education", "culture"],
+        "housingCapacity": 60
+      },
+      {
+        "name": "Mrakodrap",
+        "upgradeCost": {
+          "iron": 80,
+          "bricks": 80,
+          "tools": 60,
+          "electricity": 40
+        },
+        "requiredTechnologyId": "steel_frames",
+        "requiredServices": ["water", "education", "culture", "health"],
+        "housingCapacity": 80
+      },
+      {
+        "name": "Inteligentný dom",
+        "upgradeCost": {
+          "iron": 100,
+          "electronics": 40,
+          "electricity": 80
+        },
+        "requiredTechnologyId": "smart_cities",
+        "requiredServices": ["water", "education", "culture", "health"],
+        "housingCapacity": 100
+      },
+      {
+        "name": "Arkológia",
+        "upgradeCost": {
+          "iron": 200,
+          "electronics": 150,
+          "electricity": 200,
+          "tools": 200
+        },
+        "requiredTechnologyId": "arcologies",
+        "requiredServices": ["water", "education", "culture", "health"],
+        "housingCapacity": 150
       }
     ]
   },
@@ -539,5 +597,793 @@
       "radius": 14
     },
     "requiredTechnologyId": "theology"
+  },
+  {
+    "id": "pasture",
+    "name": "Pastvina",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 40
+    },
+    "inputs": {},
+    "outputs": {
+      "cloth": 2
+    },
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 0.5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "connectsAdjacent": true,
+    "allowedTerrain": ["grass", "hill"],
+    "toolUsePerWorker": 0.05,
+    "requiredTechnologyId": "textiles"
+  },
+  {
+    "id": "harbor",
+    "name": "Prístav",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 80,
+      "stone": 60,
+      "bricks": 40
+    },
+    "inputs": {
+      "cloth": 2,
+      "tools": 1
+    },
+    "outputs": {},
+    "workersRequired": 6,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 40,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["water"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "navigation"
+  },
+  {
+    "id": "printing_house",
+    "name": "Tlačiareň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 40,
+      "bricks": 60,
+      "tools": 20
+    },
+    "inputs": {
+      "wood": 2
+    },
+    "outputs": {
+      "knowledge": 14
+    },
+    "workersRequired": 5,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "printing"
+  },
+  {
+    "id": "observatory",
+    "name": "Observatórium",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 80,
+      "bricks": 80,
+      "iron": 20
+    },
+    "inputs": {},
+    "outputs": {
+      "knowledge": 6
+    },
+    "workersRequired": 4,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile", "hill"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "education",
+      "radius": 14
+    },
+    "requiredTechnologyId": "astronomy"
+  },
+  {
+    "id": "theater",
+    "name": "Divadlo",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 60,
+      "bricks": 100,
+      "cloth": 40
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 6,
+    "housingCapacity": 0,
+    "maintenanceCost": 5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 12
+    },
+    "requiredTechnologyId": "arts"
+  },
+  {
+    "id": "coal_mine",
+    "name": "Uhoľná baňa",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 80,
+      "stone": 60,
+      "tools": 20
+    },
+    "inputs": {},
+    "outputs": {
+      "coal": 4
+    },
+    "workersRequired": 5,
+    "housingCapacity": 0,
+    "maintenanceCost": 2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "connectsAdjacent": true,
+    "allowedTerrain": ["hill", "rock"],
+    "toolUsePerWorker": 0.05,
+    "requiredTechnologyId": "steam"
+  },
+  {
+    "id": "steelworks",
+    "name": "Oceliareň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 120,
+      "iron": 60
+    },
+    "inputs": {
+      "iron": 3,
+      "coal": 3
+    },
+    "outputs": {
+      "tools": 18
+    },
+    "workersRequired": 8,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "steel"
+  },
+  {
+    "id": "textile_factory",
+    "name": "Textilná továreň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 150,
+      "iron": 40,
+      "tools": 40
+    },
+    "inputs": {
+      "coal": 2,
+      "wood": 2
+    },
+    "outputs": {
+      "cloth": 12
+    },
+    "workersRequired": 8,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "industrialization"
+  },
+  {
+    "id": "railway_station",
+    "name": "Železničná stanica",
+    "category": "infrastructure",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 150,
+      "iron": 80,
+      "coal": 50
+    },
+    "inputs": {
+      "coal": 2
+    },
+    "outputs": {},
+    "workersRequired": 6,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 50,
+    "storageCapacity": 500,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "railways"
+  },
+  {
+    "id": "waterworks",
+    "name": "Vodáreň",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 100,
+      "iron": 40,
+      "tools": 30
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 4,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "water",
+      "radius": 14
+    },
+    "requiredTechnologyId": "sanitation"
+  },
+  {
+    "id": "exhibition_palace",
+    "name": "Výstavný palác",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 300,
+      "bricks": 400,
+      "iron": 200,
+      "tools": 100,
+      "cloth": 150,
+      "coal": 150
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 10,
+    "housingCapacity": 0,
+    "maintenanceCost": 10,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 18
+    },
+    "requiredTechnologyId": "urbanism"
+  },
+  {
+    "id": "power_plant",
+    "name": "Uhoľná elektráreň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 200,
+      "iron": 120,
+      "tools": 60
+    },
+    "inputs": {
+      "coal": 3
+    },
+    "outputs": {
+      "electricity": 16
+    },
+    "workersRequired": 8,
+    "housingCapacity": 0,
+    "maintenanceCost": 5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "electricity"
+  },
+  {
+    "id": "hospital",
+    "name": "Nemocnica",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 200,
+      "iron": 80,
+      "tools": 60
+    },
+    "inputs": {
+      "electricity": 2
+    },
+    "outputs": {},
+    "workersRequired": 10,
+    "housingCapacity": 0,
+    "maintenanceCost": 6,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "health",
+      "radius": 14
+    },
+    "requiredTechnologyId": "medicine"
+  },
+  {
+    "id": "cold_storage",
+    "name": "Chladiarenský sklad",
+    "category": "infrastructure",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 150,
+      "iron": 100
+    },
+    "inputs": {
+      "electricity": 2
+    },
+    "outputs": {},
+    "workersRequired": 3,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 1500,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "refrigeration"
+  },
+  {
+    "id": "assembly_plant",
+    "name": "Montážna linka",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 250,
+      "iron": 150,
+      "tools": 80
+    },
+    "inputs": {
+      "iron": 2,
+      "electricity": 4
+    },
+    "outputs": {
+      "tools": 36
+    },
+    "workersRequired": 12,
+    "housingCapacity": 0,
+    "maintenanceCost": 6,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "mass_production"
+  },
+  {
+    "id": "radio_station",
+    "name": "Rozhlasová stanica",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 150,
+      "iron": 100,
+      "tools": 40
+    },
+    "inputs": {
+      "electricity": 3
+    },
+    "outputs": {},
+    "workersRequired": 5,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 20
+    },
+    "requiredTechnologyId": "radio"
+  },
+  {
+    "id": "department_store",
+    "name": "Obchodný dom",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 250,
+      "iron": 100,
+      "cloth": 80
+    },
+    "inputs": {
+      "cloth": 2,
+      "electricity": 2
+    },
+    "outputs": {},
+    "workersRequired": 10,
+    "housingCapacity": 0,
+    "maintenanceCost": 5,
+    "moneyOutput": 120,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "consumerism"
+  },
+  {
+    "id": "electronics_factory",
+    "name": "Továreň na elektroniku",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 300,
+      "iron": 200,
+      "tools": 150
+    },
+    "inputs": {
+      "iron": 1,
+      "electricity": 4
+    },
+    "outputs": {
+      "electronics": 6
+    },
+    "workersRequired": 12,
+    "housingCapacity": 0,
+    "maintenanceCost": 8,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "computers"
+  },
+  {
+    "id": "nuclear_plant",
+    "name": "Jadrová elektráreň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 500,
+      "iron": 300,
+      "electronics": 60,
+      "tools": 150
+    },
+    "inputs": {},
+    "outputs": {
+      "electricity": 80
+    },
+    "workersRequired": 15,
+    "housingCapacity": 0,
+    "maintenanceCost": 15,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "nuclear_power"
+  },
+  {
+    "id": "data_center",
+    "name": "Dátové centrum",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 300,
+      "iron": 200,
+      "electronics": 80
+    },
+    "inputs": {
+      "electronics": 1,
+      "electricity": 6
+    },
+    "outputs": {
+      "knowledge": 120
+    },
+    "workersRequired": 8,
+    "housingCapacity": 0,
+    "maintenanceCost": 10,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "internet"
+  },
+  {
+    "id": "solar_park",
+    "name": "Solárny park",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "iron": 80,
+      "electronics": 30
+    },
+    "inputs": {},
+    "outputs": {
+      "electricity": 10
+    },
+    "workersRequired": 1,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "connectsAdjacent": true,
+    "allowedTerrain": ["grass", "fertile", "rock", "hill"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "ecology"
+  },
+  {
+    "id": "vertical_farm",
+    "name": "Vertikálna farma",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 200,
+      "iron": 150,
+      "electronics": 40
+    },
+    "inputs": {
+      "electricity": 4
+    },
+    "outputs": {
+      "food": 60
+    },
+    "workersRequired": 8,
+    "housingCapacity": 0,
+    "maintenanceCost": 6,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "genetics"
+  },
+  {
+    "id": "robot_factory",
+    "name": "Robotická továreň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 300,
+      "iron": 250,
+      "electronics": 120
+    },
+    "inputs": {
+      "electronics": 2,
+      "electricity": 6
+    },
+    "outputs": {
+      "tools": 90
+    },
+    "workersRequired": 6,
+    "housingCapacity": 0,
+    "maintenanceCost": 10,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "robotics"
+  },
+  {
+    "id": "fusion_reactor",
+    "name": "Fúzny reaktor",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "iron": 800,
+      "electronics": 400,
+      "tools": 400
+    },
+    "inputs": {},
+    "outputs": {
+      "electricity": 300
+    },
+    "workersRequired": 20,
+    "housingCapacity": 0,
+    "maintenanceCost": 30,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "fusion"
+  },
+  {
+    "id": "ai_center",
+    "name": "Centrum umelej inteligencie",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "iron": 400,
+      "electronics": 500,
+      "bricks": 400
+    },
+    "inputs": {
+      "electricity": 20,
+      "electronics": 3
+    },
+    "outputs": {
+      "knowledge": 400
+    },
+    "workersRequired": 10,
+    "housingCapacity": 0,
+    "maintenanceCost": 25,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "education",
+      "radius": 24
+    },
+    "requiredTechnologyId": "artificial_intelligence"
+  },
+  {
+    "id": "nano_foundry",
+    "name": "Nanotováreň",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "iron": 500,
+      "electronics": 300
+    },
+    "inputs": {
+      "iron": 2,
+      "electricity": 20
+    },
+    "outputs": {
+      "electronics": 30
+    },
+    "workersRequired": 10,
+    "housingCapacity": 0,
+    "maintenanceCost": 20,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "nanotechnology"
+  },
+  {
+    "id": "space_port",
+    "name": "Vesmírny prístav",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "iron": 3000,
+      "electronics": 2000,
+      "tools": 2000,
+      "bricks": 2000,
+      "electricity": 2000
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 50,
+    "housingCapacity": 0,
+    "maintenanceCost": 50,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "culture",
+      "radius": 30
+    },
+    "requiredTechnologyId": "spaceflight"
   }
 ]

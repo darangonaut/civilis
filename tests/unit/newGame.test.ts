@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createNewGame } from '@/engine/core/newGame';
 import { getTile } from '@/engine/world/grid';
+import { zeroResources } from '../helpers/fixtures';
 import { testData } from '../helpers/gameData';
 
 const newGame = (seed = 42) =>
@@ -14,17 +15,15 @@ describe('nová hra', () => {
     expect(state.city.population.availableWorkers).toBe(5);
     expect(state.city.population.happiness).toBe(70);
     expect(state.city.economy.resources).toEqual({
+      ...zeroResources(),
       food: 100,
       wood: 80,
       stone: 30,
       tools: 10,
-      knowledge: 0,
-      bricks: 0,
-      iron: 0,
     });
     expect(state.city.economy.money).toBe(500);
     expect(state.simulation.day).toBe(0);
-    expect(state.world.width).toBe(64);
+    expect(state.world.width).toBe(testData.balance.mapSize.width);
   });
 
   it('obsahuje dom, sklad a prístupovú cestu', () => {

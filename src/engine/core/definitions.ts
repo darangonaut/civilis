@@ -27,6 +27,10 @@ export const resourcesSchema = z.strictObject({
   knowledge: nonNegative,
   bricks: nonNegative,
   iron: nonNegative,
+  cloth: nonNegative,
+  coal: nonNegative,
+  electricity: nonNegative,
+  electronics: nonNegative,
 }) satisfies z.ZodType<Resources>;
 
 export const partialResourcesSchema = resourcesSchema.partial();
@@ -164,6 +168,8 @@ export const balanceSchema = z.strictObject({
   populationGrowthRate: z.number().min(0).max(1),
   /** Najviac nových obyvateľov za deň. */
   populationMaxGrowth: z.number().int().positive(),
+  /** Strop rastu ako podiel populácie (ak je vyšší ako `populationMaxGrowth`). */
+  populationMaxGrowthShare: z.number().min(0).max(1),
   populationDeclineRate: z.number().min(0).max(1),
   happinessDeclineThreshold: z.number().min(0).max(100),
 });

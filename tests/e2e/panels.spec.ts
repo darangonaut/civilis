@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
 
 async function openGame(page: Page) {
-  await page.goto('/?seed=42&e2e&paused');
+  await page.goto('/?seed=7&e2e&paused');
   await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
 }
 

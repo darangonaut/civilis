@@ -9,7 +9,7 @@ import type { GameData } from '../core/definitions';
 import { effectiveDefinition } from '../core/levels';
 import { computeConnectedBuildings, computeRoadNetwork } from '../world/connectivity';
 import { getTile } from '../world/grid';
-import { maintenanceMultiplier, productionMultiplier } from './modifiers';
+import { maintenanceMultiplier, moneyMultiplier, productionMultiplier } from './modifiers';
 
 export type BuildingProblem =
   | { code: 'disabled' }
@@ -111,6 +111,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
   }
 
   const maintenanceFactor = maintenanceMultiplier(state.research, data);
+  const moneyFactor = moneyMultiplier(state.research, data);
   const maintenanceTotal = maintenanceBase * maintenanceFactor;
   const fundingRatio =
     maintenanceTotal > 0 ? Math.min(1, Math.max(0, economy.money) / maintenanceTotal) : 1;
@@ -177,6 +178,20 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
       status.problems.push({ code: 'no_funds' });
     }
 
+    // Plný sklad všetkých výrobkov: budova si dá prestávku a nemíňa vstupy ani nástroje.
+    const outputIds = RESOURCE_IDS.filter((id) => (definition.outputs[id] ?? 0) > 0);
+    const allOutputsFull =
+      outputIds.length > 0 &&
+      definition.moneyOutput === 0 &&
+      outputIds.every(
+        (id) => !UNCAPPED_RESOURCES.has(id) && economy.resources[id] >= storageCapacity,
+      );
+    if (allOutputsFull) {
+      for (const id of outputIds) status.problems.push({ code: 'storage_full', resource: id });
+      status.efficiency = 0;
+      continue;
+    }
+
     const toolsNeeded = status.workersAssigned * definition.toolUsePerWorker;
     if (toolsNeeded > 0) {
       const toolsUsed = Math.min(pool.tools, toolsNeeded);
@@ -218,7 +233,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
         status.problems.push({ code: 'storage_full', resource: id });
       }
     }
-    status.moneyIncome = definition.moneyOutput * status.efficiency;
+    status.moneyIncome = definition.moneyOutput * status.efficiency * moneyFactor;
     moneyIncome += status.moneyIncome;
   }
 

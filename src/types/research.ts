@@ -1,6 +1,11 @@
 import type { ResourceId, Resources } from './resources';
 
-export const TECHNOLOGY_EFFECT_TYPES = ['production_multiplier', 'maintenance_multiplier'] as const;
+export const TECHNOLOGY_EFFECT_TYPES = [
+  'production_multiplier',
+  'maintenance_multiplier',
+  /** Rozšírenie: príjem peňazí (trhovisko, prístav…). */
+  'money_multiplier',
+] as const;
 export type TechnologyEffectType = (typeof TECHNOLOGY_EFFECT_TYPES)[number];
 
 export interface TechnologyEffect {

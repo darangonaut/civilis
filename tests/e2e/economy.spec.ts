@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
 
-async function openGame(page: Page, query = '?seed=42&e2e&paused') {
+async function openGame(page: Page, query = '?seed=7&e2e&paused') {
   await page.goto(`/${query}`);
   await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
 }
@@ -9,7 +9,7 @@ async function openGame(page: Page, query = '?seed=42&e2e&paused') {
 const day = (page: Page) => page.evaluate(() => window.__civilis!.getState().simulation.day);
 
 test('čas beží pri 1× a medzerník ho pozastaví', async ({ page }) => {
-  await openGame(page, '?seed=42&e2e');
+  await openGame(page, '?seed=7&e2e');
   await expect(page.getByTestId('speed-1')).toHaveAttribute('aria-pressed', 'true');
   await expect.poll(() => day(page), { timeout: 5000 }).toBeGreaterThanOrEqual(1);
 

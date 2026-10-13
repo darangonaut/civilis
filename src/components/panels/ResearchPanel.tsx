@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { formatAmount } from '@/app/format';
 import { controller } from '@/app/game';
 import { commandReasonLabel, effectLabel, t } from '@/app/i18n';
@@ -16,6 +17,12 @@ export function ResearchPanel() {
   const knowledge = useGameState((s) => s.city.economy.resources.knowledge);
   const knowledgeRate = useGameState((s) => s.city.economy.dailyProduction.knowledge ?? 0);
   const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const currentEraRef = useRef<HTMLElement>(null);
+  // Panel sa otvorí na aktuálnej ére.
+  useEffect(() => {
+    currentEraRef.current?.scrollIntoView({ block: 'start' });
+  }, []);
   const active = research.activeTechnologyId
     ? gameData.technologiesById.get(research.activeTechnologyId)
     : undefined;
@@ -47,16 +54,37 @@ export function ResearchPanel() {
           <p className="muted">{t('research.noneActive')}</p>
         )}
       </div>
-      {gameData.eras.map((era, index) => (
-        <section key={era.id} className="era-group" data-era-id={era.id}>
-          <h3>{era.name}</h3>
-          {index > eraIndex ? (
-            <p className="muted hint">{t('research.eraLocked', { era: era.name })}</p>
-          ) : (
-            <ul className="tech-list">
-              {gameData.technologies
-                .filter((tech) => tech.era === era.id)
-                .map((tech) => (
+      {gameData.eras.map((era, index) => {
+        const technologies = gameData.technologies.filter((tech) => tech.era === era.id);
+        const done = technologies.filter((tech) =>
+          research.completedTechnologyIds.includes(tech.id),
+        ).length;
+        const finished = done === technologies.length;
+        return (
+          <section
+            key={era.id}
+            className="era-group"
+            data-era-id={era.id}
+            ref={index === eraIndex ? currentEraRef : undefined}
+          >
+            <h3>
+              {era.name}{' '}
+              <span className="muted">
+                ({done}/{technologies.length})
+              </span>
+            </h3>
+            {index > eraIndex ? (
+              <p className="muted hint">{t('research.eraLocked', { era: era.name })}</p>
+            ) : finished && !expanded.has(era.id) ? (
+              <button
+                className="link-button"
+                onClick={() => setExpanded((s) => new Set(s).add(era.id))}
+              >
+                {t('research.allDone')}
+              </button>
+            ) : (
+              <ul className="tech-list">
+                {technologies.map((tech) => (
                   <TechCard
                     key={tech.id}
                     tech={tech}
@@ -64,10 +92,11 @@ export function ResearchPanel() {
                     hasActive={active !== undefined}
                   />
                 ))}
-            </ul>
-          )}
-        </section>
-      ))}
+              </ul>
+            )}
+          </section>
+        );
+      })}
     </PanelFrame>
   );
 }

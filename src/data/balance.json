@@ -8,21 +8,36 @@
       "tools": 10,
       "knowledge": 0,
       "bricks": 0,
-      "iron": 0
+      "iron": 0,
+      "cloth": 0,
+      "coal": 0,
+      "electricity": 0,
+      "electronics": 0
     },
     "money": 500,
     "happiness": 70
   },
-  "mapSize": { "width": 64, "height": 64 },
+  "mapSize": {
+    "width": 96,
+    "height": 96
+  },
   "baseStorageCapacity": 100,
   "workforceShare": 0.5,
   "minimumPopulation": 5,
   "foodPerCapita": 0.25,
   "demolishRefund": 0.5,
-  "baseProduction": { "wood": 1, "stone": 0.5 },
+  "baseProduction": {
+    "wood": 1,
+    "stone": 0.5
+  },
   "noToolsEfficiency": 0.5,
   "noFundsEfficiency": 0.5,
-  "happinessWeights": { "food": 0.4, "housing": 0.25, "water": 0.2, "education": 0.15 },
+  "happinessWeights": {
+    "food": 0.4,
+    "housing": 0.25,
+    "water": 0.2,
+    "education": 0.15
+  },
   "happinessGrowthThreshold": 60,
   "happinessDeclineThreshold": 40,
   "happinessChangePerDay": 5,
@@ -30,5 +45,6 @@
   "populationBaseGrowth": 0.3,
   "populationGrowthRate": 0.005,
   "populationMaxGrowth": 5,
+  "populationMaxGrowthShare": 0.001,
   "populationDeclineRate": 0.03
 }

@@ -34,3 +34,14 @@ export function maintenanceMultiplier(research: ResearchState, data: GameData): 
   }
   return Math.max(0, 1 + bonus);
 }
+
+/** Násobič príjmu peňazí z dokončených technológií (aditívne). */
+export function moneyMultiplier(research: ResearchState, data: GameData): number {
+  let bonus = 0;
+  for (const techId of research.completedTechnologyIds) {
+    for (const effect of data.technologiesById.get(techId)?.effects ?? []) {
+      if (effect.type === 'money_multiplier') bonus += effect.multiplier - 1;
+    }
+  }
+  return Math.max(0, 1 + bonus);
+}

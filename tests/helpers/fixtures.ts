@@ -1,6 +1,7 @@
 import { createGameEngine } from '@/engine/core/engine';
 import { SCHEMA_VERSION } from '@/engine/core/constants';
 import type { CivilisEngine } from '@/engine/core/engine';
+import { RESOURCE_IDS } from '@/types';
 import type { GameEngine, GameState, Position, Resources, TerrainType, Tile } from '@/types';
 import { economyTestData as testData } from './gameData';
 
@@ -47,7 +48,7 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
         growthProgress: 0,
       },
       economy: {
-        resources: { food: 0, wood: 0, stone: 0, tools: 0, knowledge: 0, bricks: 0, iron: 0 },
+        resources: zeroResources(),
         money: 0,
         storageCapacity: 0,
         dailyIncome: 0,
@@ -76,15 +77,7 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
 export function build(engine: GameEngine, buildingId: string, position: Position): string {
   const state = engine.serialize();
   const saved = { ...state.city.economy.resources };
-  state.city.economy.resources = {
-    food: 1e6,
-    wood: 1e6,
-    stone: 1e6,
-    tools: 1e6,
-    knowledge: 1e6,
-    bricks: 1e6,
-    iron: 1e6,
-  };
+  state.city.economy.resources = zeroResources(1e6);
   engine.load(state);
   const result = engine.execute({ type: 'PLACE_BUILDING', buildingId, position });
   if (!result.success) throw new Error(`Nepodarilo sa postaviť ${buildingId}: ${result.reason}`);
@@ -107,20 +100,16 @@ export function setCity(
   const state = engine.serialize();
   if (values.population !== undefined) state.city.population.total = values.population;
   if (values.resources) {
-    state.city.economy.resources = {
-      food: 0,
-      wood: 0,
-      stone: 0,
-      tools: 0,
-      knowledge: 0,
-      bricks: 0,
-      iron: 0,
-      ...values.resources,
-    };
+    state.city.economy.resources = { ...zeroResources(), ...values.resources };
   }
   if (values.money !== undefined) state.city.economy.money = values.money;
   if (values.completedTechnologyIds)
     state.research.completedTechnologyIds = values.completedTechnologyIds;
   if (values.happiness !== undefined) state.city.population.happiness = values.happiness;
   engine.load(state);
+}
+
+/** Zásoby so všetkými surovinami nastavenými na `value`. */
+export function zeroResources(value = 0): Resources {
+  return Object.fromEntries(RESOURCE_IDS.map((id) => [id, value])) as Resources;
 }

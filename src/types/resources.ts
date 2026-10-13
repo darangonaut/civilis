@@ -6,6 +6,10 @@ export const RESOURCE_IDS = [
   'knowledge',
   'bricks',
   'iron',
+  'cloth',
+  'coal',
+  'electricity',
+  'electronics',
 ] as const;
 
 export type ResourceId = (typeof RESOURCE_IDS)[number];

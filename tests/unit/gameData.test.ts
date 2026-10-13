@@ -5,6 +5,7 @@ import buildings from '@/data/buildings.json';
 import eras from '@/data/eras.json';
 import milestones from '@/data/milestones.json';
 import technologies from '@/data/technologies.json';
+import { zeroResources } from '../helpers/fixtures';
 
 const validRaw = (): RawGameData =>
   structuredClone({ eras, buildings, technologies, milestones, balance });
@@ -23,9 +24,29 @@ function expectIssue(raw: RawGameData, pattern: RegExp) {
 describe('herné dáta', () => {
   it('súbory v src/data prejdú validáciou', () => {
     const data = loadGameData(validRaw());
-    expect(data.eras.map((e) => e.id)).toEqual(['settlement', 'antiquity', 'middle_ages']);
-    // Prvá éra zodpovedá špecifikácii: 10 budov, 6 technológií, 5 míľnikov.
-    expect(data.technologies.filter((t) => t.era === 'settlement')).toHaveLength(6);
+    expect(data.eras.map((e) => e.id)).toEqual([
+      'settlement',
+      'antiquity',
+      'middle_ages',
+      'renaissance',
+      'industrial',
+      'modern',
+      'information',
+      'future',
+    ]);
+    // Prvá éra: 10 budov a 5 míľnikov zo špecifikácie, 6 technológií zo špecifikácie + 2 voliteľné.
+    const specTechs = [
+      'woodworking',
+      'irrigation',
+      'masonry',
+      'labor_organization',
+      'education',
+      'city_administration',
+    ];
+    for (const id of specTechs) expect(data.technologiesById.get(id)?.era).toBe('settlement');
+    expect(data.technologies.filter((t) => t.era === 'settlement').length).toBeGreaterThanOrEqual(
+      6,
+    );
     expect(data.milestones.filter((m) => m.era === 'settlement')).toHaveLength(5);
     expect(data.buildings.filter((b) => !b.requiredTechnologyId)).toHaveLength(10);
   });
@@ -59,7 +80,7 @@ describe('herné dáta', () => {
     const { startingState } = loadGameData(validRaw()).balance;
     expect(startingState).toEqual({
       population: 10,
-      resources: { food: 100, wood: 80, stone: 30, tools: 10, knowledge: 0, bricks: 0, iron: 0 },
+      resources: { ...zeroResources(), food: 100, wood: 80, stone: 30, tools: 10 },
       money: 500,
       happiness: 70,
     });

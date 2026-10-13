@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
 
-async function openGame(page: Page, query = '?seed=42&e2e&paused') {
+async function openGame(page: Page, query = '?seed=7&e2e&paused') {
   page.on('dialog', (dialog) => void dialog.accept());
   await page.goto(`/${query}`);
   await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');

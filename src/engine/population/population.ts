@@ -146,7 +146,12 @@ export function simulatePopulation(
         population.growthProgress +
         balance.populationBaseGrowth +
         total * balance.populationGrowthRate;
-      const arrivals = Math.min(free, balance.populationMaxGrowth, Math.floor(progress));
+      // Strop rastu sa zväčšuje s mestom (veľké mestá priťahujú viac ľudí).
+      const cap = Math.max(
+        balance.populationMaxGrowth,
+        Math.floor(total * balance.populationMaxGrowthShare),
+      );
+      const arrivals = Math.min(free, cap, Math.floor(progress));
       total += arrivals;
       // Pri strope rastu alebo plnom bývaní sa nadbytok nesčítava donekonečna.
       population.growthProgress =

@@ -1,4 +1,4 @@
-import type { TerrainType } from '@/types';
+import type { ResourceId, TerrainType } from '@/types';
 import { PixelCanvas, pixelNoise, shade, type Point, type Rgb } from './PixelCanvas';
 
 /** Rozmery pixelového políčka (logické pixely). */
@@ -298,7 +298,7 @@ function finish(pc: PixelCanvas, cx: number, cy: number): PixelSprite {
 }
 
 /** Výška plátna nad políčkom pre všetky budovy (spoločná, aby varianty mohli pridávať detaily). */
-const BUILDING_TOP = 44;
+const BUILDING_TOP = 56;
 
 type Painter = (pc: PixelCanvas, cx: number, cy: number) => void;
 
@@ -706,6 +706,462 @@ const PAINTERS: Record<string, Painter> = {
     }
   },
 
+  'house@6': (pc, cx, cy) => {
+    // Renesančný palác: symetrická fasáda, arkády, kupola.
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 18, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    for (const dx of [2, 6, 10]) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 7);
+      pc.fillRect(x, y, 2, 6, P.plasterDark);
+      pc.stamp(...leftWall(cx, cy, hw, dx, 15), WINDOW, DETAIL_PAL);
+    }
+    for (const dx of [3, 8]) pc.stamp(...rightWall(cx, cy, hw, dx, 15), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 5, 5), DOOR, DETAIL_PAL);
+    hipRoof(pc, cx, cy, hw, 18, 6, P.brick, P.brickShade);
+    pc.fillDiamond(cx, cy - 27, 5, P.grassDark);
+    pc.fillDiamond(cx, cy - 29, 3, P.grass);
+  },
+
+  'house@7': (pc, cx, cy) => {
+    // Mestský činžiak: štvorpodlažný tehlový blok s plochou strechou a komínmi.
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 26, { top: P.stoneDark, left: P.brick, right: P.brickShade });
+    for (let up = 6; up < 26; up += 5) {
+      for (const dx of [2, 6, 10]) pc.stamp(...leftWall(cx, cy, hw, dx, up), WINDOW, DETAIL_PAL);
+      for (const dx of [3, 8]) pc.stamp(...rightWall(cx, cy, hw, dx, up), WINDOW, DETAIL_PAL);
+    }
+    pc.stamp(...rightWall(cx, cy, hw, 5, 5), DOOR, DETAIL_PAL);
+    pc.fillRect(cx - 6, cy - 32, 2, 5, P.stoneDeep);
+    pc.fillRect(cx + 5, cy - 31, 2, 5, P.stoneDeep);
+  },
+
+  'house@8': (pc, cx, cy) => {
+    // Mrakodrap: vysoká oceľovo-sklenená veža.
+    const hw = 10;
+    isoBox(pc, cx, cy, hw, 40, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    for (let up = 6; up < 40; up += 4) {
+      for (const dx of [2, 5, 8]) {
+        const [x, y] = leftWall(cx, cy, hw, dx, up);
+        pc.fillRect(x, y, 2, 2, up % 8 ? P.waterLight : P.glow);
+        const [rx, ry] = rightWall(cx, cy, hw, dx, up);
+        pc.fillRect(rx, ry, 2, 2, P.waterDeep);
+      }
+    }
+    pc.fillRect(cx, cy - 47, 1, 6, P.stoneDeep);
+    pc.set(cx, cy - 48, P.roof);
+  },
+
+  'house@9': (pc, cx, cy) => {
+    // Inteligentný dom: biela moderná budova so zelenou strechou a solárnymi panelmi.
+    const hw = 12;
+    isoBox(pc, cx, cy, hw, 30, { top: P.grassLight, left: P.white, right: P.plaster });
+    for (let up = 5; up < 30; up += 6) {
+      const [x, y] = leftWall(cx, cy, hw, 1, up);
+      pc.fillRect(x, y - 1, 11, 2, P.waterLight);
+      const [rx, ry] = rightWall(cx, cy, hw, 1, up);
+      pc.fillRect(rx, ry - 1, 10, 2, P.waterDeep);
+    }
+    pc.fillDiamond(cx, cy - 30, 7, (x, y) => ((x + y) % 3 === 0 ? P.waterLight : 0x262b44));
+  },
+
+  'house@10': (pc, cx, cy) => {
+    // Arkológia: stupňovitá megaštruktúra so zeleňou na terasách.
+    isoBox(pc, cx, cy, 15, 12, { top: P.grass, left: P.white, right: P.stoneLight });
+    isoBox(pc, cx, cy - 12, 11, 12, { top: P.grassLight, left: P.white, right: P.stoneLight });
+    isoBox(pc, cx, cy - 24, 7, 12, { top: P.grass, left: P.white, right: P.stoneLight });
+    for (const [hw, base] of [
+      [15, 0],
+      [11, 12],
+      [7, 24],
+    ] as const) {
+      for (let dx = 2; dx < hw; dx += 3) {
+        const [x, y] = leftWall(cx, cy - base, hw, dx, base + 7);
+        pc.fillRect(x, y, 2, 2, P.waterLight);
+      }
+    }
+    pc.fillRect(cx, cy - 44, 1, 8, P.stoneDeep);
+    pc.set(cx, cy - 45, P.waterLight);
+  },
+
+  pasture: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) =>
+      pixelNoise(x, y, 13) < 0.08 ? P.grassLight : P.grass,
+    );
+    for (const [dx, dy] of [
+      [-7, -2],
+      [4, -3],
+      [-2, 2],
+      [7, 2],
+    ])
+      pc.stamp(cx + dx! - 2, cy + dy! - 2, ['.ww.', 'wwww', 'kwwk', '.k.k'], {
+        w: P.white,
+        k: P.ink,
+      });
+    // Plot
+    for (let dx = -14; dx <= 14; dx += 4)
+      pc.fillRect(cx + dx, cy + 6 - Math.abs(dx) / 2 - 2, 1, 3, P.woodDark);
+  },
+
+  harbor: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, HW - 3, (x, y) => ((x + y) % 4 === 0 ? P.woodShade : P.wood));
+    isoBox(pc, cx - 5, cy - 2, 5, 7, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx - 5, cy - 2, 5, 7, 4, P.stoneDark, P.stoneDeep);
+    // Plachetnica
+    pc.stamp(cx + 1, cy - 2, ['.WWWWWW.', 'WwwwwwwW', '.WWWWWW.'], { W: P.woodDark, w: P.wood });
+    pc.fillRect(cx + 4, cy - 18, 1, 16, P.woodDark);
+    pc.fillPolygon(
+      [
+        [cx + 5, cy - 18],
+        [cx + 12, cy - 5],
+        [cx + 5, cy - 5],
+      ],
+      P.white,
+    );
+  },
+
+  printing_house: (pc, cx, cy) => {
+    const hw = 12;
+    isoBox(pc, cx, cy, hw, 12, { top: P.wood, left: P.plaster, right: P.plasterShade });
+    for (let dx = 1; dx < hw; dx += 3) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 12);
+      pc.fillRect(x, y, 1, 12, P.woodDark);
+    }
+    hipRoof(pc, cx, cy, hw, 12, 7, P.roofShade, P.roofDark);
+    pc.stamp(...leftWall(cx, cy, hw, 5, 9), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+    pc.stamp(cx - 14, cy + 1, ['pppp', 'PPPP', 'pppp'], { p: P.white, P: P.plaster });
+  },
+
+  observatory: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 12, 10, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    pc.fillPolygon(
+      [
+        [cx - 8, cy - 10],
+        [cx - 6, cy - 17],
+        [cx, cy - 20],
+        [cx + 6, cy - 17],
+        [cx + 8, cy - 10],
+      ],
+      (x) => (x < cx ? P.white : P.stoneLight),
+    );
+    pc.fillRect(cx - 1, cy - 20, 2, 9, P.stoneDeep);
+    pc.fillRect(cx + 1, cy - 25, 6, 2, P.woodDark);
+    pc.stamp(...rightWall(cx, cy, 12, 4, 5), DOOR, DETAIL_PAL);
+  },
+
+  theater: (pc, cx, cy) => {
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 16, { top: P.roof, left: P.plaster, right: P.plasterShade });
+    for (const dx of [2, 5, 8, 11]) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 14);
+      pc.fillRect(x, y, 1, 13, P.white);
+    }
+    hipRoof(pc, cx, cy, hw, 16, 6, P.roof, P.roofShade);
+    pc.stamp(...rightWall(cx, cy, hw, 5, 6), ['RRRR', 'RggR', 'RRRR', 'RRRR'], {
+      R: P.roofDark,
+      g: P.glow,
+    });
+    pc.fillRect(cx + 10, cy - 26, 1, 6, P.woodDark);
+    pc.fillRect(cx + 11, cy - 26, 3, 2, P.wheat);
+  },
+
+  coal_mine: (pc, cx, cy) => {
+    pc.fillPolygon(
+      [
+        [cx - 13, cy + 2],
+        [cx - 3, cy - 9],
+        [cx + 13, cy + 2],
+        [cx, cy + 7],
+      ],
+      (x) => (x < cx ? P.stoneDark : P.stoneDeep),
+    );
+    // Ťažná veža
+    pc.fillRect(cx + 2, cy - 22, 1, 20, P.woodDark);
+    pc.fillRect(cx + 8, cy - 22, 1, 20, P.woodDark);
+    pc.fillRect(cx + 2, cy - 22, 7, 1, P.woodDark);
+    pc.stamp(cx + 3, cy - 26, ['.ooo.', 'o.o.o', '.ooo.'], { o: P.ink });
+    pc.stamp(cx - 9, cy - 1, ['.kkkk.', 'kKkKKk', 'oooooo', '.o..o.'], {
+      k: P.ink,
+      K: 0x262b44,
+      o: P.woodDark,
+    });
+  },
+
+  steelworks: (pc, cx, cy) => {
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 12, { top: P.stoneDeep, left: P.stoneDark, right: P.stoneDeep });
+    for (const ox of [-6, 0, 6]) {
+      pc.fillRect(cx + ox - 1, cy - 34, 3, 22, P.brickShade);
+      pc.set(cx + ox, cy - 36, P.smoke);
+      pc.set(cx + ox + 1, cy - 38, P.smoke);
+    }
+    const [fx, fy] = leftWall(cx, cy, hw, 4, 7);
+    pc.stamp(fx, fy, ['oooooo', 'oGGGGo', 'GGGGGG'], { o: P.ink, G: P.wheat });
+  },
+
+  textile_factory: (pc, cx, cy) => {
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 14, { top: P.brick, left: P.brick, right: P.brickShade });
+    // Pílová strecha
+    for (let dx = -12; dx < 12; dx += 6) {
+      pc.fillPolygon(
+        [
+          [cx + dx, cy - 14 + Math.abs(dx) / 4],
+          [cx + dx + 6, cy - 14 + Math.abs(dx) / 4],
+          [cx + dx + 6, cy - 19 + Math.abs(dx) / 4],
+        ],
+        P.stoneDark,
+      );
+    }
+    for (let dx = 2; dx < hw; dx += 3)
+      pc.stamp(...leftWall(cx, cy, hw, dx, 10), ['gg', 'ww'], { g: P.glow, w: P.window });
+    pc.fillRect(cx + 9, cy - 34, 3, 18, P.brickShade);
+    pc.set(cx + 10, cy - 36, P.smoke);
+  },
+
+  railway_station: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy + 2, 15, (x, y) =>
+      ((x >> 1) + y) % 4 === 0 ? P.stoneDeep : P.stoneDark,
+    );
+    isoBox(pc, cx - 2, cy - 2, 11, 12, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx - 2, cy - 2, 11, 12, 6, P.stoneDark, P.stoneDeep);
+    pc.fillDiamond(cx - 2, cy - 22, 3, P.white);
+    pc.set(cx - 2, cy - 22, P.ink);
+    pc.stamp(cx + 5, cy + 1, ['.KKKK.', 'KrKKKK', 'oo..oo'], {
+      K: P.ink,
+      r: P.roof,
+      o: P.stoneDark,
+    });
+  },
+
+  waterworks: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 12, 8, { top: P.brick, left: P.brick, right: P.brickShade });
+    // Vodojem na stĺpoch
+    pc.fillRect(cx - 4, cy - 26, 1, 18, P.stoneDeep);
+    pc.fillRect(cx + 4, cy - 26, 1, 18, P.stoneDeep);
+    isoBox(pc, cx, cy - 26, 7, 8, { top: P.waterLight, left: P.stoneLight, right: P.stone });
+    pc.fillDiamond(cx, cy - 34, 7, P.water);
+  },
+
+  exhibition_palace: (pc, cx, cy) => {
+    // Výstavný palác: železo a sklo, veľká klenba.
+    const hw = 15;
+    isoBox(pc, cx, cy, hw, 10, { top: P.waterLight, left: P.stoneLight, right: P.stone });
+    pc.fillPolygon(
+      [
+        [cx - 15, cy - 10],
+        [cx - 10, cy - 24],
+        [cx, cy - 30],
+        [cx + 10, cy - 24],
+        [cx + 15, cy - 10],
+        [cx, cy - 2],
+      ],
+      (x, y) => ((x + y) % 4 === 0 ? P.stoneDeep : x < cx ? P.waterLight : P.water),
+    );
+    pc.fillRect(cx, cy - 38, 1, 8, P.stoneDeep);
+    pc.fillRect(cx + 1, cy - 38, 4, 2, P.roof);
+  },
+
+  power_plant: (pc, cx, cy) => {
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 14, { top: P.stoneDark, left: P.brick, right: P.brickShade });
+    for (const ox of [-5, 5]) {
+      pc.fillPolygon(
+        [
+          [cx + ox - 4, cy - 12],
+          [cx + ox - 3, cy - 36],
+          [cx + ox + 3, cy - 36],
+          [cx + ox + 4, cy - 12],
+        ],
+        P.stoneLight,
+      );
+      pc.set(cx + ox, cy - 38, P.smoke);
+      pc.set(cx + ox + 1, cy - 40, P.smoke);
+    }
+    pc.stamp(...rightWall(cx, cy, hw, 6, 8), ['.y.', 'yyy', '.y.'], { y: P.glow });
+  },
+
+  hospital: (pc, cx, cy) => {
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 20, { top: P.white, left: P.white, right: P.plaster });
+    for (let up = 6; up < 20; up += 5)
+      for (const dx of [2, 6, 10])
+        pc.stamp(...leftWall(cx, cy, hw, dx, up), ['ww', 'ww'], { w: P.waterLight });
+    pc.stamp(...rightWall(cx, cy, hw, 4, 16), ['.r.', 'rrr', '.r.'], { r: P.roof });
+    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+  },
+
+  cold_storage: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 14, 12, { top: P.stoneLight, left: P.white, right: P.stoneLight });
+    for (let dx = 2; dx < 14; dx += 3) {
+      const [x, y] = leftWall(cx, cy, 14, dx, 12);
+      pc.fillRect(x, y + 1, 1, 11, P.stoneLight);
+    }
+    pc.stamp(...rightWall(cx, cy, 14, 4, 6), ['bbbb', 'bWWb', 'bWWb', 'bWWb'], {
+      b: P.waterDeep,
+      W: P.waterLight,
+    });
+  },
+
+  assembly_plant: (pc, cx, cy) => {
+    const hw = 15;
+    isoBox(pc, cx, cy, hw, 12, { top: P.stoneDark, left: P.stoneLight, right: P.stone });
+    for (let dx = 2; dx < hw; dx += 3)
+      pc.stamp(...leftWall(cx, cy, hw, dx, 9), ['gg'], { g: P.glow });
+    pc.stamp(cx - 13, cy + 2, ['.rrrr.', 'rRrrRr', 'oo..oo'], {
+      r: P.roof,
+      R: P.waterLight,
+      o: P.ink,
+    });
+    pc.fillRect(cx + 8, cy - 26, 3, 14, P.stoneDeep);
+  },
+
+  radio_station: (pc, cx, cy) => {
+    isoBox(pc, cx - 3, cy + 1, 8, 7, { top: P.white, left: P.white, right: P.plaster });
+    // Anténa
+    for (let i = 0; i < 40; i++) {
+      const w = Math.max(1, Math.floor((40 - i) / 10));
+      pc.fillRect(cx + 5 - Math.floor(w / 2), cy - i, w, 1, i % 6 < 3 ? P.roof : P.white);
+    }
+    pc.set(cx + 5, cy - 41, P.glow);
+  },
+
+  department_store: (pc, cx, cy) => {
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 18, { top: P.stoneDark, left: P.plaster, right: P.plasterShade });
+    for (let dx = 1; dx < hw; dx += 3)
+      pc.stamp(...leftWall(cx, cy, hw, dx, 7), ['WW', 'WW', 'WW'], { W: P.waterLight });
+    for (const up of [12, 16])
+      for (let dx = 2; dx < hw; dx += 4)
+        pc.stamp(...leftWall(cx, cy, hw, dx, up), ['ww'], { w: P.window });
+    pc.stamp(...rightWall(cx, cy, hw, 2, 10), ['rwrwrwrw'], { r: P.roof, w: P.white });
+  },
+
+  electronics_factory: (pc, cx, cy) => {
+    const hw = 15;
+    isoBox(pc, cx, cy, hw, 12, { top: P.white, left: P.white, right: P.stoneLight });
+    for (let dx = 1; dx < hw; dx += 2) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 8);
+      pc.fillRect(x, y, 1, 3, P.waterDeep);
+    }
+    pc.stamp(...rightWall(cx, cy, hw, 4, 9), ['GGGG', 'GyyG', 'GGGG'], { G: 0x265c42, y: P.glow });
+  },
+
+  nuclear_plant: (pc, cx, cy) => {
+    // Chladiaca veža + reaktorová kupola.
+    pc.fillPolygon(
+      [
+        [cx - 13, cy + 2],
+        [cx - 9, cy - 22],
+        [cx - 1, cy - 22],
+        [cx + 3, cy + 2],
+      ],
+      (x) => (x < cx - 5 ? P.stoneLight : P.stone),
+    );
+    pc.fillDiamond(cx - 5, cy - 22, 4, P.stoneDeep);
+    pc.set(cx - 5, cy - 25, P.smoke);
+    pc.set(cx - 4, cy - 28, P.smoke);
+    isoBox(pc, cx + 7, cy + 1, 6, 8, { top: P.white, left: P.white, right: P.stoneLight });
+    pc.fillDiamond(cx + 7, cy - 9, 5, P.stoneLight);
+    pc.set(cx + 7, cy - 6, P.glow);
+  },
+
+  data_center: (pc, cx, cy) => {
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 12, { top: P.stoneDark, left: 0x262b44, right: P.ink });
+    for (let up = 3; up < 12; up += 3) {
+      for (let dx = 1; dx < hw; dx += 2) {
+        const [x, y] = leftWall(cx, cy, hw, dx, up);
+        pc.set(x, y, (dx + up) % 3 ? P.grassLight : P.waterLight);
+      }
+    }
+    pc.fillRect(cx - 2, cy - 20, 1, 8, P.stoneLight);
+    pc.fillRect(cx + 4, cy - 18, 1, 6, P.stoneLight);
+  },
+
+  solar_park: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) => (pixelNoise(x, y, 5) < 0.1 ? P.grassLight : P.grass));
+    for (const [dx, dy] of [
+      [-8, -1],
+      [0, -3],
+      [8, -1],
+      [-4, 3],
+      [4, 3],
+    ])
+      pc.fillDiamond(cx + dx!, cy + dy! - 2, 4, (x, y) => ((x + y) % 2 ? 0x124e89 : 0x262b44));
+  },
+
+  vertical_farm: (pc, cx, cy) => {
+    const hw = 10;
+    isoBox(pc, cx, cy, hw, 34, { top: P.grassLight, left: P.waterLight, right: P.water });
+    for (let up = 3; up < 34; up += 4) {
+      const [x, y] = leftWall(cx, cy, hw, 0, up);
+      pc.fillRect(x, y - 1, 10, 2, P.grass);
+      const [rx, ry] = rightWall(cx, cy, hw, 0, up);
+      pc.fillRect(rx, ry - 1, 10, 2, P.grassDark);
+    }
+  },
+
+  robot_factory: (pc, cx, cy) => {
+    const hw = 14;
+    isoBox(pc, cx, cy, hw, 12, { top: P.stoneLight, left: P.white, right: P.stoneLight });
+    pc.stamp(cx - 13, cy - 6, ['..o..', '.ooo.', '..o..', '.o.o.', 'o...o', 'SSSSS'], {
+      o: 0xf77622,
+      S: P.stoneDeep,
+    });
+    pc.stamp(...rightWall(cx, cy, hw, 4, 9), ['bbbbbb', 'byybyb', 'bbbbbb'], {
+      b: P.waterDeep,
+      y: P.glow,
+    });
+  },
+
+  fusion_reactor: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 15, 8, { top: P.stoneLight, left: P.white, right: P.stoneLight });
+    // Prstenec tokamaku so žiarou
+    pc.fillDiamond(cx, cy - 14, 12, P.stoneDark);
+    pc.fillDiamond(cx, cy - 14, 8, P.waterLight);
+    pc.fillDiamond(cx, cy - 14, 5, P.white);
+    pc.fillDiamond(cx, cy - 14, 2, P.glow);
+  },
+
+  ai_center: (pc, cx, cy) => {
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 22, { top: P.ink, left: 0x262b44, right: P.ink });
+    for (let up = 4; up < 22; up += 3) {
+      const [x, y] = leftWall(cx, cy, hw, 1, up);
+      pc.fillRect(x, y, 11, 1, up % 2 ? P.waterLight : 0x124e89);
+    }
+    pc.fillDiamond(cx, cy - 26, 5, P.waterLight);
+    pc.fillDiamond(cx, cy - 26, 2, P.white);
+  },
+
+  nano_foundry: (pc, cx, cy) => {
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 14, { top: P.purpleShade, left: P.white, right: P.stoneLight });
+    pc.fillDiamond(cx, cy - 14, 9, (x, y) => ((x + y) % 3 ? P.purple : P.purpleShade));
+    pc.stamp(...rightWall(cx, cy, hw, 4, 10), ['.p.', 'pPp', '.p.'], { p: P.purple, P: P.glow });
+  },
+
+  space_port: (pc, cx, cy) => {
+    // Štartovacia rampa a raketa.
+    pc.fillDiamond(cx, cy, 15, (x, y) => ((x + 2 * y) % 6 === 0 ? P.stoneDeep : P.stoneDark));
+    pc.fillRect(cx - 6, cy - 40, 2, 38, P.stoneDeep);
+    pc.fillRect(cx - 6, cy - 30, 6, 1, P.stoneDeep);
+    pc.fillRect(cx, cy - 44, 4, 40, P.white);
+    pc.fillRect(cx + 3, cy - 44, 1, 40, P.stoneLight);
+    pc.fillPolygon(
+      [
+        [cx, cy - 44],
+        [cx + 4, cy - 44],
+        [cx + 2, cy - 50],
+      ],
+      P.roof,
+    );
+    pc.stamp(cx - 2, cy - 8, ['r......r', 'rr....rr'], { r: P.roof });
+    pc.set(cx + 1, cy - 2, P.glow);
+    pc.set(cx + 2, cy - 1, 0xf77622);
+  },
+
   market: paintMarket(2),
   'market+': (pc, cx, cy) => {
     paintMarket(3)(pc, cx, cy);
@@ -829,8 +1285,7 @@ export function drawMarker(kind: MarkerKind): PixelSprite {
 
 // --- Ikony surovín (8 × 8) ------------------------------------------------------------
 
-export type IconKind =
-  'food' | 'wood' | 'stone' | 'tools' | 'knowledge' | 'bricks' | 'iron' | 'money';
+export type IconKind = ResourceId | 'money';
 
 const ICONS: Record<IconKind, { rows: string[]; pal: Record<string, Rgb> }> = {
   food: {
@@ -923,6 +1378,58 @@ const ICONS: Record<IconKind, { rows: string[]; pal: Record<string, Rgb> }> = {
       '........',
     ],
     pal: { L: P.stoneLight, S: P.stone, D: P.stoneDeep },
+  },
+  cloth: {
+    rows: [
+      '........',
+      '.ppppp..',
+      'pPPPPPp.',
+      'pPwPwPpp',
+      'pPPPPPpP',
+      'pPwPwPpP',
+      '.pppppPp',
+      '......pp',
+    ],
+    pal: { p: P.purpleShade, P: P.purple, w: P.plaster },
+  },
+  coal: {
+    rows: [
+      '........',
+      '...oo...',
+      '..oKko..',
+      '.oKKKKo.',
+      'oKkKKKKo',
+      'oKKKKkKo',
+      '.oooooo.',
+      '........',
+    ],
+    pal: { o: P.ink, K: 0x262b44, k: P.stoneDark },
+  },
+  electricity: {
+    rows: [
+      '....yy..',
+      '...yy...',
+      '..yy....',
+      '.yyyyy..',
+      '...yy...',
+      '..yy....',
+      '.yy.....',
+      '.y......',
+    ],
+    pal: { y: P.glow },
+  },
+  electronics: {
+    rows: [
+      '.g.g.g..',
+      'GGGGGGG.',
+      'GkkkkkG.',
+      'GkyykkGg',
+      'GkkkkkG.',
+      'GGGGGGGg',
+      '.g.g.g..',
+      '........',
+    ],
+    pal: { G: 0x265c42, g: P.stoneLight, k: 0x193c3e, y: P.glow },
   },
   money: {
     rows: [

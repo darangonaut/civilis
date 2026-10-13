@@ -306,3 +306,17 @@ describe('bloky polí (connectsAdjacent)', () => {
     expect(status(engine, house).connected).toBe(false);
   });
 });
+
+describe('plný sklad', () => {
+  it('budova s plným skladom výrobkov nemíňa vstupy', () => {
+    const engine = createTestCity({
+      population: 10,
+      resources: { wood: 50, stone: 50, tools: 300 },
+    });
+    const workshop = build(engine, 'workshop', { x: 3, y: 3 });
+    expect(problems(engine, workshop)).toContain('storage_full');
+    engine.tick();
+    expect(resource(engine, 'wood')).toBe(50);
+    expect(resource(engine, 'stone')).toBe(50);
+  });
+});

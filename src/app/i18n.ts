@@ -131,7 +131,8 @@ const sk = {
   'detail.requires': 'Vyžaduje',
   'detail.service.water': 'studňa v dosahu',
   'detail.service.education': 'fungujúca škola v dosahu',
-  'detail.service.culture': 'fungujúci chrám v dosahu',
+  'detail.service.culture': 'kultúra v dosahu (chrám, divadlo…)',
+  'detail.service.health': 'nemocnica v dosahu',
   'detail.upgraded': 'Budova vylepšená',
   'detail.maxLevel': 'Najvyššia úroveň',
   'detail.pause': 'Pozastaviť',
@@ -200,6 +201,7 @@ const sk = {
   'effect.production': '+{percent} % produkcia {resource}',
   'effect.productionAll': '+{percent} % všetka produkcia',
   'effect.maintenance': '−{percent} % údržba budov',
+  'effect.money': '+{percent} % príjem peňazí',
   'events.foodShortage': 'Obyvatelia hladujú — postav farmy.',
   'events.researchCompleted': 'Výskum dokončený',
   'events.milestoneCompleted': 'Míľnik splnený',
@@ -211,6 +213,7 @@ const sk = {
   'era.newBuildings': 'Nové budovy',
   'era.newTechnologies': 'Nové technológie',
   'era.continue': 'Pokračovať',
+  'research.allDone': 'Všetko preskúmané — zobraziť',
   'research.eraLocked': 'Odomkne sa splnením míľnikov predchádzajúcej éry ({era}).',
   'victory.continue': 'Pokračovať v hre',
   'happiness.factors': 'Zložky spokojnosti',
@@ -246,6 +249,10 @@ const sk = {
   'resource.knowledge': 'Vedomosti',
   'resource.bricks': 'Tehly',
   'resource.iron': 'Železo',
+  'resource.cloth': 'Látky',
+  'resource.coal': 'Uhlie',
+  'resource.electricity': 'Elektrina',
+  'resource.electronics': 'Elektronika',
   'resourceGenitive.food': 'potravín',
   'resourceGenitive.wood': 'dreva',
   'resourceGenitive.stone': 'kameňa',
@@ -253,6 +260,10 @@ const sk = {
   'resourceGenitive.knowledge': 'vedomostí',
   'resourceGenitive.bricks': 'tehál',
   'resourceGenitive.iron': 'železa',
+  'resourceGenitive.cloth': 'látok',
+  'resourceGenitive.coal': 'uhlia',
+  'resourceGenitive.electricity': 'elektriny',
+  'resourceGenitive.electronics': 'elektroniky',
   'terrain.grass': 'tráva',
   'terrain.forest': 'les',
   'terrain.fertile': 'úrodná pôda',
@@ -262,6 +273,7 @@ const sk = {
   'service.water': 'voda',
   'service.education': 'vzdelanie',
   'service.culture': 'kultúra',
+  'service.health': 'zdravotníctvo',
 } as const;
 
 export type TranslationKey = keyof typeof sk;
@@ -295,6 +307,7 @@ export function problemLabel(problem: BuildingProblem): string {
 export function effectLabel(effect: TechnologyEffect): string {
   const percent = Math.round(Math.abs(effect.multiplier - 1) * 100);
   if (effect.type === 'maintenance_multiplier') return t('effect.maintenance', { percent });
+  if (effect.type === 'money_multiplier') return t('effect.money', { percent });
   if (effect.target === 'all') return t('effect.productionAll', { percent });
   const resource = (RESOURCE_IDS as readonly string[]).includes(effect.target)
     ? t(`resourceGenitive.${effect.target as ResourceId}`)

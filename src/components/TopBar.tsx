@@ -1,4 +1,4 @@
-import { formatDelta } from '@/app/format';
+import { formatCompact, formatDelta } from '@/app/format';
 import { controller } from '@/app/game';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
@@ -50,38 +50,40 @@ export function TopBar() {
           .join(', ')}`}
         testId="happiness"
       />
-      {RESOURCE_IDS.filter((id) => resourceVisible(id, eraIndex, economy.resources[id])).map(
-        (id) => {
-          const delta = (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
-          const capped = id !== 'knowledge';
-          return (
-            <Stat
-              key={id}
-              label={resourceLabel(id)}
-              icon={id}
-              value={Math.floor(economy.resources[id])}
-              delta={day > 0 ? delta : undefined}
-              warn={
-                (capped && economy.resources[id] >= economy.storageCapacity) ||
-                (id === 'food' && economy.resources.food <= 0)
-              }
-              title={
-                capped
-                  ? `${resourceLabel(id)} · ${t('topbar.storage')}: ${economy.storageCapacity}`
-                  : resourceLabel(id)
-              }
-              testId={`resource-${id}`}
-            />
-          );
-        },
-      )}
-      <Stat
-        label={t('topbar.money')}
-        icon="money"
-        value={Math.floor(economy.money)}
-        delta={day > 0 ? economy.dailyIncome - economy.dailyExpenses : undefined}
-        testId="money"
-      />
+      <div className="resource-strip">
+        {RESOURCE_IDS.filter((id) => resourceVisible(id, eraIndex, economy.resources[id])).map(
+          (id) => {
+            const delta = (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
+            const capped = id !== 'knowledge';
+            return (
+              <Stat
+                key={id}
+                label={resourceLabel(id)}
+                icon={id}
+                value={formatCompact(economy.resources[id])}
+                delta={day > 0 ? delta : undefined}
+                warn={
+                  (capped && economy.resources[id] >= economy.storageCapacity) ||
+                  (id === 'food' && economy.resources.food <= 0)
+                }
+                title={
+                  capped
+                    ? `${resourceLabel(id)} · ${t('topbar.storage')}: ${economy.storageCapacity}`
+                    : resourceLabel(id)
+                }
+                testId={`resource-${id}`}
+              />
+            );
+          },
+        )}
+        <Stat
+          label={t('topbar.money')}
+          icon="money"
+          value={formatCompact(economy.money)}
+          delta={day > 0 ? economy.dailyIncome - economy.dailyExpenses : undefined}
+          testId="money"
+        />
+      </div>
       <div className="speed-controls" title={t('topbar.speedHint')}>
         <span className="stat-label">{t('topbar.speed')}</span>
         {SPEED_BUTTONS.map((button) => (

@@ -113,3 +113,20 @@ myšou nad budovou; legenda je v Nastaveniach.
 - **Bloky polí:** farma, drevorubač, kameňolom a baňa sú pripojené aj cez susednú pripojenú
   budovu rovnakého typu — blok stačí napojiť na cestu v jednom bode.
 - **Recyklácia:** zbúranie vráti 50 % surovín investovaných do stavby a vylepšení.
+
+## Osem ér (2026-10-13, na želanie)
+
+Osada → Starovek → Stredovek → Renesancia → Priemyselná éra → Moderná éra → Informačný vek →
+Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a 3 míľniky; posledný míľnik
+„Ku hviezdam“ vyžaduje Vesmírny prístav.
+
+- Nové suroviny: látky (Pastvina, Textilná továreň), uhlie (Uhoľná baňa), elektrina (elektrárne,
+  solárne parky, fúzia), elektronika (Továreň na elektroniku, Nanotováreň).
+- Nová služba **zdravotníctvo** (Nemocnica) — vyžadujú ju Mrakodrap a ďalšie domy.
+- Úrovne domu až po 10: … Patricijský dom → Renesančný palác → Mestský činžiak → Mrakodrap →
+  Inteligentný dom → Arkológia.
+- Nový efekt technológie `money_multiplier` (príjem peňazí).
+- **Plný sklad:** keď sú všetky výrobky budovy na kapacite skladu, budova si dá prestávku a
+  nemíňa vstupy ani nástroje (inak by napr. huty minuli všetko železo na zahadzované nástroje).
+- Mapa 96 × 96 a strop rastu populácie ako podiel populácie — neskoré éry s tisíckami obyvateľov
+  sa tak dajú prejsť v rozumnom čase.

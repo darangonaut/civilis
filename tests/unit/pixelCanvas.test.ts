@@ -77,7 +77,11 @@ describe('sprity budov', () => {
       }
     }
     for (const key of keys) expect(isFallback(key), key).toBe(false);
-    expect(keys.has('house@3')).toBe(true);
+    // Každá úroveň domu má vlastný vzhľad (nie návrat k základnému domu).
+    const house = testData.buildingsById.get('house')!;
+    for (let level = 2; level <= 1 + house.levels!.length; level++) {
+      expect(buildingSpriteKey('house', level, []), `úroveň ${level}`).toBe(`house@${level}`);
+    }
     expect(keys.has('road+')).toBe(true);
   });
 });

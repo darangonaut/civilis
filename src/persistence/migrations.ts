@@ -29,6 +29,27 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v3 → v4: nové suroviny látky, uhlie, elektrina a elektronika (éry 4–8). */
+  3: (raw) => {
+    const city = raw.city as RawCity | undefined;
+    if (!city?.economy?.resources) return raw;
+    return {
+      ...raw,
+      city: {
+        ...city,
+        economy: {
+          ...city.economy,
+          resources: {
+            cloth: 0,
+            coal: 0,
+            electricity: 0,
+            electronics: 0,
+            ...city.economy.resources,
+          },
+        },
+      },
+    };
+  },
   /** v2 → v3: nové suroviny tehly a železo (éry Starovek a Stredovek). */
   2: (raw) => {
     const city = raw.city as RawCity | undefined;

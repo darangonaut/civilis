@@ -1,13 +1,21 @@
 import { analyzeCity } from '@/engine/economy/analysis';
 import { validatePlacement } from '@/engine/core/commands';
 import { upgradableBuildings } from '@/engine/core/upgrade';
+import { currentMilestone } from '@/engine/milestones/milestones';
 import { computeRoadNetwork } from '@/engine/world/connectivity';
 import { serviceCoverage, serviceCoverageGrid } from '@/engine/population/population';
 import { validateResearch } from '@/engine/research/research';
 import type { CivilisEngine } from '@/engine/core/engine';
 import type { GameData } from '@/engine/core/definitions';
 import { getTile, neighbors4, tileIndex } from '@/engine/world/grid';
-import { RESOURCE_IDS, type GameState, type Position, type TerrainType } from '@/types';
+import {
+  RESOURCE_IDS,
+  type GameState,
+  type Position,
+  type ResourceId,
+  type ServiceType,
+  type TerrainType,
+} from '@/types';
 
 /**
  * Jednoduchý „hráč“ pre test hrateľnosti (test F). Používa výhradne herné príkazy
@@ -336,8 +344,24 @@ export class Bot {
       if (this.buildWell()) return true;
     }
 
+    // 0. Budovy chýbajúce k aktuálnemu míľniku majú prednosť; kým nie sú postavené,
+    //    šetríme suroviny (žiadne vylepšenia domov).
+    const goal = currentMilestone(this.state, this.data);
+    const missing = (goal?.conditions ?? []).flatMap((c) =>
+      c.type === 'building_count' && this.count(c.buildingId) < c.minimum ? [c.buildingId] : [],
+    );
+    for (const id of missing) {
+      const definition = this.data.buildingsById.get(id)!;
+      if (!this.affordable(id) || freeWorkers < definition.workersRequired) continue;
+      if (definition.service ? this.buildServiceNear(id) || this.build(id) : this.build(id))
+        return true;
+    }
+    const saving = missing.some((id) => !this.affordable(id));
+
     // 5a. Vylepšenie budovy, ak to ide (domy dávajú viac bývania, míľniky ich vyžadujú).
-    const upgradable = upgradableBuildings(this.state, this.data, analysis);
+    const upgradable = saving
+      ? new Set<string>()
+      : upgradableBuildings(this.state, this.data, analysis);
     const toUpgrade =
       city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'house') ??
       city.buildings.find((b) => upgradable.has(b.id));
@@ -436,7 +460,7 @@ export class Bot {
     }
     if (
       this.affordable('smelter', 2) &&
-      this.count('smelter') < 1 + Math.floor(population.total / 600) &&
+      (this.count('smelter') === 0 || need('tools') < 2) &&
       r.iron >= 10 &&
       freeWorkers >= 4
     ) {
@@ -447,6 +471,50 @@ export class Bot {
     }
     if (this.affordable('cathedral', 2) && this.count('cathedral') === 0 && freeWorkers >= 6) {
       if (this.build('cathedral')) return true;
+    }
+
+    // --- Éry 4–8: tabuľka „koľko budov chcem“ ---
+    const flow = (id: ResourceId) =>
+      (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
+    const pop = population.total;
+    const coverage = (type: ServiceType) => serviceCoverage(this.state, this.data, analysis, type);
+    const wants: [string, number][] = [
+      // Služby pri domoch mimo dosahu
+      ['theater', coverage('culture') < 0.9 ? this.count('theater') + 1 : 0],
+      ['hospital', coverage('health') < 0.9 ? this.count('hospital') + 1 : 0],
+      ['waterworks', coverage('water') < 0.95 ? this.count('waterworks') + 1 : 0],
+      // Suroviny podľa bilancie
+      ['pasture', flow('cloth') < 2 + pop / 800 ? this.count('pasture') + 1 : 4],
+      ['coal_mine', flow('coal') < 2 ? this.count('coal_mine') + 1 : 2],
+      ['power_plant', flow('electricity') < 4 ? this.count('power_plant') + 1 : 2],
+      ['electronics_factory', flow('electronics') < 2 ? this.count('electronics_factory') + 1 : 2],
+      ['solar_park', 6],
+      ['vertical_farm', flow('food') < pop * 0.02 ? this.count('vertical_farm') + 1 : 2],
+      // Jednorazové budovy pre míľniky
+      ['harbor', 1 + Math.floor(pop / 3000)],
+      ['printing_house', 1],
+      ['observatory', 1],
+      ['steelworks', 1],
+      ['textile_factory', 2],
+      ['railway_station', 1],
+      ['assembly_plant', 1],
+      ['radio_station', 1],
+      ['department_store', 1],
+      ['nuclear_plant', 1],
+      ['data_center', 1],
+      ['fusion_reactor', 1],
+      ['ai_center', 1],
+      ['nano_foundry', 1],
+      ['space_port', 1],
+    ];
+    for (const [id, want] of wants) {
+      const definition = this.data.buildingsById.get(id);
+      if (!definition || this.count(id) >= want || !this.affordable(id, 2)) continue;
+      if (freeWorkers < definition.workersRequired) continue;
+      const built = definition.service
+        ? this.buildServiceNear(id) || this.build(id)
+        : this.build(id);
+      if (built) return true;
     }
     return false;
   }
@@ -464,6 +532,8 @@ export function playthrough(
   engine: CivilisEngine,
   data: GameData,
   maxDays: number,
+  /** Zastaví sa po splnení tohto míľnika (predvolene posledného). */
+  untilMilestoneId: string = data.milestones.at(-1)!.id,
 ): PlaythroughResult {
   const bot = new Bot(engine, data);
   const completedAt: Record<string, number> = {};
@@ -474,7 +544,7 @@ export function playthrough(
       if (event.type === 'milestone_completed')
         completedAt[event.milestoneId] = engine.getState().simulation.day;
     }
-    if (Object.keys(completedAt).length === data.milestones.length) break;
+    if (completedAt[untilMilestoneId] !== undefined) break;
   }
   return {
     completedAt,

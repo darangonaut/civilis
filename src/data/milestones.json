@@ -118,7 +118,8 @@
         "minimum": 300
       },
       {
-        "type": "all_research_completed"
+        "type": "completed_research",
+        "minimum": 7
       },
       {
         "type": "happiness",
@@ -285,7 +286,8 @@
         "minimum": 1
       },
       {
-        "type": "all_research_completed"
+        "type": "completed_research",
+        "minimum": 17
       },
       {
         "type": "happiness",
@@ -294,7 +296,399 @@
       }
     ],
     "rewards": {
+      "money": 1000,
       "badgeId": "era_3_complete"
+    }
+  },
+  {
+    "id": "trading_city",
+    "title": "Obchodné mesto",
+    "era": "renaissance",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 2400
+      },
+      {
+        "type": "building_count",
+        "buildingId": "pasture",
+        "minimum": 4
+      },
+      {
+        "type": "building_count",
+        "buildingId": "harbor",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 800,
+      "resources": {
+        "cloth": 40
+      }
+    }
+  },
+  {
+    "id": "city_of_arts",
+    "title": "Mesto umenia",
+    "era": "renaissance",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "theater",
+        "minimum": 1
+      },
+      {
+        "type": "building_count",
+        "buildingId": "observatory",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 6,
+        "minimum": 10
+      }
+    ],
+    "rewards": {
+      "money": 1000
+    }
+  },
+  {
+    "id": "renaissance_metropolis",
+    "title": "Renesančná metropola",
+    "era": "renaissance",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 3000
+      },
+      {
+        "type": "completed_research",
+        "minimum": 22
+      },
+      {
+        "type": "happiness",
+        "minimum": 80,
+        "consecutiveDays": 20
+      }
+    ],
+    "rewards": {
+      "money": 1500,
+      "badgeId": "era_4_complete"
+    }
+  },
+  {
+    "id": "coal_and_steam",
+    "title": "Uhlie a para",
+    "era": "industrial",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 3500
+      },
+      {
+        "type": "building_count",
+        "buildingId": "coal_mine",
+        "minimum": 2
+      },
+      {
+        "type": "building_count",
+        "buildingId": "steelworks",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 1500,
+      "resources": {
+        "coal": 50
+      }
+    }
+  },
+  {
+    "id": "factories",
+    "title": "Továrne",
+    "era": "industrial",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "textile_factory",
+        "minimum": 2
+      },
+      {
+        "type": "building_count",
+        "buildingId": "railway_station",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 7,
+        "minimum": 10
+      }
+    ],
+    "rewards": {
+      "money": 2000
+    }
+  },
+  {
+    "id": "industrial_power",
+    "title": "Priemyselná veľmoc",
+    "era": "industrial",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 4500
+      },
+      {
+        "type": "building_count",
+        "buildingId": "exhibition_palace",
+        "minimum": 1
+      },
+      {
+        "type": "completed_research",
+        "minimum": 27
+      },
+      {
+        "type": "happiness",
+        "minimum": 80,
+        "consecutiveDays": 30
+      }
+    ],
+    "rewards": {
+      "money": 3000,
+      "badgeId": "era_5_complete"
+    }
+  },
+  {
+    "id": "electrified_city",
+    "title": "Elektrifikované mesto",
+    "era": "modern",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 5500
+      },
+      {
+        "type": "building_count",
+        "buildingId": "power_plant",
+        "minimum": 2
+      },
+      {
+        "type": "building_count",
+        "buildingId": "hospital",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 3000,
+      "resources": {
+        "electricity": 100
+      }
+    }
+  },
+  {
+    "id": "consumer_society",
+    "title": "Spotrebná spoločnosť",
+    "era": "modern",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "department_store",
+        "minimum": 1
+      },
+      {
+        "type": "building_count",
+        "buildingId": "assembly_plant",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 8,
+        "minimum": 10
+      }
+    ],
+    "rewards": {
+      "money": 4000
+    }
+  },
+  {
+    "id": "modern_metropolis",
+    "title": "Moderná metropola",
+    "era": "modern",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 6500
+      },
+      {
+        "type": "completed_research",
+        "minimum": 36
+      },
+      {
+        "type": "happiness",
+        "minimum": 80,
+        "consecutiveDays": 20
+      }
+    ],
+    "rewards": {
+      "money": 5000,
+      "badgeId": "era_6_complete"
+    }
+  },
+  {
+    "id": "digital_city",
+    "title": "Digitálne mesto",
+    "era": "information",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 7500
+      },
+      {
+        "type": "building_count",
+        "buildingId": "electronics_factory",
+        "minimum": 2
+      },
+      {
+        "type": "building_count",
+        "buildingId": "data_center",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 5000,
+      "resources": {
+        "electronics": 50
+      }
+    }
+  },
+  {
+    "id": "green_city",
+    "title": "Zelené mesto",
+    "era": "information",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "solar_park",
+        "minimum": 6
+      },
+      {
+        "type": "building_count",
+        "buildingId": "vertical_farm",
+        "minimum": 2
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 9,
+        "minimum": 10
+      }
+    ],
+    "rewards": {
+      "money": 6000
+    }
+  },
+  {
+    "id": "information_society",
+    "title": "Informačná spoločnosť",
+    "era": "information",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 9000
+      },
+      {
+        "type": "building_count",
+        "buildingId": "nuclear_plant",
+        "minimum": 1
+      },
+      {
+        "type": "completed_research",
+        "minimum": 42
+      },
+      {
+        "type": "happiness",
+        "minimum": 80,
+        "consecutiveDays": 20
+      }
+    ],
+    "rewards": {
+      "money": 8000,
+      "badgeId": "era_7_complete"
+    }
+  },
+  {
+    "id": "fusion_age",
+    "title": "Vek fúzie",
+    "era": "future",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 10000
+      },
+      {
+        "type": "building_count",
+        "buildingId": "fusion_reactor",
+        "minimum": 1
+      },
+      {
+        "type": "building_count",
+        "buildingId": "ai_center",
+        "minimum": 1
+      }
+    ],
+    "rewards": {
+      "money": 10000
+    }
+  },
+  {
+    "id": "arcology_city",
+    "title": "Mesto arkológií",
+    "era": "future",
+    "conditions": [
+      {
+        "type": "building_count",
+        "buildingId": "nano_foundry",
+        "minimum": 1
+      },
+      {
+        "type": "building_level",
+        "buildingId": "house",
+        "level": 10,
+        "minimum": 15
+      }
+    ],
+    "rewards": {
+      "money": 15000
+    }
+  },
+  {
+    "id": "to_the_stars",
+    "title": "Ku hviezdam",
+    "era": "future",
+    "conditions": [
+      {
+        "type": "population",
+        "minimum": 12000
+      },
+      {
+        "type": "building_count",
+        "buildingId": "space_port",
+        "minimum": 1
+      },
+      {
+        "type": "completed_research",
+        "minimum": 48
+      },
+      {
+        "type": "happiness",
+        "minimum": 85,
+        "consecutiveDays": 30
+      }
+    ],
+    "rewards": {
+      "badgeId": "era_8_complete"
     }
   }
 ]

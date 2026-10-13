@@ -13,5 +13,30 @@
     "id": "middle_ages",
     "name": "Stredovek",
     "description": "Baníctvo na kopcoch, huty a univerzity. Korunou mesta bude katedrála."
+  },
+  {
+    "id": "renaissance",
+    "name": "Renesancia",
+    "description": "Obchod, umenie a veda. Ovce na pastvinách dávajú látky, prístavy ich vyvážajú a divadlá a observatóriá robia z mesta centrum vzdelanosti."
+  },
+  {
+    "id": "industrial",
+    "name": "Priemyselná éra",
+    "description": "Para, uhlie a oceľ. Továrne a železnica menia mesto na priemyselnú veľmoc — korunou bude Výstavný palác."
+  },
+  {
+    "id": "modern",
+    "name": "Moderná éra",
+    "description": "Elektrina mení všetko: elektrárne, nemocnice, obchodné domy a prvé mrakodrapy."
+  },
+  {
+    "id": "information",
+    "name": "Informačný vek",
+    "description": "Počítače, internet a jadrová energia. Elektronika poháňa dátové centrá, solárne parky a vertikálne farmy."
+  },
+  {
+    "id": "future",
+    "name": "Blízka budúcnosť",
+    "description": "Fúzia, umelá inteligencia a arkológie. Posledným krokom civilizácie bude vesmírny prístav."
   }
 ]

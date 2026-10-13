@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createGameEngine } from '@/engine/core/engine';
 import type { GameState, Tile } from '@/types';
+import { zeroResources } from '../helpers/fixtures';
 import { testData } from '../helpers/gameData';
 import { createNewGame } from '@/engine/core/newGame';
 
@@ -38,13 +39,11 @@ function buildDenseCity(): GameState {
   }
   state.city.population.total = 2000;
   state.city.economy.resources = {
+    ...zeroResources(),
     food: 200,
     wood: 200,
     stone: 200,
     tools: 200,
-    knowledge: 0,
-    bricks: 0,
-    iron: 0,
   };
   state.city.economy.money = 1e6;
   return state;

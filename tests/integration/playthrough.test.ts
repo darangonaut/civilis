@@ -4,27 +4,45 @@ import { createNewGame } from '@/engine/core/newGame';
 import { playthrough } from '../helpers/bot';
 import { testData } from '../helpers/gameData';
 
-const SEEDS = [1, 7, 42, 1234];
-/** Horná hranica dní pre bota (2 stavebné akcie denne) na všetky tri éry; dnes ~860–910. */
-const MAX_DAYS = 1200;
+/**
+ * Test F — hrateľnosť. Simulovaný hráč (2 stavebné akcie denne, iba herné príkazy) musí
+ * splniť míľniky v poradí. Rýchla verzia overuje prvé tri éry na viacerých mapách; celú hru
+ * (8 ér, ~2 300–2 800 dní) spúšťa `npm run test:full`.
+ */
+function play(seed: number, eraCount: number, maxDays: number) {
+  const eraIds = testData.eras.slice(0, eraCount).map((e) => e.id);
+  const milestones = testData.milestones.filter((m) => eraIds.includes(m.era));
+  const engine = createGameEngine(
+    testData,
+    createNewGame(testData, { seed, gameId: 'f', now: 'x' }),
+  );
+  const result = playthrough(engine, testData, maxDays, milestones.at(-1)!.id);
+  const days = milestones.map((m) => result.completedAt[m.id]);
+  expect(
+    days.every((d) => d !== undefined),
+    JSON.stringify(result.completedAt),
+  ).toBe(true);
+  expect([...days].sort((a, b) => a! - b!)).toEqual(days);
+  expect(days[0]).toBeGreaterThan(15);
+  return days as number[];
+}
 
 describe('hrateľnosť (test F)', () => {
-  it.each(SEEDS)(
-    'na mape so seedom %i sa dajú prejsť všetky éry bez vývojárskych nástrojov',
+  it.each([1, 7, 42, 1234])(
+    'na mape %i sa dajú prejsť prvé tri éry',
     (seed) => {
-      const engine = createGameEngine(
-        testData,
-        createNewGame(testData, { seed, gameId: 'f', now: 'x' }),
-      );
-      const result = playthrough(engine, testData, MAX_DAYS);
-
-      expect(Object.keys(result.completedAt)).toEqual(testData.milestones.map((m) => m.id));
-      // Míľniky sa plnia v poradí a v rozumnom tempe.
-      const days = testData.milestones.map((m) => result.completedAt[m.id]!);
-      expect([...days].sort((a, b) => a - b)).toEqual(days);
-      expect(days[0]).toBeGreaterThan(15);
-      expect(days.at(-1)).toBeLessThanOrEqual(MAX_DAYS);
+      const days = play(seed, 3, 1200);
+      expect(days.at(-1)).toBeLessThan(1200);
     },
     60_000,
+  );
+
+  it.skipIf(!import.meta.env.CIVILIS_FULL)(
+    'na mape 7 sa dá prejsť všetkých 8 ér',
+    () => {
+      const days = play(7, testData.eras.length, 4000);
+      expect(days.at(-1)).toBeLessThan(4000);
+    },
+    900_000,
   );
 });

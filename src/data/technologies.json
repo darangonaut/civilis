@@ -222,5 +222,593 @@
         "multiplier": 1.1
       }
     ]
+  },
+  {
+    "id": "textiles",
+    "name": "Súkenníctvo",
+    "era": "renaissance",
+    "cost": 1200,
+    "prerequisites": ["banking"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "cloth",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "printing",
+    "name": "Kníhtlač",
+    "era": "renaissance",
+    "cost": 1400,
+    "prerequisites": ["scholasticism"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "navigation",
+    "name": "Navigácia",
+    "era": "renaissance",
+    "cost": 1600,
+    "prerequisites": ["textiles"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "astronomy",
+    "name": "Astronómia",
+    "era": "renaissance",
+    "cost": 1800,
+    "prerequisites": ["printing"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "arts",
+    "name": "Umenie",
+    "era": "renaissance",
+    "cost": 2000,
+    "prerequisites": ["printing", "textiles"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.9
+      }
+    ]
+  },
+  {
+    "id": "steam",
+    "name": "Parný stroj",
+    "era": "industrial",
+    "cost": 3000,
+    "prerequisites": ["astronomy", "navigation"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "steel",
+    "name": "Oceliarstvo",
+    "era": "industrial",
+    "cost": 3400,
+    "prerequisites": ["steam"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "tools",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "industrialization",
+    "name": "Industrializácia",
+    "era": "industrial",
+    "cost": 3600,
+    "prerequisites": ["steam"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "cloth",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "railways",
+    "name": "Železnice",
+    "era": "industrial",
+    "cost": 4000,
+    "prerequisites": ["steel"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.9
+      }
+    ]
+  },
+  {
+    "id": "sanitation",
+    "name": "Kanalizácia",
+    "era": "industrial",
+    "cost": 4000,
+    "prerequisites": ["industrialization"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "urbanism",
+    "name": "Urbanizmus",
+    "era": "industrial",
+    "cost": 5000,
+    "prerequisites": ["railways", "sanitation"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "baking",
+    "name": "Pekárstvo",
+    "era": "settlement",
+    "cost": 40,
+    "prerequisites": ["irrigation"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.15
+      }
+    ]
+  },
+  {
+    "id": "trade",
+    "name": "Obchod",
+    "era": "settlement",
+    "cost": 40,
+    "prerequisites": ["woodworking"],
+    "effects": [
+      {
+        "type": "money_multiplier",
+        "target": "all",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "philosophy",
+    "name": "Filozofia",
+    "era": "antiquity",
+    "cost": 110,
+    "prerequisites": ["mythology"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.15
+      }
+    ]
+  },
+  {
+    "id": "coinage",
+    "name": "Mincovníctvo",
+    "era": "antiquity",
+    "cost": 90,
+    "prerequisites": ["pottery"],
+    "effects": [
+      {
+        "type": "money_multiplier",
+        "target": "all",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "guilds",
+    "name": "Cechy",
+    "era": "middle_ages",
+    "cost": 260,
+    "prerequisites": ["mining"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "tools",
+        "multiplier": 1.15
+      }
+    ]
+  },
+  {
+    "id": "crop_rotation",
+    "name": "Trojpoľný systém",
+    "era": "middle_ages",
+    "cost": 240,
+    "prerequisites": ["architecture"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.15
+      }
+    ]
+  },
+  {
+    "id": "merchant_banks",
+    "name": "Bankové domy",
+    "era": "renaissance",
+    "cost": 1500,
+    "prerequisites": ["textiles"],
+    "effects": [
+      {
+        "type": "money_multiplier",
+        "target": "all",
+        "multiplier": 1.25
+      }
+    ]
+  },
+  {
+    "id": "optics",
+    "name": "Optika",
+    "era": "renaissance",
+    "cost": 1500,
+    "prerequisites": ["printing"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.15
+      }
+    ]
+  },
+  {
+    "id": "chemistry",
+    "name": "Chémia",
+    "era": "industrial",
+    "cost": 3500,
+    "prerequisites": ["steam"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "coal",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "electricity",
+    "name": "Elektrina",
+    "era": "modern",
+    "cost": 7000,
+    "prerequisites": ["urbanism"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "electricity",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "medicine",
+    "name": "Medicína",
+    "era": "modern",
+    "cost": 7500,
+    "prerequisites": ["electricity"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "refrigeration",
+    "name": "Chladenie",
+    "era": "modern",
+    "cost": 7500,
+    "prerequisites": ["electricity"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "mass_production",
+    "name": "Sériová výroba",
+    "era": "modern",
+    "cost": 8500,
+    "prerequisites": ["electricity"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "tools",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "radio",
+    "name": "Rádio",
+    "era": "modern",
+    "cost": 8000,
+    "prerequisites": ["electricity"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "steel_frames",
+    "name": "Oceľové konštrukcie",
+    "era": "modern",
+    "cost": 9000,
+    "prerequisites": ["mass_production"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.9
+      }
+    ]
+  },
+  {
+    "id": "automobile",
+    "name": "Automobil",
+    "era": "modern",
+    "cost": 9500,
+    "prerequisites": ["mass_production"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "consumerism",
+    "name": "Spotrebná spoločnosť",
+    "era": "modern",
+    "cost": 9000,
+    "prerequisites": ["radio"],
+    "effects": [
+      {
+        "type": "money_multiplier",
+        "target": "all",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "computers",
+    "name": "Počítače",
+    "era": "information",
+    "cost": 13000,
+    "prerequisites": ["radio", "steel_frames"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "nuclear_power",
+    "name": "Jadrová energia",
+    "era": "information",
+    "cost": 14000,
+    "prerequisites": ["computers"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "electricity",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "internet",
+    "name": "Internet",
+    "era": "information",
+    "cost": 15000,
+    "prerequisites": ["computers"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "ecology",
+    "name": "Ekológia",
+    "era": "information",
+    "cost": 13000,
+    "prerequisites": ["computers"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.85
+      }
+    ]
+  },
+  {
+    "id": "genetics",
+    "name": "Genetika",
+    "era": "information",
+    "cost": 14000,
+    "prerequisites": ["medicine", "computers"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "robotics",
+    "name": "Robotika",
+    "era": "information",
+    "cost": 16000,
+    "prerequisites": ["internet"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "tools",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "smart_cities",
+    "name": "Inteligentné mestá",
+    "era": "information",
+    "cost": 17000,
+    "prerequisites": ["internet", "ecology"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
+      }
+    ]
+  },
+  {
+    "id": "fusion",
+    "name": "Jadrová fúzia",
+    "era": "future",
+    "cost": 24000,
+    "prerequisites": ["nuclear_power", "robotics"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "electricity",
+        "multiplier": 1.3
+      }
+    ]
+  },
+  {
+    "id": "artificial_intelligence",
+    "name": "Umelá inteligencia",
+    "era": "future",
+    "cost": 26000,
+    "prerequisites": ["robotics", "internet"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "nanotechnology",
+    "name": "Nanotechnológie",
+    "era": "future",
+    "cost": 25000,
+    "prerequisites": ["robotics"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "electronics",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "quantum_computing",
+    "name": "Kvantové počítače",
+    "era": "future",
+    "cost": 27000,
+    "prerequisites": ["artificial_intelligence"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.5
+      }
+    ]
+  },
+  {
+    "id": "climate_engineering",
+    "name": "Klimatické inžinierstvo",
+    "era": "future",
+    "cost": 25000,
+    "prerequisites": ["genetics", "ecology"],
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.2
+      }
+    ]
+  },
+  {
+    "id": "arcologies",
+    "name": "Arkológie",
+    "era": "future",
+    "cost": 28000,
+    "prerequisites": ["smart_cities", "nanotechnology"],
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.85
+      }
+    ]
+  },
+  {
+    "id": "spaceflight",
+    "name": "Vesmírne lety",
+    "era": "future",
+    "cost": 32000,
+    "prerequisites": ["fusion", "artificial_intelligence"],
+    "effects": [
+      {
+        "type": "money_multiplier",
+        "target": "all",
+        "multiplier": 1.5
+      }
+    ]
   }
 ]

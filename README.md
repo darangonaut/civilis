@@ -1,8 +1,9 @@
 # Civilis
 
 Webová singleplayerová budovateľská stratégia — budovanie mesta zo SimCity a civilizačný postup
-z Civilization. Bez vojen a katastrof. Tri éry — Osada, Starovek, Stredovek: z hŕstky osadníkov
-na metropolu s katedrálou. Pixel art grafika.
+z Civilization. Bez vojen a katastrof. Osem ér — od osady cez starovek, stredovek, renesanciu,
+priemyselnú, modernú a informačnú éru až po blízku budúcnosť s fúziou a vesmírnym prístavom.
+Pixel art grafika.
 
 TypeScript · React · Vite · PixiJS 8 · Zustand · Dexie · Zod · Vitest · Playwright
 
@@ -26,7 +27,8 @@ Náhľad buildu: `npm run preview`.
 5. **Peniaze.** Budovy stoja údržbu, trhovisko prináša príjem. Bez peňazí budovy bežia na polovicu.
 6. **Vylepšenia.** Domy sa vylepšujú (až na Patricijský dom) — potrebujú technológie a služby v dosahu.
 7. **Míľniky a éry.** Panel Míľniky ukazuje aktuálny cieľ. Splnením éry sa odomknú nové technológie,
-   budovy a suroviny (tehly, železo). Po Zlatom veku hra pokračuje ako sandbox.
+   budovy a suroviny (tehly, železo, látky, uhlie, elektrina, elektronika). Výskum ponúka aj voliteľné
+   vetvy. Po poslednom míľniku „Ku hviezdam“ hra pokračuje ako sandbox.
 
 Stavať sa dá aj ťahaním: cesta sa natiahne ako čiara, ostatné budovy vyplnia obdĺžnik. Susedné farmy
 (aj drevorubači, lomy, bane) tvoria blok, ktorý stačí napojiť na cestu v jednom bode. Zbúranie vráti

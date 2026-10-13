@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CivilisEngine } from '@/engine/core/engine';
 import { effectiveDefinition } from '@/engine/core/levels';
+import { SCHEMA_VERSION } from '@/engine/core/constants';
 import { migrateGameState } from '@/persistence/migrations';
 import { build, createTestCity, setCity } from '../helpers/fixtures';
 import { def, economyTestData } from '../helpers/gameData';
@@ -110,11 +111,12 @@ describe('migrácia uložených hier', () => {
     };
     for (const b of city.buildings) delete b.level;
     delete city.population.growthProgress;
-    delete city.economy.resources.bricks;
-    delete city.economy.resources.iron;
+    for (const id of ['bricks', 'iron', 'cloth', 'coal', 'electricity', 'electronics']) {
+      delete city.economy.resources[id];
+    }
 
     const migrated = migrateGameState(v1);
-    expect(migrated.schemaVersion).toBe(3);
+    expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
     expect(migrated.city.buildings.every((b) => b.level === 1)).toBe(true);
     expect(migrated.city.population.growthProgress).toBe(0);
     expect(migrated.city.economy.resources.bricks).toBe(0);

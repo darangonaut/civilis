@@ -64,8 +64,8 @@ describe('výstavba (test C)', () => {
     const engine = setup();
     for (const position of [
       { x: -1, y: 0 },
-      { x: 0, y: 64 },
-      { x: 64, y: 10 },
+      { x: 0, y: testData.balance.mapSize.height },
+      { x: testData.balance.mapSize.width, y: 10 },
       { x: 1.5, y: 2 },
     ]) {
       expectRejected(
