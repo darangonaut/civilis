@@ -10,6 +10,7 @@ import { Notice } from '@/components/Notice';
 import { PanelHost } from '@/components/panels/PanelHost';
 import { VictoryDialog } from '@/components/VictoryDialog';
 import { useEffect } from 'react';
+import { useUiStore } from '@/stores/uiStore';
 import { controller } from './game';
 import { installGameEventNotifications } from './gameEvents';
 import { installAutosave } from './saving';
@@ -28,9 +29,10 @@ export function App() {
     };
   }, []);
 
+  const selected = useUiStore((s) => s.selectedInstanceId !== null);
   // Mapa je na celú obrazovku, ovládanie pláva nad ňou.
   return (
-    <div className="game-layout">
+    <div className={`game-layout${selected ? ' has-selection' : ''}`}>
       <MapView />
       <TopHud />
       <GoalTracker />

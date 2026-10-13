@@ -83,7 +83,10 @@ export function MapView() {
         renderer.setEffectsOptions({ animations: display.animations, dayNight: display.dayNight });
         const ui = useUiStore.getState();
         renderer.setBuildMode(ui.buildModeId, ui.buildLevel);
-        registerCameraTarget((wx, wy) => created.centerOnWorld(wx, wy));
+        registerCameraTarget({
+          centerOnWorld: (wx, wy) => created.centerOnWorld(wx, wy),
+          zoomStep: (direction) => created.zoomStep(direction),
+        });
         renderer.setSelectedInstance(ui.selectedInstanceId);
 
         unsubscribers.push(

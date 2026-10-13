@@ -40,6 +40,19 @@ body,
   margin: 0;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+.game-layout,
+.game-layout button {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 h2,
@@ -203,6 +216,7 @@ button.danger:hover:not(:disabled),
 .map-canvas {
   display: block;
   cursor: crosshair;
+  touch-action: none;
 }
 
 .map-canvas.dragging {
@@ -491,6 +505,27 @@ button.danger:hover:not(:disabled),
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  background: none;
+  text-align: left;
+}
+
+.goal-head:hover:not(:disabled) {
+  background: none;
+}
+
+.goal-head:hover .hud-caption {
+  color: var(--text-soft);
+}
+
+.goal-tracker.collapsed {
+  gap: 6px;
+  padding: 10px 14px;
+}
+
+.goal-title.small {
+  font-size: 15px;
 }
 
 .era-pips {
@@ -1093,6 +1128,31 @@ button.danger:hover:not(:disabled),
   50% {
     opacity: 0;
   }
+}
+
+.zoom-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-button.small {
+  width: 38px;
+  height: 38px;
+  font-family: var(--pixel);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.dock-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  padding: 6px 10px;
+  font-family: var(--pixel);
+  font-size: 13px;
+  background: rgb(228 59 68 / 20%);
+  color: var(--red-text);
 }
 
 .quick-progress {
@@ -2019,8 +2079,472 @@ button.danger:hover:not(:disabled),
   bottom: -3px;
 }
 
+/* --- Mobil (rovnaká podmienka ako COMPACT_QUERY v useCompact.ts) --- */
+@media (max-width: 760px), (max-height: 520px) {
+  :root {
+    font-size: 13px;
+    --gutter: 8px;
+    --safe-top: max(var(--gutter), env(safe-area-inset-top));
+    --safe-bottom: max(var(--gutter), env(safe-area-inset-bottom));
+    --safe-left: max(var(--gutter), env(safe-area-inset-left));
+    --safe-right: max(var(--gutter), env(safe-area-inset-right));
+    --frame: 0 0 0 2px var(--ink), 0 0 0 3px var(--edge);
+  }
+
+  .top-hud {
+    top: var(--safe-top);
+    left: var(--safe-left);
+    right: var(--safe-right);
+    gap: 7px;
+  }
+
+  .hud-brand {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .hud-brand .brand-block,
+  .hud-brand .hud-divider {
+    display: none;
+  }
+
+  .era-name {
+    font-size: 14px;
+  }
+
+  .era-day {
+    font-size: 12px;
+  }
+
+  .hud-people {
+    margin-left: auto;
+    gap: 8px;
+    padding: 6px 8px;
+  }
+
+  .hud-people .hud-divider {
+    display: none;
+  }
+
+  .hud-value,
+  .res-value {
+    font-size: 14px;
+  }
+
+  .hud-sub {
+    display: none;
+  }
+
+  .speed-controls button {
+    width: 27px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  /* Suroviny v jednom riadku, posúvajú sa prstom. */
+  .hud-resources {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 6px;
+    scrollbar-width: none;
+  }
+
+  .hud-resources::-webkit-scrollbar {
+    display: none;
+  }
+
+  .res-chip {
+    flex-shrink: 0;
+    gap: 4px;
+    padding: 4px 7px;
+  }
+
+  .hud-left {
+    left: var(--safe-left);
+    top: var(--hud-top, 96px);
+    width: min(280px, calc(100vw - 80px));
+    max-height: none;
+  }
+
+  .goal-tracker {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .goal-title {
+    font-size: 16px;
+  }
+
+  /* Skryté na mobile: pracovníci, text fázy dňa. */
+  .hud-stat.workers,
+  .phase-text {
+    display: none;
+  }
+
+  /* Rýchle tlačidlá ako stĺpec vpravo pod lištou (pod oknami, tie majú vlastné zatvorenie). */
+  .hud-right-bottom {
+    z-index: auto;
+    top: var(--hud-top, 96px);
+    right: var(--safe-right);
+    bottom: auto;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .quick-bar,
+  .zoom-buttons {
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .quick-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .quick-button.small {
+    width: 40px;
+    height: 34px;
+  }
+
+  .quick-button svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  /* Dok na celú šírku pri spodnom okraji. */
+  .build-dock-wrap {
+    left: var(--safe-left);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    width: auto;
+    min-width: 0;
+    transform: none;
+    gap: 8px;
+  }
+
+  .dock-tabs {
+    overflow-x: auto;
+    padding: 4px 4px 0;
+    scrollbar-width: none;
+  }
+
+  .dock-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dock-tabs button {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .dock-hint {
+    display: none;
+  }
+
+  .dock-cancel {
+    margin-left: auto;
+  }
+
+  .dock-tiles {
+    gap: 5px;
+    padding: 6px;
+    scrollbar-width: none;
+  }
+
+  .dock-tile {
+    width: 64px;
+    height: 76px;
+  }
+
+  .dock-tile-icon {
+    left: 2px;
+    top: 2px;
+    width: 60px;
+    height: 52px;
+  }
+
+  .dock-tooltip {
+    width: auto;
+    max-width: calc(100% - 56px);
+    padding: 8px 10px;
+    gap: 5px;
+  }
+
+  .tooltip-title {
+    font-size: 15px;
+  }
+
+  /* Na mobile karta ukáže len cenu a hlavné údaje. */
+  .tooltip-grid {
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 2px 8px;
+    font-size: 12px;
+  }
+
+  .tooltip-note {
+    font-size: 12px;
+  }
+
+  /* Len cena a hlavný údaj (výroba / kapacita), nech karta nezakrýva mapu. */
+  .tooltip-grid dt:nth-of-type(n + 3),
+  .tooltip-grid dd:nth-of-type(n + 3) {
+    display: none;
+  }
+
+  /* Inšpektor ako panel vysunutý zdola (dok a tlačidlá sa medzitým skryjú). */
+  .has-selection .build-dock-wrap,
+  .has-selection .hud-right-bottom {
+    display: none;
+  }
+
+  .inspector {
+    top: auto;
+    left: var(--safe-left);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    width: auto;
+    max-height: 55vh;
+    gap: 9px;
+    padding: 10px 12px;
+  }
+
+  .inspector-icon {
+    width: 52px;
+    height: 50px;
+  }
+
+  .inspector-title h2 {
+    font-size: 16px;
+  }
+
+  .btn {
+    min-height: 38px;
+  }
+
+  .map-info {
+    display: none;
+  }
+
+  .notice-stack {
+    top: var(--hud-top, 96px);
+    width: calc(100vw - 120px);
+  }
+
+  .notice {
+    white-space: normal;
+    text-align: center;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Okná na celú obrazovku. */
+  .modal-backdrop {
+    padding: 0;
+  }
+
+  .modal,
+  .modal.wide {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+    box-shadow: none;
+  }
+
+  .modal-header {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 10px 12px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .modal-header > .icon-button {
+    order: 2;
+  }
+
+  .research-header {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+  }
+
+  .research-active {
+    flex: 1 1 100%;
+    white-space: normal;
+  }
+
+  .modal-body {
+    padding: 12px;
+  }
+
+  .era-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 8px 12px 0;
+    scrollbar-width: none;
+  }
+
+  .era-tabs button {
+    flex-shrink: 0;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .research-body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .tech-tree {
+    flex: 0 0 auto;
+    height: 60vh;
+    margin: 10px 12px;
+    padding: 12px;
+  }
+
+  .research-side {
+    width: auto;
+    overflow: visible;
+    padding: 4px 12px 16px;
+  }
+
+  .tree-legend {
+    gap: 10px;
+  }
+
+  .stats-table {
+    font-size: 12px;
+  }
+
+  .factor-list li {
+    grid-template-columns: 100px 1fr 32px;
+  }
+
+  .slot {
+    flex-wrap: wrap;
+  }
+
+  .new-game-form {
+    flex-wrap: wrap;
+  }
+
+  .victory-dialog {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 18px;
+  }
+
+  .era-buildings {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Nízky telefón na výšku: zoom len gestom, aby stĺpec tlačidiel nezasahoval do doku. */
+@media (max-width: 760px) and (max-height: 760px) {
+  .zoom-buttons {
+    display: none;
+  }
+}
+
+/* Veľmi úzky telefón (iPhone SE): stiesnenejšia horná lišta. */
+@media (max-width: 400px) {
+  .hud-brand {
+    padding: 6px 8px;
+  }
+
+  .hud-people {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .hud-stat {
+    gap: 4px;
+  }
+
+  .hud-stat svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .speed-controls button {
+    width: 24px;
+  }
+}
+
+/* Mobil na šírku: málo výšky — dok bez záložkového riadku navyše, cieľ úzky. */
+@media (max-height: 520px) {
+  .has-selection .hud-right-bottom {
+    display: flex;
+  }
+
+  .zoom-buttons {
+    display: none;
+  }
+
+  .quick-button {
+    width: 38px;
+    height: 36px;
+  }
+
+  .hud-resources {
+    order: 0;
+    flex: 1 1 0;
+  }
+
+  .hud-people {
+    margin-left: 0;
+  }
+
+  .dock-tile {
+    width: 56px;
+    height: 64px;
+  }
+
+  .dock-tile-icon {
+    width: 52px;
+    height: 42px;
+  }
+
+  .dock-tiles {
+    padding: 4px;
+  }
+
+  .dock-tabs button {
+    padding: 5px 9px;
+  }
+
+  .build-dock-wrap {
+    right: calc(var(--safe-right) + 52px);
+  }
+
+  .dock-tooltip {
+    display: none;
+  }
+
+  .inspector {
+    left: auto;
+    width: min(360px, 60vw);
+    max-height: calc(100vh - var(--hud-top, 60px) - 8px);
+    right: calc(var(--safe-right) + 52px);
+  }
+
+  .tech-tree {
+    height: 75vh;
+  }
+}
+
 /* --- Menšie obrazovky: dok na celú šírku nad minimapou --- */
-@media (max-width: 1280px) {
+@media (max-width: 1280px) and (min-width: 761px) and (min-height: 521px) {
   .hud-people {
     margin-left: 0;
   }

@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { formatAmount } from '@/app/format';
+import { useCompact } from '@/app/useCompact';
 import { t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
@@ -19,14 +21,32 @@ export function GoalTracker() {
       : [],
   );
   const togglePanel = useUiStore((s) => s.togglePanel);
+  const compact = useCompact();
+  // Na mobile je cieľ predvolene zbalený (zaberá málo miesta nad mapou).
+  const [collapsed, setCollapsed] = useState<boolean | null>(null);
+  const isCollapsed = collapsed ?? compact;
+  const metCount = progress.filter((p) => p.days >= p.requiredDays).length;
   const era = gameData.eras[eraIndex]!;
   const eraMilestones = gameData.milestones.filter((m) => m.era === era.id);
 
   return (
     <div className="hud-left">
-      <section className="hud-panel goal-tracker" data-testid="goal-tracker">
-        <div className="goal-head">
-          <span className="hud-caption">{t('milestones.current')}</span>
+      <section
+        className={`hud-panel goal-tracker${isCollapsed ? ' collapsed' : ''}`}
+        data-testid="goal-tracker"
+      >
+        <button
+          className="goal-head"
+          onClick={() => setCollapsed(!isCollapsed)}
+          aria-expanded={!isCollapsed}
+          title={isCollapsed ? t('hud.expand') : t('hud.collapse')}
+        >
+          <span className="hud-caption">
+            <span className="chevron" aria-hidden>
+              {isCollapsed ? '▸' : '▾'}
+            </span>{' '}
+            {t('milestones.current')}
+          </span>
           <span
             className="era-pips"
             aria-label={t('hud.eraMilestones', {
@@ -47,8 +67,15 @@ export function GoalTracker() {
               />
             ))}
           </span>
-        </div>
-        {milestone ? (
+        </button>
+        {milestone && isCollapsed ? (
+          <span className="goal-title small">
+            {milestone.title}{' '}
+            <span className="muted">
+              {metCount}/{milestone.conditions.length}
+            </span>
+          </span>
+        ) : milestone ? (
           <>
             <span className="goal-title">{milestone.title}</span>
             <ul className="goal-conditions">
@@ -91,11 +118,13 @@ export function GoalTracker() {
         ) : (
           <span className="goal-title">{t('milestones.allDone')}</span>
         )}
-        <button className="link-button" onClick={() => togglePanel('milestones')}>
-          {t('hud.allMilestones')} ›
-        </button>
+        {!isCollapsed && (
+          <button className="link-button" onClick={() => togglePanel('milestones')}>
+            {t('hud.allMilestones')} ›
+          </button>
+        )}
       </section>
-      <EventLog />
+      {!compact && <EventLog />}
     </div>
   );
 }

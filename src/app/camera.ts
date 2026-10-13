@@ -1,10 +1,19 @@
-/** Most medzi rozhraním (minimapa) a rendererom, ktorý sa načítava asynchrónne. */
-let centerFn: ((wx: number, wy: number) => void) | null = null;
+/** Most medzi rozhraním (minimapa, tlačidlá zoomu) a rendererom, ktorý sa načítava asynchrónne. */
+export interface CameraTarget {
+  centerOnWorld(wx: number, wy: number): void;
+  zoomStep(direction: 1 | -1): void;
+}
 
-export function registerCameraTarget(fn: ((wx: number, wy: number) => void) | null): void {
-  centerFn = fn;
+let target: CameraTarget | null = null;
+
+export function registerCameraTarget(next: CameraTarget | null): void {
+  target = next;
 }
 
 export function centerCamera(wx: number, wy: number): void {
-  centerFn?.(wx, wy);
+  target?.centerOnWorld(wx, wy);
+}
+
+export function zoomCamera(direction: 1 | -1): void {
+  target?.zoomStep(direction);
 }

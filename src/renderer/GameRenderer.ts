@@ -16,6 +16,10 @@ extensions.add(CullerPlugin);
 
 /** Celočíselné úrovne zoomu drží pixely rovnako veľké (½ je prehľad celej mapy). */
 const ZOOM_LEVELS = [0.5, 1, 2, 3, 4] as const;
+/** Pomer roztiahnutia prstov na jeden krok zoomu. */
+const PINCH_STEP = 1.4;
+/** Prst sa pri ťuknutí trochu pohne — väčšia tolerancia ako pri myši. */
+const TOUCH_DRAG_THRESHOLD = 10;
 const DEFAULT_ZOOM = 2;
 /** Posun myšou väčší ako toto (px) sa berie ako ťahanie, nie klik. */
 const DRAG_THRESHOLD = 5;
@@ -112,6 +116,10 @@ export class GameRenderer {
     dragging: boolean;
     mode: 'pan' | 'build';
   } | null = null;
+  /** Aktívne dotyky (pre priblíženie dvoma prstami). */
+  private touches = new Map<number, { x: number; y: number }>();
+  /** Gesto dvoma prstami: vzdialenosť pri poslednom kroku zoomu a posledný stred. */
+  private pinch: { distance: number; midX: number; midY: number } | null = null;
   private destroyed = false;
   private cleanup: (() => void)[] = [];
 
@@ -508,14 +516,59 @@ export class GameRenderer {
     this.callbacks.onTileHover(tile);
   }
 
+  /** Priblíženie o jednu úroveň; bod (sx, sy) na plátne zostane na mieste. */
+  zoomStep(
+    direction: 1 | -1,
+    sx = this.app.screen.width / 2,
+    sy = this.app.screen.height / 2,
+  ): void {
+    const oldScale = this.camera.scale.x;
+    const level = ZOOM_LEVELS.findIndex((z) => z >= oldScale - 1e-6);
+    const next = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, level + direction));
+    const newScale = ZOOM_LEVELS[next]!;
+    if (newScale === oldScale) return;
+    const wx = (sx - this.camera.x) / oldScale;
+    const wy = (sy - this.camera.y) / oldScale;
+    this.camera.scale.set(newScale);
+    this.camera.position.set(sx - wx * newScale, sy - wy * newScale);
+    this.clampCamera();
+  }
+
   private bindInput(): void {
     const canvas = this.app.canvas;
 
+    const pinchState = () => {
+      const [a, b] = [...this.touches.values()];
+      return {
+        distance: Math.hypot(a!.x - b!.x, a!.y - b!.y),
+        midX: (a!.x + b!.x) / 2,
+        midY: (a!.y + b!.y) / 2,
+      };
+    };
+
     const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') {
+        this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (this.touches.size === 2) {
+          // Druhý prst: zruší rozpracované ťahanie (bez stavby) a začne gesto.
+          if (this.pointer && canvas.hasPointerCapture(this.pointer.id))
+            canvas.releasePointerCapture(this.pointer.id);
+          this.pointer = null;
+          this.dragBuild = null;
+          this.refreshOverlay();
+          this.pinch = pinchState();
+          return;
+        }
+        if (this.touches.size > 2 || this.pinch) return;
+      }
       if (this.pointer || e.button > 2) return;
       // Ľavé tlačidlo v režime stavby kreslí, inak (a pravé/stredné vždy) posúva mapu.
       const mode: 'pan' | 'build' = e.button === 0 && this.buildModeId ? 'build' : 'pan';
-      canvas.setPointerCapture(e.pointerId);
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {
+        // Ukazovateľ už nie je aktívny (napr. syntetická udalosť) — pokračuje sa bez zachytenia.
+      }
       this.pointer = {
         id: e.pointerId,
         startX: e.clientX,
@@ -532,11 +585,32 @@ export class GameRenderer {
     };
 
     const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' && this.touches.has(e.pointerId)) {
+        this.touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (this.pinch && this.touches.size === 2) {
+          const now = pinchState();
+          this.camera.x += now.midX - this.pinch.midX;
+          this.camera.y += now.midY - this.pinch.midY;
+          this.pinch.midX = now.midX;
+          this.pinch.midY = now.midY;
+          // Zoom má pevné úrovne — krok, keď sa prsty dostatočne roztiahnu / stiahnu.
+          const ratio = now.distance / this.pinch.distance;
+          if (ratio > PINCH_STEP || ratio < 1 / PINCH_STEP) {
+            const rect = canvas.getBoundingClientRect();
+            this.zoomStep(ratio > 1 ? 1 : -1, now.midX - rect.left, now.midY - rect.top);
+            this.pinch.distance = now.distance;
+          } else {
+            this.clampCamera();
+          }
+          return;
+        }
+      }
       const p = this.pointer;
       if (p && p.id === e.pointerId) {
         if (
           !p.dragging &&
-          Math.hypot(e.clientX - p.startX, e.clientY - p.startY) > DRAG_THRESHOLD
+          Math.hypot(e.clientX - p.startX, e.clientY - p.startY) >
+            (e.pointerType === 'touch' ? TOUCH_DRAG_THRESHOLD : DRAG_THRESHOLD)
         ) {
           p.dragging = true;
           canvas.classList.add('dragging');
@@ -560,6 +634,14 @@ export class GameRenderer {
     };
 
     const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') {
+        this.touches.delete(e.pointerId);
+        // Gesto končí až keď sa zdvihnú všetky prsty (zvyšný prst nič nespustí).
+        if (this.pinch) {
+          if (this.touches.size === 0) this.pinch = null;
+          return;
+        }
+      }
       const p = this.pointer;
       if (!p || p.id !== e.pointerId) return;
       this.pointer = null;
@@ -616,17 +698,7 @@ export class GameRenderer {
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
       if (e.deltaY === 0) return;
-      const oldScale = this.camera.scale.x;
-      const level = ZOOM_LEVELS.findIndex((z) => z >= oldScale - 1e-6);
-      const next = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, level + (e.deltaY < 0 ? 1 : -1)));
-      const newScale = ZOOM_LEVELS[next]!;
-      if (newScale === oldScale) return;
-      // Bod pod kurzorom zostane na mieste.
-      const wx = (sx - this.camera.x) / oldScale;
-      const wy = (sy - this.camera.y) / oldScale;
-      this.camera.scale.set(newScale);
-      this.camera.position.set(sx - wx * newScale, sy - wy * newScale);
-      this.clampCamera();
+      this.zoomStep(e.deltaY < 0 ? 1 : -1, sx, sy);
     };
 
     canvas.addEventListener('pointerdown', onPointerDown);

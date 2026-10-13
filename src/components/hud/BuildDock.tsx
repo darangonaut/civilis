@@ -86,6 +86,16 @@ export function BuildDock() {
             </button>
           ))}
           <span className="dock-hint">{t('hud.dockHint')}</span>
+          {buildModeId && (
+            <button
+              className="dock-cancel"
+              onClick={() => setBuildMode(null)}
+              data-testid="cancel-build"
+              title={t('hud.cancelBuild')}
+            >
+              <Icon name="close" size={14} /> {t('hud.cancelBuild')}
+            </button>
+          )}
         </div>
         <div className="dock-tiles" onMouseLeave={() => setHovered(null)}>
           {tiles.length === 0 && <p className="muted">{t('catalog.empty')}</p>}

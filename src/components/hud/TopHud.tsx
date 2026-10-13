@@ -59,7 +59,9 @@ export function TopHud() {
               </span>
             )}
             {t('topbar.day')} <span data-testid="day">{day}</span>
-            {phase && <> · {t(`phase.${phase}` as TranslationKey)}</>}
+            {phase && (
+              <span className="phase-text"> · {t(`phase.${phase}` as TranslationKey)}</span>
+            )}
           </span>
         </div>
       </div>
@@ -110,7 +112,7 @@ export function TopHud() {
           <span className="hud-sub">/ {population.housingCapacity}</span>
           <span className="sr-only">{`${population.total} / ${population.housingCapacity}`}</span>
         </span>
-        <span className="hud-stat" title={`${t('hud.employed')} / ${t('topbar.workers')}`}>
+        <span className="hud-stat workers" title={`${t('hud.employed')} / ${t('topbar.workers')}`}>
           <Icon name="workers" />
           <span className="hud-value">{population.employedWorkers}</span>
           <span className="hud-sub">/ {population.availableWorkers}</span>

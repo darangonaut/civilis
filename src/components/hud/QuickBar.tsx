@@ -1,4 +1,6 @@
+import { zoomCamera } from '@/app/camera';
 import { t, type TranslationKey } from '@/app/i18n';
+import { useCompact } from '@/app/useCompact';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
 import { useUiStore, type PanelId } from '@/stores/uiStore';
@@ -17,6 +19,7 @@ const PANELS: { id: PanelId; label: TranslationKey; icon: IconName }[] = [
 export function QuickBar() {
   const openPanel = useUiStore((s) => s.openPanel);
   const togglePanel = useUiStore((s) => s.togglePanel);
+  const compact = useCompact();
   const research = useGameState((s) => {
     const tech = s.research.activeTechnologyId
       ? gameData.technologiesById.get(s.research.activeTechnologyId)
@@ -53,7 +56,25 @@ export function QuickBar() {
           );
         })}
       </nav>
-      <MiniMap />
+      <div className="zoom-buttons">
+        <button
+          className="quick-button small"
+          onClick={() => zoomCamera(1)}
+          aria-label={t('hud.zoomIn')}
+          title={t('hud.zoomIn')}
+        >
+          +
+        </button>
+        <button
+          className="quick-button small"
+          onClick={() => zoomCamera(-1)}
+          aria-label={t('hud.zoomOut')}
+          title={t('hud.zoomOut')}
+        >
+          −
+        </button>
+      </div>
+      {!compact && <MiniMap />}
     </div>
   );
 }
