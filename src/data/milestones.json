@@ -1,0 +1,51 @@
+[
+  {
+    "id": "settlement_founded",
+    "title": "Založená osada",
+    "conditions": [
+      { "type": "population", "minimum": 20 },
+      { "type": "building_count", "buildingId": "farm", "minimum": 1 },
+      { "type": "building_count", "buildingId": "lumberjack", "minimum": 1 }
+    ],
+    "rewards": { "money": 100 }
+  },
+  {
+    "id": "self_sufficient_village",
+    "title": "Sebestačná dedina",
+    "conditions": [
+      { "type": "population", "minimum": 40 },
+      { "type": "resource_balance", "resource": "food", "minimum": 1, "consecutiveDays": 10 },
+      { "type": "happiness", "minimum": 60 }
+    ],
+    "rewards": { "resources": { "wood": 20, "stone": 20 } }
+  },
+  {
+    "id": "educated_society",
+    "title": "Vzdelaná spoločnosť",
+    "conditions": [
+      { "type": "building_count", "buildingId": "school", "minimum": 1 },
+      { "type": "completed_research", "minimum": 3 }
+    ],
+    "rewards": { "money": 100, "resources": { "knowledge": 20 } }
+  },
+  {
+    "id": "prosperous_town",
+    "title": "Prosperujúce mesto",
+    "conditions": [
+      { "type": "population", "minimum": 100 },
+      { "type": "building_count", "buildingId": "market", "minimum": 1 },
+      { "type": "money_balance", "minimum": 1, "consecutiveDays": 15 }
+    ],
+    "rewards": { "money": 300 }
+  },
+  {
+    "id": "birth_of_civilization",
+    "title": "Zrod civilizácie",
+    "conditions": [
+      { "type": "population", "minimum": 200 },
+      { "type": "all_research_completed" },
+      { "type": "happiness", "minimum": 75, "consecutiveDays": 20 }
+    ],
+    "rewards": { "badgeId": "era_1_complete" }
+  }
+]

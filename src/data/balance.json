@@ -1,0 +1,18 @@
+{
+  "startingState": {
+    "population": 10,
+    "resources": { "food": 100, "wood": 80, "stone": 30, "tools": 10, "knowledge": 0 },
+    "money": 500,
+    "happiness": 70
+  },
+  "mapSize": { "width": 64, "height": 64 },
+  "baseStorageCapacity": 100,
+  "workforceShare": 0.5,
+  "minimumPopulation": 5,
+  "foodPerCapita": 0.25,
+  "noToolsEfficiency": 0.5,
+  "noFundsEfficiency": 0.5,
+  "happinessWeights": { "food": 0.4, "housing": 0.25, "water": 0.2, "education": 0.15 },
+  "happinessGrowthThreshold": 60,
+  "happinessDeclineThreshold": 40
+}

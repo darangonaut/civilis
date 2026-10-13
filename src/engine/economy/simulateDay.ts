@@ -1,0 +1,57 @@
+import { RESOURCE_IDS, type GameState, type Resources } from '@/types';
+import type { GameData } from '../core/definitions';
+import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
+
+function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
+  for (const id of RESOURCE_IDS) {
+    const amount = source[id] ?? 0;
+    if (amount > 0) target[id] = (target[id] ?? 0) + amount;
+  }
+}
+
+/**
+ * Jeden herný deň v pevnom poradí zo špecifikácie 2.4. Kroky 7, 9 a 10
+ * (populácia, výskum, míľniky) pribudnú v etape 4.
+ */
+export function simulateDay(state: GameState, data: GameData): void {
+  const economy = state.city.economy;
+
+  // 1.–4. Pripojenie, pracovníci, kapacita, rezervácia vstupov.
+  const analysis = analyzeCity(state, data);
+  const resources: Resources = { ...analysis.resourcesAfterInputs };
+  const production: Partial<Resources> = {};
+  const consumption: Partial<Resources> = {};
+
+  // 5. Výroba, orezaná kapacitou skladu (už preplnený sklad sa neznižuje).
+  for (const status of analysis.statuses.values()) {
+    addTo(consumption, status.consumed);
+    addTo(production, status.produced);
+  }
+  for (const id of RESOURCE_IDS) {
+    const produced = production[id] ?? 0;
+    if (produced <= 0) continue;
+    const current = resources[id];
+    resources[id] = UNCAPPED_RESOURCES.has(id)
+      ? current + produced
+      : Math.max(current, Math.min(analysis.storageCapacity, current + produced));
+  }
+
+  // 6. Spotreba potravín obyvateľmi.
+  const foodNeeded = state.city.population.total * data.balance.foodPerCapita;
+  const foodEaten = Math.min(resources.food, foodNeeded);
+  resources.food -= foodEaten;
+  if (foodEaten > 0) consumption.food = (consumption.food ?? 0) + foodEaten;
+
+  // 8. Peniaze: príjem z trhovísk, údržba (pokladnica neklesne pod nulu).
+  economy.money = Math.max(0, economy.money + analysis.moneyIncome - analysis.maintenanceTotal);
+  economy.dailyIncome = analysis.moneyIncome;
+  economy.dailyExpenses = analysis.maintenanceTotal;
+
+  for (const id of RESOURCE_IDS) resources[id] = Math.max(0, resources[id]);
+  economy.resources = resources;
+  economy.dailyProduction = production;
+  economy.dailyConsumption = consumption;
+
+  state.simulation.day += 1;
+  refreshDerivedState(state, data);
+}

@@ -1,0 +1,111 @@
+import { createGameEngine } from '@/engine/core/engine';
+import { SCHEMA_VERSION } from '@/engine/core/constants';
+import type { GameEngine, GameState, Position, Resources, TerrainType, Tile } from '@/types';
+import { testData } from './gameData';
+
+export interface TestCityOptions {
+  width?: number;
+  height?: number;
+  /** Terén podľa súradníc; predvolene tráva. */
+  terrain?: (x: number, y: number) => TerrainType;
+  population?: number;
+  resources?: Partial<Resources>;
+  money?: number;
+}
+
+/**
+ * Malé syntetické mesto pre ekonomické testy: sklad na [1, 1] a cesta po celom riadku y = 2.
+ * Budovy umiestnené na y = 3 (alebo y = 1) sú teda pripojené k sieti.
+ */
+export function createTestCity(options: TestCityOptions = {}): GameEngine {
+  const width = options.width ?? 16;
+  const height = options.height ?? 8;
+  const tiles: Tile[] = [];
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const terrain = options.terrain?.(x, y) ?? 'grass';
+      tiles.push({ terrain, fertility: terrain === 'fertile' ? 90 : 45 });
+    }
+  }
+  const state: GameState = {
+    schemaVersion: SCHEMA_VERSION,
+    gameId: 'test',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    lastSavedAt: '2026-01-01T00:00:00.000Z',
+    simulation: { day: 0, speed: 1, seed: 1 },
+    world: { seed: 1, width, height, tiles },
+    city: {
+      name: 'Test',
+      population: {
+        total: 0,
+        housingCapacity: 0,
+        availableWorkers: 0,
+        employedWorkers: 0,
+        happiness: 70,
+      },
+      economy: {
+        resources: { food: 0, wood: 0, stone: 0, tools: 0, knowledge: 0 },
+        money: 0,
+        storageCapacity: 0,
+        dailyIncome: 0,
+        dailyExpenses: 0,
+        dailyProduction: {},
+        dailyConsumption: {},
+      },
+      buildings: [],
+    },
+    research: { completedTechnologyIds: [], activeTechnologyId: null, investedKnowledge: 0 },
+    milestones: { completedIds: [], progressDays: {} },
+  };
+
+  const engine = createGameEngine(testData, state);
+  build(engine, 'warehouse', { x: 1, y: 1 });
+  for (let x = 0; x < width; x++) build(engine, 'road', { x, y: 2 });
+  setCity(engine, {
+    population: options.population ?? 10,
+    resources: options.resources ?? {},
+    money: options.money ?? 1000,
+  });
+  return engine;
+}
+
+/** Postaví budovu bez ohľadu na suroviny (pôvodné zásoby zostanú zachované). */
+export function build(engine: GameEngine, buildingId: string, position: Position): string {
+  const state = engine.serialize();
+  const saved = { ...state.city.economy.resources };
+  state.city.economy.resources = { food: 1e6, wood: 1e6, stone: 1e6, tools: 1e6, knowledge: 1e6 };
+  engine.load(state);
+  const result = engine.execute({ type: 'PLACE_BUILDING', buildingId, position });
+  if (!result.success) throw new Error(`Nepodarilo sa postaviť ${buildingId}: ${result.reason}`);
+  const after = engine.serialize();
+  after.city.economy.resources = saved;
+  engine.load(after);
+  return after.city.buildings.at(-1)!.id;
+}
+
+export function setCity(
+  engine: GameEngine,
+  values: {
+    population?: number;
+    resources?: Partial<Resources>;
+    money?: number;
+    completedTechnologyIds?: string[];
+  },
+): void {
+  const state = engine.serialize();
+  if (values.population !== undefined) state.city.population.total = values.population;
+  if (values.resources) {
+    state.city.economy.resources = {
+      food: 0,
+      wood: 0,
+      stone: 0,
+      tools: 0,
+      knowledge: 0,
+      ...values.resources,
+    };
+  }
+  if (values.money !== undefined) state.city.economy.money = values.money;
+  if (values.completedTechnologyIds)
+    state.research.completedTechnologyIds = values.completedTechnologyIds;
+  engine.load(state);
+}

@@ -1,0 +1,253 @@
+[
+  {
+    "id": "house",
+    "name": "Dom",
+    "category": "housing",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 10
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 10,
+    "maintenanceCost": 0,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "road",
+    "name": "Cesta",
+    "category": "infrastructure",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 1
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 0,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile", "forest", "rock", "hill"],
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "lumberjack",
+    "name": "Drevorubač",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 15
+    },
+    "inputs": {},
+    "outputs": {
+      "wood": 6
+    },
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["forest"],
+    "toolUsePerWorker": 0.1
+  },
+  {
+    "id": "farm",
+    "name": "Farma",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 10
+    },
+    "inputs": {},
+    "outputs": {
+      "food": 8
+    },
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["fertile", "grass"],
+    "toolUsePerWorker": 0.1,
+    "terrainEfficiency": {
+      "grass": 0.5
+    }
+  },
+  {
+    "id": "quarry",
+    "name": "Kameňolom",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 20
+    },
+    "inputs": {},
+    "outputs": {
+      "stone": 4
+    },
+    "workersRequired": 3,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["rock"],
+    "toolUsePerWorker": 0.1
+  },
+  {
+    "id": "well",
+    "name": "Studňa",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 10,
+      "stone": 5
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 0,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile", "hill"],
+    "service": {
+      "type": "water",
+      "radius": 4
+    },
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "warehouse",
+    "name": "Sklad",
+    "category": "infrastructure",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 20,
+      "stone": 10
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 200,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "workshop",
+    "name": "Dielňa",
+    "category": "production",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 20,
+      "stone": 10
+    },
+    "inputs": {
+      "wood": 2,
+      "stone": 1
+    },
+    "outputs": {
+      "tools": 2
+    },
+    "workersRequired": 3,
+    "housingCapacity": 0,
+    "maintenanceCost": 2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "school",
+    "name": "Škola",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 30,
+      "stone": 20
+    },
+    "inputs": {},
+    "outputs": {
+      "knowledge": 3
+    },
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "service": {
+      "type": "education",
+      "radius": 6
+    },
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "market",
+    "name": "Trhovisko",
+    "category": "service",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 20,
+      "stone": 10
+    },
+    "inputs": {
+      "food": 2
+    },
+    "outputs": {},
+    "workersRequired": 2,
+    "housingCapacity": 0,
+    "maintenanceCost": 0,
+    "moneyOutput": 8,
+    "storageCapacity": 0,
+    "requiresRoad": true,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0
+  }
+]
