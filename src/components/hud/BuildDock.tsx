@@ -50,6 +50,15 @@ function dockTiles(category: string, eraIndex: number, completed: readonly strin
 const affordable = (cost: Partial<Resources>, stock: Resources) =>
   RESOURCE_IDS.every((id) => (cost[id] ?? 0) <= stock[id]);
 
+let touchHintShown = false;
+
+/** Na dotykovej obrazovke raz vysvetlí ovládanie stavby (žiadne prejdenie myšou). */
+function showTouchHint(): void {
+  if (touchHintShown || !window.matchMedia('(pointer: coarse)').matches) return;
+  touchHintShown = true;
+  useUiStore.getState().showNotice(t('hud.touchBuildHint'));
+}
+
 /** Stavebný dok dole: záložky kategórií a dlaždice budov s ikonou a cenou. */
 export function BuildDock() {
   const category = useUiStore((s) => s.catalogCategory);
@@ -116,7 +125,10 @@ export function BuildDock() {
                 data-available={!locked && canAfford}
                 onMouseEnter={() => setHovered({ id: definition.id, level })}
                 onFocus={() => setHovered({ id: definition.id, level })}
-                onClick={() => setBuildMode(selected ? null : definition.id, level)}
+                onClick={() => {
+                  setBuildMode(selected ? null : definition.id, level);
+                  if (!selected) showTouchHint();
+                }}
               >
                 <span className="dock-tile-icon">
                   <BuildingIcon

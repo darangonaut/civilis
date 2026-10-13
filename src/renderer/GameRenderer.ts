@@ -145,7 +145,8 @@ export class GameRenderer {
       antialias: false,
       roundPixels: true,
       autoDensity: true,
-      resolution: window.devicePixelRatio || 1,
+      // Pixel art nepotrebuje viac ako 2× — na telefónoch s 3× šetrí výkon aj batériu.
+      resolution: Math.min(window.devicePixelRatio || 1, 2),
     });
     this.app.canvas.classList.add('map-canvas');
     this.host.appendChild(this.app.canvas);

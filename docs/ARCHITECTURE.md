@@ -9,16 +9,16 @@ PixiJS Renderer (src/renderer) ─────┘           │
 
 ## Vrstvy a pravidlá závislostí
 
-| Adresár            | Zodpovednosť                                                         | Smie importovať                                                      |
-| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `src/types/`       | Dátový kontrakt zo špecifikácie (sekcie 5–6). Iba typy a konštanty.  | nič                                                                  |
-| `src/engine/`      | Čistá deterministická simulácia, validácia dát a príkazov.           | `@/types`, `zod`                                                     |
-| `src/data/`        | Deklaratívne JSON definície + načítanie cez `loadGameData`.          | `@/engine/core`, `@/types`                                           |
-| `src/persistence/` | Dexie, save sloty, export/import, migrácie.                          | `@/engine`, `@/types`, `dexie`                                       |
-| `src/app/`         | Game Controller (herná slučka, napojenie engine ↔ store), i18n, App. | všetko                                                               |
-| `src/stores/`      | Zustand — iba UI stav a snapshot herného stavu pre React.            | `@/types`, `zustand`                                                 |
-| `src/renderer/`    | PixiJS izometrický renderer, kamera, picking.                        | `@/types`, `@/data`, `pixi.js`                                       |
-| `src/components/`  | React komponenty.                                                    | `@/app`, `@/stores`, `@/data`, `@/types`, `@/renderer/pixel/sprites` |
+| Adresár            | Zodpovednosť                                                         | Smie importovať                                                                            |
+| ------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `src/types/`       | Dátový kontrakt zo špecifikácie (sekcie 5–6). Iba typy a konštanty.  | nič                                                                                        |
+| `src/engine/`      | Čistá deterministická simulácia, validácia dát a príkazov.           | `@/types`, `zod`                                                                           |
+| `src/data/`        | Deklaratívne JSON definície + načítanie cez `loadGameData`.          | `@/engine/core`, `@/types`                                                                 |
+| `src/persistence/` | Dexie, save sloty, export/import, migrácie.                          | `@/engine`, `@/types`, `dexie`                                                             |
+| `src/app/`         | Game Controller (herná slučka, napojenie engine ↔ store), i18n, App. | všetko                                                                                     |
+| `src/stores/`      | Zustand — iba UI stav a snapshot herného stavu pre React.            | `@/types`, `zustand`                                                                       |
+| `src/renderer/`    | PixiJS izometrický renderer, kamera, picking.                        | `@/types`, `@/data`, `pixi.js`                                                             |
+| `src/components/`  | React komponenty.                                                    | `@/app`, `@/stores`, `@/data`, `@/types`, `@/renderer/pixel/sprites`, `@/renderer/minimap` |
 
 Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslint.config.js`
 (React, PixiJS, Zustand, Dexie ani vyššie vrstvy nesmú byť v `src/engine/**`).
@@ -85,3 +85,14 @@ Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslin
   `antialias: false` a `roundPixels: true`, kamera má celočíselné úrovne zoomu (½, 1, 2, 3, 4)
   a zaokrúhľuje polohu na celé pixely.
 - Katalóg budov používa tie isté sprity ako ikony (`components/BuildingIcon.tsx`, 2×).
+
+## Rozhranie (HUD)
+
+- `App` skladá mapu na celú obrazovku (`MapView`) a plávajúce panely z `components/hud/`:
+  `TopHud`, `GoalTracker` (+ záznam udalostí z `uiStore.log`), `Inspector`, `BuildDock`,
+  `QuickBar` (+ `MiniMap`). Panely (`components/panels/`) sú modálne okná cez `PanelFrame`.
+- Renderer hlási výhľad kamery (`onCameraChange`) a fázu dňa (`onDayPhase`) do `uiStore`;
+  minimapa a tlačidlá zoomu ovládajú kameru cez `app/camera.ts` (renderer sa načítava asynchrónne).
+- Výška hornej lišty sa meria (`--hud-top`), panely pod ňou sa posunú, keď sa lišta zalomí.
+- Mobil: `app/useCompact.ts` (`COMPACT_QUERY`) musí sedieť s media query v `styles.css`.
+  Dotyky spracúva `GameRenderer` (mapa aktívnych dotykov, gesto dvoma prstami → kroky zoomu).

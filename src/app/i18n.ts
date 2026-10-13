@@ -232,6 +232,7 @@ const sk = {
   'hud.collapse': 'Zbaliť',
   'hud.cancelBuild': 'Zrušiť stavbu',
   'hud.zoomIn': 'Priblížiť',
+  'hud.touchBuildHint': 'Ťuknutím postavíš, ťahaním prsta viac naraz. Mapu posúvaš dvoma prstami.',
   'hud.zoomOut': 'Oddialiť',
   'phase.dawn': 'ráno',
   'phase.day': 'deň',

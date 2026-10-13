@@ -18,7 +18,9 @@ export function Notice() {
 function NoticeItem({ notice }: { notice: NoticeData }) {
   const dismiss = useUiStore((s) => s.dismissNotice);
   useEffect(() => {
-    const timer = window.setTimeout(() => dismiss(notice.id), NOTICE_DURATION_MS[notice.kind]);
+    // Dlhší text zostane dlhšie, aby sa dal prečítať.
+    const duration = Math.max(NOTICE_DURATION_MS[notice.kind], notice.text.length * 60);
+    const timer = window.setTimeout(() => dismiss(notice.id), duration);
     return () => window.clearTimeout(timer);
   }, [notice, dismiss]);
 

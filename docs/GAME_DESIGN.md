@@ -143,3 +143,14 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   aj autá.
 - **Vlniaca sa voda** a **„vyskočenie“** novej budovy s obláčikom prachu.
 - Nastavenia → Zobrazenie: prepínače „Animácie“ a „Deň a noc“ (uložené v prehliadači).
+
+## Rozhranie a mobil (2026-10-13, na želanie)
+
+- Domy (a ďalšie budovy s úrovňami) sa dajú postaviť rovno na ľubovoľnej odomknutej úrovni.
+  Cena je súčet stavby a všetkých vylepšení po danú úroveň, takže je to len skratka (žiadna
+  zľava). Musia byť splnené technológie aj služby v dosahu, ako pri vylepšení.
+- Poradie výskumu: max. 10 technológií. Po dokončení výskumu (alebo keď sa nič neskúma) sa začne
+  prvá dostupná z poradia. Technológia môže byť v poradí aj vtedy, keď jej prerekvizity sú
+  v poradí pred ňou.
+- Na dotykovej obrazovke ťuknutie stavia alebo vyberá, ťahanie prstom v režime stavby stavia
+  viac naraz a mapa sa vtedy posúva dvoma prstami. Mimo stavby posúva mapu jeden prst.
