@@ -5,6 +5,7 @@ import { currentMarkers } from '@/app/markers';
 import { installTestHook } from '@/app/testHook';
 import { gameData } from '@/data';
 import type { GameRenderer } from '@/renderer/GameRenderer';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useUiStore } from '@/stores/uiStore';
 import type { Position } from '@/types';
 import { MapInfo } from './MapInfo';
@@ -75,19 +76,29 @@ export function MapView() {
           return;
         }
         renderer = created;
-        renderer.sync(controller.state, currentMarkers());
+        renderer.sync(controller.state, currentMarkers(), controller.activity);
+        const display = useSettingsStore.getState();
+        renderer.setEffectsOptions({ animations: display.animations, dayNight: display.dayNight });
         const ui = useUiStore.getState();
         renderer.setBuildMode(ui.buildModeId);
         renderer.setSelectedInstance(ui.selectedInstanceId);
 
         unsubscribers.push(
-          controller.subscribe(() => created.sync(controller.state, currentMarkers())),
+          controller.subscribe(() =>
+            created.sync(controller.state, currentMarkers(), controller.activity),
+          ),
           useUiStore.subscribe((s, prev) => {
             if (s.buildModeId !== prev.buildModeId) created.setBuildMode(s.buildModeId);
             if (s.selectedInstanceId !== prev.selectedInstanceId)
               created.setSelectedInstance(s.selectedInstanceId);
           }),
           installTestHook(created),
+          useSettingsStore.subscribe((display) =>
+            created.setEffectsOptions({
+              animations: display.animations,
+              dayNight: display.dayNight,
+            }),
+          ),
         );
         setReady(true);
       });

@@ -49,7 +49,7 @@ export const P = {
   purple: 0xb55088,
   purpleShade: 0x68386c,
   window: 0x262b44,
-  glow: 0xfee761,
+  glow: 0xfff3a8,
   white: 0xffffff,
   smoke: 0xc0cbdc,
 } as const;
@@ -1451,3 +1451,93 @@ export function drawIcon(kind: IconKind): PixelCanvas {
   pc.stamp(0, 0, ICONS[kind].rows, ICONS[kind].pal);
   return pc;
 }
+
+// --- Efekty: svetlá, komíny, chodci ----------------------------------------------------
+
+const LIGHT_SOURCES: ReadonlySet<Rgb> = new Set([P.window, P.glow]);
+const WARM_LIGHT = 0xffd36b;
+
+/**
+ * Mapa svetiel budovy: pixely okien (tmavé sklo a žiarivé body) ako teplé svetlo, zvyšok
+ * priehľadný. V noci sa kreslí nad budovou s aditívnym miešaním.
+ */
+export function drawLights(key: string): PixelSprite {
+  const { canvas, anchorX, anchorY } = drawBuilding(key);
+  const lights = new PixelCanvas(canvas.width, canvas.height);
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const color = canvas.get(x, y);
+      if (color !== null && LIGHT_SOURCES.has(color)) lights.set(x, y, WARM_LIGHT);
+    }
+  }
+  return { canvas: lights, anchorX, anchorY };
+}
+
+/** Či má mapa svetiel aspoň jeden pixel. */
+export function hasLights(sprite: PixelSprite): boolean {
+  for (let i = 3; i < sprite.canvas.data.length; i += 4)
+    if (sprite.canvas.data[i]! > 0) return true;
+  return false;
+}
+
+/** Ústia komínov (pixely voči stredu políčka) — odtiaľ stúpa dym, keď budova pracuje. */
+export const CHIMNEYS: Readonly<Record<string, readonly (readonly [number, number])[]>> = {
+  house: [[5, -22]],
+  'house@2': [[-4, -26]],
+  'house@7': [
+    [-5, -33],
+    [6, -32],
+  ],
+  workshop: [[6, -20]],
+  'workshop+': [[6, -20]],
+  brickworks: [[6, -23]],
+  smelter: [[-2, -31]],
+  steelworks: [
+    [-6, -35],
+    [0, -35],
+    [6, -35],
+  ],
+  textile_factory: [[10, -35]],
+  power_plant: [
+    [-5, -37],
+    [5, -37],
+  ],
+  nuclear_plant: [[-5, -24]],
+};
+
+const PEOPLE_COLORS: readonly Rgb[] = [P.roof, P.waterDeep, P.grass, P.wheat, P.purple, P.white];
+
+/** Chodec 4 × 7 px (hlava, telo, nohy) s tmavým obrysom pre čitateľnosť. */
+export function drawWalker(variant: number): PixelCanvas {
+  const pc = new PixelCanvas(5, 8);
+  pc.stamp(1, 0, ['.hh.', '.hh.', 'cccc', 'cccc', '.cc.', '.ll.', '.l.l'], {
+    h: P.soilLight,
+    c: PEOPLE_COLORS[variant % PEOPLE_COLORS.length]!,
+    l: P.ink,
+  });
+  pc.outline(P.ink);
+  return pc;
+}
+
+/** Auto 8 × 5 px (moderné éry). */
+export function drawCar(variant: number): PixelCanvas {
+  const pc = new PixelCanvas(10, 7);
+  pc.stamp(1, 1, ['..www...', '.cccccc.', 'cccccccc', 'cccccccc', '.o....o.'], {
+    w: P.waterLight,
+    c: PEOPLE_COLORS[variant % PEOPLE_COLORS.length]!,
+    o: P.ink,
+  });
+  pc.outline(P.ink);
+  return pc;
+}
+
+/** Obláčik dymu alebo prachu. */
+export function drawPuff(color: Rgb): PixelCanvas {
+  const pc = new PixelCanvas(5, 5);
+  pc.stamp(0, 0, ['.ccc.', 'ccccc', 'ccLcc', 'ccccc', '.ccc.'], { c: color, L: P.white });
+  return pc;
+}
+
+export const SMOKE_COLOR = 0xe4e9f0;
+export const DUST_COLOR = P.soilLight;
+export const WATER_KEY_COUNT = 4;

@@ -2,6 +2,7 @@ import { Application, Container, CullerPlugin, Sprite, extensions } from 'pixi.j
 import type { GameState, Position } from '@/types';
 import { tileToWorld, worldBounds, worldToTile } from './iso';
 import { dragPositions, dragShapeFor } from './dragPath';
+import { CityEffects, type BuildingVisual, type CityActivity } from './effects';
 import { buildingSpriteKey, type MarkerKind } from './pixel/sprites';
 import {
   TERRAIN_VARIANTS,
@@ -67,6 +68,12 @@ export class GameRenderer {
 
   private buildingSprites = new Map<string, Sprite>();
   private markerLayer = new Container();
+  private lightLayer = new Container();
+  private particleLayer = new Container();
+  private effects!: CityEffects;
+  private waterSprites: Sprite[] = [];
+  /** Po prvej synchronizácii nového sveta sa nové budovy animujú („vyskočia“). */
+  private animateNewBuildings = false;
   private markerSprites = new Map<string, Sprite>();
   private renderedWorld: GameState['world'] | null = null;
   private state: Readonly<GameState> | null = null;
@@ -128,9 +135,28 @@ export class GameRenderer {
       this.roadLayer,
       this.groundOverlay,
       this.buildingLayer,
+      this.lightLayer,
+      this.particleLayer,
       this.markerLayer,
     );
     this.app.stage.addChild(this.camera);
+
+    this.effects = new CityEffects(
+      {
+        tinted: [this.terrainLayer, this.roadLayer, this.buildingLayer],
+        lights: this.lightLayer,
+        particles: this.particleLayer,
+        actors: this.buildingLayer,
+      },
+      {
+        sprites: () => this.waterSprites,
+        frames: () => this.atlas.terrain.water.map((t) => t.texture),
+      },
+    );
+    const onTick = () =>
+      this.effects.update(this.app.ticker.deltaMS, this.state?.simulation.speed ?? 0);
+    this.app.ticker.add(onTick);
+    this.cleanup.push(() => this.app.ticker.remove(onTick));
 
     applyTexture(this.hoverOutline, this.atlas.outline);
     applyTexture(this.selectionOutline, this.atlas.outline);
@@ -152,6 +178,7 @@ export class GameRenderer {
     if (this.destroyed) return;
     this.destroyed = true;
     this.cleanup.forEach((fn) => fn());
+    this.effects.destroy();
     this.atlas.destroy();
     this.app.destroy(true, { children: true });
   }
@@ -160,15 +187,43 @@ export class GameRenderer {
    * Synchronizuje sprity s herným stavom. Volá sa po každej zmene stavu.
    * `markers` určuje, nad ktorými budovami sa zobrazí značka a akého druhu.
    */
-  sync(state: Readonly<GameState>, markers: ReadonlyMap<string, MarkerKind> = new Map()): void {
+  sync(
+    state: Readonly<GameState>,
+    markers: ReadonlyMap<string, MarkerKind> = new Map(),
+    activity?: CityActivity,
+  ): void {
     const worldChanged = this.renderedWorld !== state.world;
     this.state = state;
-    if (worldChanged) this.buildTerrain(state.world);
+    if (worldChanged) {
+      this.buildTerrain(state.world);
+      this.animateNewBuildings = false;
+    }
     this.syncBuildings(state);
+    this.animateNewBuildings = true;
     this.syncMarkers(state, markers);
+    if (activity) this.effects.sync(state, this.buildingVisuals(state), activity);
     // Nová alebo načítaná hra: kamera späť na mesto.
     if (worldChanged) this.centerOnStart();
     this.refreshOverlay();
+  }
+
+  effectsStats() {
+    return this.effects.stats();
+  }
+
+  /** Animácie (dym, chodci, voda) a cyklus dňa a noci. */
+  setEffectsOptions(options: { animations: boolean; dayNight: boolean }): void {
+    this.effects.setOptions(options);
+  }
+
+  private buildingVisuals(state: Readonly<GameState>): Map<string, BuildingVisual> {
+    const visuals = new Map<string, BuildingVisual>();
+    for (const building of state.city.buildings) {
+      const sprite = this.buildingSprites.get(building.id);
+      if (sprite)
+        visuals.set(building.id, { sprite, key: sprite.label, position: building.position });
+    }
+    return visuals;
   }
 
   setBuildMode(buildingId: string | null): void {
@@ -199,6 +254,7 @@ export class GameRenderer {
    */
   private buildTerrain(world: GameState['world']): void {
     this.terrainLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
+    this.waterSprites = [];
     const chunksX = Math.ceil(world.width / TERRAIN_CHUNK);
     const chunksY = Math.ceil(world.height / TERRAIN_CHUNK);
     const chunks: { order: number; container: Container }[] = [];
@@ -224,6 +280,7 @@ export class GameRenderer {
             );
             placeOnTile(sprite, { x, y });
             container.addChild(sprite);
+            if (tile.terrain === 'water') this.waterSprites.push(sprite);
           }
         }
         chunks.push({ order: cx + cy, container });
@@ -262,6 +319,10 @@ export class GameRenderer {
         applyTexture(sprite, this.atlas.building(key));
         (building.definitionId === 'road' ? this.roadLayer : this.buildingLayer).addChild(sprite);
         this.buildingSprites.set(building.id, sprite);
+        placeOnTile(sprite, building.position);
+        if (this.animateNewBuildings && building.definitionId !== 'road') {
+          this.effects.pop(sprite, building.position);
+        }
       }
       placeOnTile(sprite, building.position);
       sprite.zIndex = building.position.x + building.position.y;

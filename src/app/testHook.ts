@@ -8,6 +8,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
     getState: () => controller.state,
     canPlace: (buildingId, position) => controller.canPlace(buildingId, position).success,
     tileToClient: (position) => renderer.tileToClient(position),
+    effectsStats: () => renderer.effectsStats(),
     advanceDays: (days) => {
       for (let i = 0; i < days; i++) controller.tick();
     },

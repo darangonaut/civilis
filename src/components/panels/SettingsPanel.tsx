@@ -4,6 +4,7 @@ import { startNewGame } from '@/app/saving';
 import { useGameState } from '@/app/useGameState';
 import { MARKER_LEGEND } from '@/app/markers';
 import { MarkerIcon } from '../MarkerIcon';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { PanelFrame } from './PanelFrame';
 
 const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
@@ -19,6 +20,7 @@ const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
 export function SettingsPanel() {
   const seed = useGameState((s) => s.simulation.seed);
   const [seedInput, setSeedInput] = useState('');
+  const display = useSettingsStore();
 
   const parsedSeed = seedInput.trim() === '' ? undefined : Number(seedInput);
   const seedValid = parsedSeed === undefined || Number.isInteger(parsedSeed);
@@ -53,6 +55,26 @@ export function SettingsPanel() {
       <p className="muted hint">
         {t('settings.currentSeed')}: {seed}
       </p>
+
+      <h3>{t('settings.display')}</h3>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={display.animations}
+          onChange={(e) => display.set({ animations: e.target.checked })}
+          data-testid="toggle-animations"
+        />
+        {t('settings.animations')}
+      </label>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={display.dayNight}
+          onChange={(e) => display.set({ dayNight: e.target.checked })}
+          data-testid="toggle-daynight"
+        />
+        {t('settings.dayNight')}
+      </label>
 
       <h3>{t('settings.markers')}</h3>
       <ul className="marker-legend" data-testid="marker-legend">

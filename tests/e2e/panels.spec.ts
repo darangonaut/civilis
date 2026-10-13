@@ -124,3 +124,28 @@ test('éry: aktuálna éra v lište, budúce technológie a budovy sú zamknuté
     page.getByTestId('milestones-panel').locator('[data-era-id="middle_ages"]'),
   ).toContainText('Zlatý vek');
 });
+
+test('nastavenia zobrazenia: animácie a deň/noc sa dajú vypnúť a pamätajú si to', async ({
+  page,
+}) => {
+  await openGame(page);
+  // Dom na začiatku má okná, takže má aj svetlá na noc.
+  expect((await page.evaluate(() => window.__civilis!.effectsStats())).lights).toBeGreaterThan(0);
+
+  await page.getByTestId('open-settings').click();
+  const animations = page.getByTestId('toggle-animations');
+  const dayNight = page.getByTestId('toggle-daynight');
+  await expect(animations).toBeChecked();
+  await expect(dayNight).toBeChecked();
+  await dayNight.uncheck();
+  await animations.uncheck();
+
+  await page.reload();
+  await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
+  await page.getByTestId('open-settings').click();
+  await expect(page.getByTestId('toggle-animations')).not.toBeChecked();
+  await expect(page.getByTestId('toggle-daynight')).not.toBeChecked();
+  const stats = await page.evaluate(() => window.__civilis!.effectsStats());
+  expect(stats.walkers).toBe(0);
+  expect(stats.night).toBe(0);
+});

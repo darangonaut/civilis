@@ -130,3 +130,16 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   nemíňa vstupy ani nástroje (inak by napr. huty minuli všetko železo na zahadzované nástroje).
 - Mapa 96 × 96 a strop rastu populácie ako podiel populácie — neskoré éry s tisíckami obyvateľov
   sa tak dajú prejsť v rozumnom čase.
+
+## Pohyb a život v meste (2026-10-13, na želanie)
+
+Čisto vizuálne efekty v rendereri (`renderer/effects.ts`), simuláciu nemenia:
+
+- **Deň a noc:** vizuálny deň trvá 48 s pri 1× (zrýchľuje sa s rýchlosťou hry, v pauze stojí).
+  V noci sa scéna stmaví a rozsvietia sa okná — v domoch podľa obsadenosti (obyvatelia sa
+  sťahujú od najstaršieho pripojeného domu, `houseOccupancy`), v ostatných budovách, keď pracujú.
+- **Dym z komínov** iba z pracujúcich budov a obývaných domov (`CHIMNEYS` v `sprites.ts`).
+- **Chodci** na cestách napojených na mesto (počet ≈ populácia / 12, max. 180); od modernej éry
+  aj autá.
+- **Vlniaca sa voda** a **„vyskočenie“** novej budovy s obláčikom prachu.
+- Nastavenia → Zobrazenie: prepínače „Animácie“ a „Deň a noc“ (uložené v prehliadači).

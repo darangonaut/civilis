@@ -1,6 +1,8 @@
 import {
   analyzeCity,
   createGameEngine,
+  currentEraIndex,
+  houseOccupancy,
   upgradableBuildings,
   validatePlacement,
   type CityAnalysis,
@@ -9,7 +11,11 @@ import {
   type GameEvent,
 } from '@/engine';
 import type { CommandResult, GameCommand, GameState, Position, SimulationSpeed } from '@/types';
+import type { CityActivity } from '@/renderer/effects';
 import { GameLoop } from './gameLoop';
+
+/** Od modernej éry jazdia po cestách aj autá. */
+const MODERN_ERA_INDEX = 5;
 
 type Listener = () => void;
 type EventListener = (events: GameEvent[]) => void;
@@ -27,6 +33,7 @@ export class GameController {
   private readonly loop: GameLoop;
   private cachedAnalysis: CityAnalysis | null = null;
   private cachedUpgradable: Set<string> | null = null;
+  private cachedActivity: CityActivity | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
   private resumeSpeed: Exclude<SimulationSpeed, 0> = 1;
 
@@ -55,6 +62,25 @@ export class GameController {
   get upgradable(): Set<string> {
     this.cachedUpgradable ??= upgradableBuildings(this.engine.getState(), this.data, this.analysis);
     return this.cachedUpgradable;
+  }
+
+  /** Čo sa v meste deje (pre vizuálne efekty): obsadenosť domov, pracujúce budovy, cesty. */
+  get activity(): CityActivity {
+    if (!this.cachedActivity) {
+      const state = this.engine.getState();
+      const analysis = this.analysis;
+      const working = new Set<string>();
+      for (const status of analysis.statuses.values()) {
+        if (status.connected && status.efficiency > 0) working.add(status.instanceId);
+      }
+      this.cachedActivity = {
+        occupancy: houseOccupancy(state, this.data, analysis),
+        working,
+        roadTiles: analysis.roadNetwork,
+        cars: currentEraIndex(state, this.data) >= MODERN_ERA_INDEX,
+      };
+    }
+    return this.cachedActivity;
   }
 
   execute(command: GameCommand): CommandResult {
@@ -125,6 +151,7 @@ export class GameController {
   private notify(): void {
     this.cachedAnalysis = null;
     this.cachedUpgradable = null;
+    this.cachedActivity = null;
     this.listeners.forEach((listener) => listener());
   }
 }

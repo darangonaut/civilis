@@ -31,3 +31,4 @@ export {
   type UpgradeRequirements,
 } from './core/upgrade';
 export { buildingEraIndex, currentEra, currentEraIndex, isEraUnlocked } from './milestones/eras';
+export { houseOccupancy } from './population/occupancy';

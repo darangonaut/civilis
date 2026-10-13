@@ -957,3 +957,12 @@ button.primary {
   text-decoration: underline;
   font-size: 12px;
 }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
