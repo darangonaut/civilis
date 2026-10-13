@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { Position } from '../../src/types';
 import '../../src/types/testHook';
+import { pickBuilding } from './helpers';
 
 async function openGame(page: Page) {
   await page.goto('/?seed=7&e2e&paused');
@@ -33,7 +34,7 @@ test('postaví dom kliknutím na mapu a odpočíta drevo', async ({ page }) => {
   const before = await buildingCount(page);
   await expect(page.getByTestId('resource-wood')).toContainText('80');
 
-  await page.getByTestId('building-catalog').locator('[data-building-id="house"]').click();
+  await pickBuilding(page, 'house');
   // Políčko hneď pod počiatočnou cestou, aby bol dom pripojený.
   const { tile, client } = await page.evaluate(() => {
     const hook = window.__civilis!;
@@ -63,7 +64,7 @@ test('neplatné umiestnenie zobrazí dôvod a nezmení stav', async ({ page }) =
     return hook.tileToClient(position);
   });
 
-  await page.getByTestId('building-catalog').locator('[data-building-id="road"]').click();
+  await pickBuilding(page, 'road');
   await page.mouse.click(warehouse.x, warehouse.y);
 
   await expect(page.getByTestId('notice')).toContainText('Políčko je obsadené');
@@ -83,7 +84,7 @@ test('výber budovy na mape, zbúranie a Escape', async ({ page }) => {
   await expect(detail.getByRole('heading', { name: 'Dom', exact: true })).toBeVisible();
 
   await page.keyboard.press('Escape');
-  await expect(detail).toContainText('Vyber budovu');
+  await expect(detail).toBeHidden();
 
   await page.mouse.click(house.client.x, house.client.y);
   await detail.getByTestId('demolish').click();
@@ -99,7 +100,7 @@ test('výber budovy na mape, zbúranie a Escape', async ({ page }) => {
 test('pravé tlačidlo posúva mapu aj v režime stavby', async ({ page }) => {
   await openGame(page);
   const before = await buildingCount(page);
-  await page.getByTestId('building-catalog').locator('[data-building-id="road"]').click();
+  await pickBuilding(page, 'road');
   const { tile, client } = await findPlaceableTile(page, 'road');
 
   await page.mouse.move(client.x, client.y);
@@ -131,7 +132,7 @@ test('ťahaním sa postaví celá cesta naraz', async ({ page }) => {
     throw new Error('Žiadny voľný rad');
   });
   const before = await buildingCount(page);
-  await page.getByTestId('building-catalog').locator('[data-building-id="road"]').click();
+  await pickBuilding(page, 'road');
   await page.mouse.move(row.from.x, row.from.y);
   await page.mouse.down();
   await page.mouse.move(row.to.x, row.to.y, { steps: 8 });
@@ -166,7 +167,7 @@ test('ťahaním sa vyplní obdĺžnik budov a pri nedostatku surovín sa zobraz�
     throw new Error('Žiadna voľná plocha 3 × 3');
   });
   const before = await buildingCount(page);
-  await page.getByTestId('building-catalog').locator('[data-building-id="house"]').click();
+  await pickBuilding(page, 'house');
   await page.mouse.move(area.from.x, area.from.y);
   await page.mouse.down();
   await page.mouse.move(area.to.x, area.to.y, { steps: 8 });

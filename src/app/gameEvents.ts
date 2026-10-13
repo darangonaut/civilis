@@ -24,17 +24,29 @@ export function installGameEventNotifications(): () => void {
 
   return controller.onEvents((events: GameEvent[]) => {
     const ui = useUiStore.getState();
+    const day = controller.state.simulation.day;
+    const log = (label: string, text: string, kind: 'info' | 'success' | 'warning') =>
+      ui.addLog({ day, label, text, kind });
     const starvingToday = events.some((e) => e.type === 'food_shortage');
-    if (starvingToday && !starving) ui.showNotice(t('events.foodShortage'), 'warning');
+    if (starvingToday && !starving) {
+      ui.showNotice(t('events.foodShortage'), 'warning');
+      log(t('events.hunger'), t('events.hungerText'), 'warning');
+    }
     starving = starvingToday;
 
     for (const event of events) {
       if (event.type === 'research_completed') {
         const name = gameData.technologiesById.get(event.technologyId)?.name ?? event.technologyId;
         ui.showNotice(`${t('events.researchCompleted')}: ${name}`, 'success');
+        log(t('events.researchCompleted'), name, 'success');
       } else if (event.type === 'era_reached') {
         controller.setSpeed(0);
         ui.setNewEra(event.eraId);
+        log(
+          t('events.newEra'),
+          gameData.eras.find((e) => e.id === event.eraId)?.name ?? '',
+          'info',
+        );
       } else if (event.type === 'milestone_completed') {
         const title =
           gameData.milestones.find((m) => m.id === event.milestoneId)?.title ?? event.milestoneId;
@@ -43,6 +55,7 @@ export function installGameEventNotifications(): () => void {
           `${t('events.milestoneCompleted')}: ${title}${reward ? ` (${reward})` : ''}`,
           'success',
         );
+        log(t('events.milestoneCompleted'), title, 'success');
         if (event.milestoneId === FINAL_MILESTONE_ID) {
           controller.setSpeed(0);
           ui.setVictoryOpen(true);

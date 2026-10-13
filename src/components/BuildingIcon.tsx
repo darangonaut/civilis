@@ -8,20 +8,26 @@ interface Icon {
 
 const cache = new Map<string, Icon>();
 
-/** Pixelová ikona budovy (rovnaký sprite ako na mape), vytvorí sa raz. */
-function icon(definitionId: string): Icon {
-  let entry = cache.get(definitionId);
+/** Pixelová ikona budovy podľa kľúča sprite-u (napr. `house@3`), vytvorí sa raz. */
+function icon(spriteKey: string): Icon {
+  let entry = cache.get(spriteKey);
   if (!entry) {
-    const { canvas } = drawBuilding(definitionId);
+    const { canvas } = drawBuilding(spriteKey);
     entry = { url: canvas.toCanvas().toDataURL(), width: canvas.width, height: canvas.height };
-    cache.set(definitionId, entry);
+    cache.set(spriteKey, entry);
   }
   return entry;
 }
 
 /** Ikona v presnom 2× zväčšení (rovnomerné pixely), zarovnaná na spodok rámčeka. */
-export function BuildingIcon({ definitionId }: { definitionId: string }) {
-  const { url, width, height } = icon(definitionId);
+export function BuildingIcon({
+  definitionId,
+  spriteKey,
+}: {
+  definitionId?: string;
+  spriteKey?: string;
+}) {
+  const { url, width, height } = icon(spriteKey ?? definitionId ?? 'house');
   return (
     <span className="building-icon" aria-hidden>
       <img src={url} alt="" width={width * 2} height={height * 2} draggable={false} />

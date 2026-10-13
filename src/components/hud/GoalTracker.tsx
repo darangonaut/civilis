@@ -1,0 +1,121 @@
+import { formatAmount } from '@/app/format';
+import { t } from '@/app/i18n';
+import { useGameState } from '@/app/useGameState';
+import { gameData } from '@/data';
+import { conditionProgress, currentEraIndex, currentMilestone } from '@/engine';
+import { useUiStore } from '@/stores/uiStore';
+import { conditionLabel } from '@/app/conditions';
+
+/** Vľavo hore: aktuálny míľnik s priebehom podmienok a krátky záznam udalostí. */
+export function GoalTracker() {
+  const milestone = useGameState((s) => currentMilestone(s, gameData));
+  const completed = useGameState((s) => s.milestones.completedIds);
+  const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
+  const progress = useGameState((s) =>
+    milestone
+      ? milestone.conditions.map((condition, index) =>
+          conditionProgress(s, gameData, milestone.id, index, condition),
+        )
+      : [],
+  );
+  const togglePanel = useUiStore((s) => s.togglePanel);
+  const era = gameData.eras[eraIndex]!;
+  const eraMilestones = gameData.milestones.filter((m) => m.era === era.id);
+
+  return (
+    <div className="hud-left">
+      <section className="hud-panel goal-tracker" data-testid="goal-tracker">
+        <div className="goal-head">
+          <span className="hud-caption">{t('milestones.current')}</span>
+          <span
+            className="era-pips"
+            aria-label={t('hud.eraMilestones', {
+              done: eraMilestones.filter((m) => completed.includes(m.id)).length,
+              total: eraMilestones.length,
+            })}
+          >
+            {eraMilestones.map((m) => (
+              <span
+                key={m.id}
+                className={
+                  completed.includes(m.id)
+                    ? 'pip done'
+                    : m.id === milestone?.id
+                      ? 'pip current'
+                      : 'pip'
+                }
+              />
+            ))}
+          </span>
+        </div>
+        {milestone ? (
+          <>
+            <span className="goal-title">{milestone.title}</span>
+            <ul className="goal-conditions">
+              {milestone.conditions.map((condition, index) => {
+                const p = progress[index]!;
+                const multiDay = p.requiredDays > 1;
+                const done = p.days >= p.requiredDays;
+                const balance =
+                  condition.type === 'resource_balance' || condition.type === 'money_balance';
+                const ratio = multiDay
+                  ? p.days / p.requiredDays
+                  : balance
+                    ? p.metToday
+                      ? 1
+                      : 0
+                    : p.target > 0
+                      ? p.current / p.target
+                      : 1;
+                const value = multiDay
+                  ? `${p.days} / ${p.requiredDays} ${t('milestones.days')}`
+                  : balance
+                    ? `${formatAmount(p.current)} (min. ${p.target})`
+                    : `${formatAmount(Math.floor(p.current))} / ${p.target}`;
+                return (
+                  <li key={index} className={done ? 'met' : ''} data-testid="goal-condition">
+                    <div className="goal-row">
+                      <span>
+                        {done ? '✓' : '○'} {conditionLabel(condition)}
+                      </span>
+                      <span className="goal-value">{value}</span>
+                    </div>
+                    <div className="bar">
+                      <div style={{ width: `${Math.min(1, Math.max(0, ratio)) * 100}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : (
+          <span className="goal-title">{t('milestones.allDone')}</span>
+        )}
+        <button className="link-button" onClick={() => togglePanel('milestones')}>
+          {t('hud.allMilestones')} ›
+        </button>
+      </section>
+      <EventLog />
+    </div>
+  );
+}
+
+function EventLog() {
+  const log = useUiStore((s) => s.log);
+  if (log.length === 0) return null;
+  return (
+    <section className="hud-panel event-log" data-testid="event-log">
+      <span className="hud-caption">{t('hud.events')}</span>
+      <ul>
+        {log.slice(0, 4).map((entry) => (
+          <li key={entry.id}>
+            <span className="log-day">d {entry.day}</span>
+            <span>
+              <span className={`log-label ${entry.kind}`}>{entry.label}:</span> {entry.text}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}

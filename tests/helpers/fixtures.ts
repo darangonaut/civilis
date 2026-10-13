@@ -58,7 +58,12 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
       },
       buildings: [],
     },
-    research: { completedTechnologyIds: [], activeTechnologyId: null, investedKnowledge: 0 },
+    research: {
+      completedTechnologyIds: [],
+      activeTechnologyId: null,
+      investedKnowledge: 0,
+      queue: [],
+    },
     milestones: { completedIds: [], progressDays: {} },
   };
 

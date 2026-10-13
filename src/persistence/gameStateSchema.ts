@@ -71,6 +71,7 @@ export const gameStateSchema = z
       completedTechnologyIds: z.array(z.string()),
       activeTechnologyId: z.string().nullable(),
       investedKnowledge: nonNegative,
+      queue: z.array(z.string()),
     }),
     milestones: z.strictObject({
       completedIds: z.array(z.string()),

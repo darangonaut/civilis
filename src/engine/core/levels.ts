@@ -84,3 +84,26 @@ export function demolishRefund(
   }
   return refund;
 }
+
+/** Cena postavenia budovy rovno na danej úrovni: stavba + všetky vylepšenia po ňu. */
+export function buildCostAtLevel(
+  definition: BuildingDefinition,
+  level: number,
+): Partial<Resources> {
+  const total: Partial<Resources> = { ...definition.constructionCost };
+  for (const next of (definition.levels ?? []).slice(0, Math.max(0, level - 1))) {
+    for (const id of RESOURCE_IDS) {
+      if (next.upgradeCost[id]) total[id] = (total[id] ?? 0) + next.upgradeCost[id]!;
+    }
+  }
+  return total;
+}
+
+/** Technológie potrebné na úroveň (vrátane nižších úrovní). */
+export function technologiesForLevel(definition: BuildingDefinition, level: number): string[] {
+  const ids = definition.requiredTechnologyId ? [definition.requiredTechnologyId] : [];
+  for (const next of (definition.levels ?? []).slice(0, Math.max(0, level - 1))) {
+    if (next.requiredTechnologyId) ids.push(next.requiredTechnologyId);
+  }
+  return ids;
+}

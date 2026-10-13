@@ -72,11 +72,19 @@ export interface SaveSlot {
 }
 
 export type GameCommand =
-  | { type: 'PLACE_BUILDING'; buildingId: string; position: Position }
+  | {
+      type: 'PLACE_BUILDING';
+      buildingId: string;
+      position: Position;
+      /** Rozšírenie: postaviť rovno na vyššej úrovni (predvolene 1). */
+      level?: number;
+    }
   | { type: 'DEMOLISH_BUILDING'; instanceId: string }
   | { type: 'SET_BUILDING_PRIORITY'; instanceId: string; priority: number }
   /** Rozšírenie oproti špecifikácii: pozastavenie / spustenie budovy (pole `enabled`). */
   | { type: 'SET_BUILDING_ENABLED'; instanceId: string; enabled: boolean }
+  /** Rozšírenie oproti špecifikácii: poradie výskumu. */
+  | { type: 'SET_RESEARCH_QUEUE'; technologyIds: string[] }
   /** Rozšírenie oproti špecifikácii: vylepšenie budovy na ďalšiu úroveň. */
   | { type: 'UPGRADE_BUILDING'; instanceId: string }
   | { type: 'START_RESEARCH'; technologyId: string }

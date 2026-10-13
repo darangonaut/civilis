@@ -83,7 +83,12 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
       },
       buildings,
     },
-    research: { completedTechnologyIds: [], activeTechnologyId: null, investedKnowledge: 0 },
+    research: {
+      completedTechnologyIds: [],
+      activeTechnologyId: null,
+      investedKnowledge: 0,
+      queue: [],
+    },
     milestones: { completedIds: [], progressDays: {} },
   };
   const analysis = refreshDerivedState(state, data);

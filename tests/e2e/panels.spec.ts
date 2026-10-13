@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
+import { dockTile, pickBuilding } from './helpers';
 
 async function openGame(page: Page) {
   await page.goto('/?seed=7&e2e&paused');
@@ -22,7 +23,7 @@ test('výskum: spustenie technológie a stav zamknutých technológií', async (
     'active',
   );
   await expect(panel).toContainText('Skúma sa: Spracovanie dreva');
-  await expect(page.getByTestId('bottom-bar')).toContainText('Spracovanie dreva');
+  await expect(page.getByTestId('open-research')).toHaveAttribute('title', /Spracovanie dreva/);
   const research = await page.evaluate(() => window.__civilis!.getState().research);
   expect(research.activeTechnologyId).toBe('woodworking');
 
@@ -75,15 +76,12 @@ test('Escape a opätovný klik panel zatvoria', async ({ page }) => {
 
 test('katalóg ukazuje cenu a nedostupnosť pri nedostatku surovín', async ({ page }) => {
   await openGame(page);
-  const catalog = page.getByTestId('building-catalog');
-  await expect(catalog.locator('[data-building-id="school"]')).toContainText('30');
-  await expect(catalog.locator('[data-building-id="school"]')).toHaveAttribute(
-    'data-available',
-    'true',
-  );
+  const school = await dockTile(page, 'school');
+  await expect(school).toContainText('30');
+  await expect(school).toHaveAttribute('data-available', 'true');
 
   // Škola stojí 20 kameňa z 30, druhá sa už nedá zaplatiť.
-  await catalog.locator('[data-building-id="school"]').click();
+  await pickBuilding(page, 'school');
   const spot = await page.evaluate(() => {
     const hook = window.__civilis!;
     for (const road of hook.getState().city.buildings.filter((b) => b.definitionId === 'road')) {
@@ -93,10 +91,7 @@ test('katalóg ukazuje cenu a nedostupnosť pri nedostatku surovín', async ({ p
     throw new Error('Žiadne miesto pre školu');
   });
   await page.mouse.click(spot.x, spot.y);
-  await expect(catalog.locator('[data-building-id="school"]')).toHaveAttribute(
-    'data-available',
-    'false',
-  );
+  await expect(school).toHaveAttribute('data-available', 'false');
 });
 
 test('nastavenia obsahujú legendu značiek', async ({ page }) => {
@@ -111,14 +106,15 @@ test('nastavenia obsahujú legendu značiek', async ({ page }) => {
 test('éry: aktuálna éra v lište, budúce technológie a budovy sú zamknuté', async ({ page }) => {
   await openGame(page);
   await expect(page.getByTestId('era-name')).toHaveText('Osada');
-  // Budovy Staroveku sa v katalógu Osady nezobrazujú.
-  await expect(
-    page.getByTestId('building-catalog').locator('[data-building-id="brickworks"]'),
-  ).toHaveCount(0);
+  // Budovy Staroveku sa v doku Osady nezobrazujú v žiadnej kategórii.
+  await expect(dockTile(page, 'brickworks')).rejects.toThrow();
   await page.getByTestId('open-research').click();
-  const antiquity = page.getByTestId('research-panel').locator('[data-era-id="antiquity"]');
-  await expect(antiquity).toContainText('Odomkne sa');
-  await expect(antiquity.locator('[data-tech-id]')).toHaveCount(0);
+  const panel = page.getByTestId('research-panel');
+  const antiquity = panel.locator('[data-era-id="antiquity"]');
+  await expect(antiquity).toBeDisabled();
+  await expect(antiquity).toHaveAttribute('title', /Odomkne sa/);
+  await expect(panel.locator('[data-tech-id="masonry"]')).toBeVisible();
+  await expect(panel.locator('[data-tech-id="pottery"]')).toHaveCount(0);
   await page.getByTestId('open-milestones').click();
   await expect(
     page.getByTestId('milestones-panel').locator('[data-era-id="middle_ages"]'),

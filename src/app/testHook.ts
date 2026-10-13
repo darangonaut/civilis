@@ -12,6 +12,16 @@ export function installTestHook(renderer: GameRenderer): () => void {
     advanceDays: (days) => {
       for (let i = 0; i < days; i++) controller.tick();
     },
+    grantForTest: ({ technologies = [], resources = {} }) => {
+      const state = controller.serialize();
+      state.research.completedTechnologyIds.push(
+        ...technologies.filter((id) => !state.research.completedTechnologyIds.includes(id)),
+      );
+      for (const [id, amount] of Object.entries(resources)) {
+        state.city.economy.resources[id as keyof typeof resources] += amount;
+      }
+      controller.load(state);
+    },
   };
   window.__civilis = hook;
   return () => {

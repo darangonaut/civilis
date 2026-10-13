@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
+import { pickBuilding } from './helpers';
 
 async function openGame(page: Page, query = '?seed=7&e2e&paused') {
   await page.goto(`/${query}`);
@@ -41,8 +42,7 @@ test('nepripojená budova ukáže „Chýba cesta“, po dostavaní cesty funguj
     throw new Error('Nenašlo sa vhodné miesto');
   });
 
-  const catalog = page.getByTestId('building-catalog');
-  await catalog.locator('[data-building-id="house"]').click();
+  await pickBuilding(page, 'house');
   await page.mouse.click(spot.house.x, spot.house.y);
   await page.keyboard.press('Escape');
   await page.mouse.click(spot.house.x, spot.house.y);
@@ -53,7 +53,7 @@ test('nepripojená budova ukáže „Chýba cesta“, po dostavaní cesty funguj
   await expect(page.getByTestId('map-info')).toContainText('Chýba cesta');
   await expect(page.getByTestId('top-bar')).toContainText('10 / 10');
 
-  await catalog.locator('[data-building-id="road"]').click();
+  await pickBuilding(page, 'road');
   await page.mouse.click(spot.gap.x, spot.gap.y);
   await page.keyboard.press('Escape');
   await page.mouse.click(spot.house.x, spot.house.y);
@@ -66,7 +66,7 @@ test('po dni sa v hornej lište zobrazí denná bilancia', async ({ page }) => {
   await page.evaluate(() => window.__civilis!.advanceDays(1));
   // 10 obyvateľov zje 2,5 potravín, sklad stojí 1 peniaz denne.
   await expect(page.getByTestId('resource-food')).toContainText('97');
-  await expect(page.getByTestId('resource-food')).toContainText('−2,5');
+  await expect(page.getByTestId('resource-food')).toContainText('▼2,5');
   await expect(page.getByTestId('money')).toContainText('499');
   await expect(page.getByTestId('day')).toContainText('1');
 });

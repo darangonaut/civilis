@@ -3,6 +3,7 @@ import {
   createGameEngine,
   currentEraIndex,
   houseOccupancy,
+  serviceCoverageGrid,
   upgradableBuildings,
   validatePlacement,
   type CityAnalysis,
@@ -12,6 +13,7 @@ import {
 } from '@/engine';
 import type { CommandResult, GameCommand, GameState, Position, SimulationSpeed } from '@/types';
 import type { CityActivity } from '@/renderer/effects';
+import { SERVICE_TYPES, type ServiceType } from '@/types';
 import { GameLoop } from './gameLoop';
 
 /** Od modernej éry jazdia po cestách aj autá. */
@@ -34,6 +36,7 @@ export class GameController {
   private cachedAnalysis: CityAnalysis | null = null;
   private cachedUpgradable: Set<string> | null = null;
   private cachedActivity: CityActivity | null = null;
+  private cachedGrids: Record<ServiceType, Uint8Array> | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
   private resumeSpeed: Exclude<SimulationSpeed, 0> = 1;
 
@@ -89,8 +92,24 @@ export class GameController {
     return result;
   }
 
-  canPlace(buildingId: string, position: Position): CommandResult {
-    return validatePlacement(this.engine.getState(), this.data, buildingId, position);
+  /** Overenie stavby (aj rovno na vyššej úrovni) — mriežky služieb sa cachujú na revíziu. */
+  canPlace(buildingId: string, position: Position, level = 1): CommandResult {
+    if (level > 1) {
+      this.cachedGrids ??= Object.fromEntries(
+        SERVICE_TYPES.map((type) => [
+          type,
+          serviceCoverageGrid(this.engine.getState(), this.data, this.analysis, type),
+        ]),
+      ) as Record<ServiceType, Uint8Array>;
+    }
+    return validatePlacement(
+      this.engine.getState(),
+      this.data,
+      buildingId,
+      position,
+      level,
+      this.cachedGrids ?? undefined,
+    );
   }
 
   setSpeed(speed: SimulationSpeed): void {
@@ -152,6 +171,7 @@ export class GameController {
     this.cachedAnalysis = null;
     this.cachedUpgradable = null;
     this.cachedActivity = null;
+    this.cachedGrids = null;
     this.listeners.forEach((listener) => listener());
   }
 }

@@ -29,6 +29,12 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v4 → v5: poradie výskumu. */
+  4: (raw) => {
+    const research = raw.research as Record<string, unknown> | undefined;
+    if (!research) return raw;
+    return { ...raw, research: { queue: [], ...research } };
+  },
   /** v3 → v4: nové suroviny látky, uhlie, elektrina a elektronika (éry 4–8). */
   3: (raw) => {
     const city = raw.city as RawCity | undefined;

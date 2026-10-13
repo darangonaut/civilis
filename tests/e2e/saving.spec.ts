@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import '../../src/types/testHook';
+import { pickBuilding } from './helpers';
 
 async function openGame(page: Page, query = '?seed=7&e2e&paused') {
   page.on('dialog', (dialog) => void dialog.accept());
@@ -10,7 +11,7 @@ async function openGame(page: Page, query = '?seed=7&e2e&paused') {
 
 /** Postaví dom na prvé voľné políčko pod cestou. */
 async function buildHouse(page: Page) {
-  await page.getByTestId('building-catalog').locator('[data-building-id="house"]').click();
+  await pickBuilding(page, 'house');
   const client = await page.evaluate(() => {
     const hook = window.__civilis!;
     const roads = hook.getState().city.buildings.filter((b) => b.definitionId === 'road');

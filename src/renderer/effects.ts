@@ -1,6 +1,6 @@
 import { Container, Sprite, Texture } from 'pixi.js';
 import type { GameState, Position } from '@/types';
-import { DAY_CYCLE_MS, nightFactor, nightTint } from './dayNight';
+import { DAY_CYCLE_MS, dayPhase, nightFactor, nightTint, type DayPhase } from './dayNight';
 import { tileToWorld } from './iso';
 import {
   CHIMNEYS,
@@ -116,13 +116,25 @@ export class CityEffects {
       actors: Container;
     },
     private readonly water: { sprites: () => Sprite[]; frames: (frame: number) => Texture[] },
+    private readonly onPhase: (phase: DayPhase | null) => void = () => {},
   ) {}
+
+  private reportedPhase: DayPhase | null = null;
+
+  private reportPhase(): void {
+    const phase = this.dayNight ? dayPhase(this.phase) : null;
+    if (phase !== this.reportedPhase) {
+      this.reportedPhase = phase;
+      this.onPhase(phase);
+    }
+  }
 
   setOptions(options: { animations: boolean; dayNight: boolean }): void {
     this.animations = options.animations;
     this.dayNight = options.dayNight;
     if (!this.animations) this.clearMotion();
     if (!this.dayNight) this.applyNight(0);
+    this.reportPhase();
   }
 
   /** Aktualizácia po zmene herného stavu. */
@@ -167,6 +179,7 @@ export class CityEffects {
 
     if (this.dayNight && timeScale > 0) {
       this.phase = (this.phase + (dt * speed) / DAY_CYCLE_MS) % 1;
+      this.reportPhase();
       const night = nightFactor(this.phase);
       if (Math.abs(night - this.night) > 0.005 || (night === 0) !== (this.night === 0))
         this.applyNight(night);

@@ -1,6 +1,7 @@
 import { Application, Container, CullerPlugin, Sprite, extensions } from 'pixi.js';
 import type { GameState, Position } from '@/types';
 import { tileToWorld, worldBounds, worldToTile } from './iso';
+import type { DayPhase } from './dayNight';
 import { dragPositions, dragShapeFor } from './dragPath';
 import { CityEffects, type BuildingVisual, type CityActivity } from './effects';
 import { buildingSpriteKey, type MarkerKind } from './pixel/sprites';
@@ -27,6 +28,13 @@ const TERRAIN_CHUNK = 16;
 /** Výška výstražnej značky nad stredom políčka (logické pixely). */
 const MARKER_OFFSET = 14;
 
+export interface CameraView {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
 export interface RendererCallbacks {
   onTileHover(position: Position | null): void;
   onTileClick(position: Position): void;
@@ -34,6 +42,10 @@ export interface RendererCallbacks {
   onPlaceMany(buildingId: string, positions: Position[]): void;
   /** Či sa dá budova na políčko postaviť — pre farbu náhľadu. */
   canPlace(buildingId: string, position: Position): boolean;
+  /** Zmena výhľadu kamery (svetové súradnice) — minimapa. */
+  onCameraChange?(view: CameraView): void;
+  /** Zmena fázy dňa (null = deň a noc vypnuté). */
+  onDayPhase?(phase: DayPhase | null): void;
 }
 
 /** Pseudonáhodný, ale stabilný variant textúry terénu pre políčko. */
@@ -84,6 +96,7 @@ export class GameRenderer {
 
   private hoveredTile: Position | null = null;
   private buildModeId: string | null = null;
+  private buildLevel = 1;
   private selectedInstanceId: string | null = null;
 
   /** Ťahanie v režime stavby: začiatočné a aktuálne políčko. */
@@ -152,6 +165,7 @@ export class GameRenderer {
         sprites: () => this.waterSprites,
         frames: () => this.atlas.terrain.water.map((t) => t.texture),
       },
+      (phase) => this.callbacks.onDayPhase?.(phase),
     );
     const onTick = () =>
       this.effects.update(this.app.ticker.deltaMS, this.state?.simulation.speed ?? 0);
@@ -226,8 +240,9 @@ export class GameRenderer {
     return visuals;
   }
 
-  setBuildMode(buildingId: string | null): void {
+  setBuildMode(buildingId: string | null, level = 1): void {
     this.buildModeId = buildingId;
+    this.buildLevel = level;
     this.refreshOverlay();
   }
 
@@ -381,7 +396,7 @@ export class GameRenderer {
       const valid = this.callbacks.canPlace(this.buildModeId!, hovered);
       const previewKey = buildingSpriteKey(
         this.buildModeId!,
-        1,
+        this.buildLevel,
         this.state.research.completedTechnologyIds,
       );
       applyTexture(this.preview, this.atlas.building(previewKey));
@@ -408,7 +423,11 @@ export class GameRenderer {
       this.dragPreview.push(sprite);
     }
     const key = this.buildModeId
-      ? buildingSpriteKey(this.buildModeId, 1, this.state?.research.completedTechnologyIds ?? [])
+      ? buildingSpriteKey(
+          this.buildModeId,
+          this.buildLevel,
+          this.state?.research.completedTechnologyIds ?? [],
+        )
       : null;
     this.dragPreview.forEach((sprite, i) => {
       const position = positions[i];
@@ -451,6 +470,24 @@ export class GameRenderer {
     const worldCy = Math.min(bounds.maxY, Math.max(bounds.minY, (cy - this.camera.y) / scale));
     // Celé obrazovkové pixely — pixel art ostane ostrý.
     this.camera.position.set(Math.round(cx - worldCx * scale), Math.round(cy - worldCy * scale));
+    // Pri oddialení pod 1× sa pixely vyhladzujú — bez toho by medzi políčkami ostávali švy.
+    this.atlas.setSmoothing(scale < 1);
+    this.callbacks.onCameraChange?.({
+      minX: -this.camera.x / scale,
+      minY: -this.camera.y / scale,
+      maxX: (this.app.screen.width - this.camera.x) / scale,
+      maxY: (this.app.screen.height - this.camera.y) / scale,
+    });
+  }
+
+  /** Presunie kameru tak, aby bol bod (svetové súradnice) v strede obrazovky — minimapa. */
+  centerOnWorld(wx: number, wy: number): void {
+    const scale = this.camera.scale.x;
+    this.camera.position.set(
+      this.app.screen.width / 2 - wx * scale,
+      this.app.screen.height / 2 - wy * scale,
+    );
+    this.clampCamera();
   }
 
   private tileAt(clientX: number, clientY: number): Position | null {

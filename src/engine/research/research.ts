@@ -38,7 +38,50 @@ export function startResearch(
   state.city.economy.resources.knowledge += research.investedKnowledge;
   research.activeTechnologyId = technologyId;
   research.investedKnowledge = 0;
+  research.queue = research.queue.filter((id) => id !== technologyId);
   return validation;
+}
+
+/** Najviac toľko technológií v poradí. */
+export const MAX_RESEARCH_QUEUE = 10;
+
+/**
+ * SET_RESEARCH_QUEUE: nové poradie. Technológie musia existovať, byť z odomknutej éry,
+ * ešte nepreskúmané a mať prerekvizity splnené už teraz, aktívnou technológiou alebo
+ * skoršou položkou poradia.
+ */
+export function setResearchQueue(
+  state: GameState,
+  data: GameData,
+  technologyIds: string[],
+): CommandResult {
+  if (
+    technologyIds.length > MAX_RESEARCH_QUEUE ||
+    new Set(technologyIds).size !== technologyIds.length
+  ) {
+    return fail('invalid_queue');
+  }
+  const { research } = state;
+  const known = new Set(research.completedTechnologyIds);
+  if (research.activeTechnologyId) known.add(research.activeTechnologyId);
+  for (const id of technologyIds) {
+    const technology = data.technologiesById.get(id);
+    if (!technology) return fail('unknown_technology');
+    if (known.has(id)) return fail('technology_completed');
+    if (!isEraUnlocked(state, data, technology.era)) return fail('era_locked');
+    if (!technology.prerequisites.every((p) => known.has(p))) return fail('prerequisites_missing');
+    known.add(id);
+  }
+  research.queue = [...technologyIds];
+  return { success: true };
+}
+
+/** Začne prvú technológiu z poradia, ktorú možno skúmať (ostatné ostávajú čakať). */
+function startNextFromQueue(state: GameState, data: GameData): void {
+  const { research } = state;
+  research.queue = research.queue.filter((id) => !research.completedTechnologyIds.includes(id));
+  const next = research.queue.find((id) => validateResearch(state, data, id).success);
+  if (next) startResearch(state, data, next);
 }
 
 /**
@@ -47,6 +90,7 @@ export function startResearch(
  */
 export function advanceResearch(state: GameState, data: GameData): string | null {
   const { research } = state;
+  if (!research.activeTechnologyId && research.queue.length > 0) startNextFromQueue(state, data);
   const technology = research.activeTechnologyId
     ? data.technologiesById.get(research.activeTechnologyId)
     : undefined;
@@ -61,6 +105,7 @@ export function advanceResearch(state: GameState, data: GameData): string | null
     research.completedTechnologyIds.push(technology.id);
     research.activeTechnologyId = null;
     research.investedKnowledge = 0;
+    startNextFromQueue(state, data);
     return technology.id;
   }
   return null;

@@ -23,7 +23,15 @@ export {
   type BuildingStatus,
   type CityAnalysis,
 } from './economy/analysis';
-export { demolishRefund, effectiveDefinition, levelName, maxLevel, nextLevel } from './core/levels';
+export {
+  buildCostAtLevel,
+  demolishRefund,
+  effectiveDefinition,
+  levelName,
+  maxLevel,
+  nextLevel,
+  technologiesForLevel,
+} from './core/levels';
 export {
   upgradableBuildings,
   upgradeRequirements,
@@ -32,3 +40,4 @@ export {
 } from './core/upgrade';
 export { buildingEraIndex, currentEra, currentEraIndex, isEraUnlocked } from './milestones/eras';
 export { houseOccupancy } from './population/occupancy';
+export { serviceCoverageGrid } from './population/population';

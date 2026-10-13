@@ -5,12 +5,20 @@ import {
   type GameCommand,
   type GameState,
   type Position,
+  type ServiceType,
 } from '@/types';
 import { footprint, getTile, isInBounds, tileIndex } from '../world/grid';
-import { refreshDerivedState } from '../economy/analysis';
-import { startResearch } from '../research/research';
+import { setResearchQueue, startResearch } from '../research/research';
 import { upgradeBuilding } from './upgrade';
-import { demolishRefund } from './levels';
+import {
+  buildCostAtLevel,
+  demolishRefund,
+  maxLevel,
+  nextLevel,
+  technologiesForLevel,
+} from './levels';
+import { analyzeCity, refreshDerivedState } from '../economy/analysis';
+import { serviceCoverageGrid } from '../population/population';
 import type { CommandFailureReason } from './commandReasons';
 import {
   DEFAULT_BUILDING_PRIORITY,
@@ -30,9 +38,15 @@ export function validatePlacement(
   data: GameData,
   buildingId: string,
   position: Position,
+  /** Postaviť rovno na vyššej úrovni (napr. murovaný dom), ak je odomknutá. */
+  level = 1,
+  /** Predpočítané mriežky pokrytia službami (náhľad pri ťahaní myšou). */
+  grids?: Partial<Record<ServiceType, Uint8Array>>,
 ): CommandResult {
   const definition = data.buildingsById.get(buildingId);
   if (!definition) return fail('unknown_building');
+  if (!Number.isInteger(level) || level < 1 || level > maxLevel(definition))
+    return fail('max_level');
 
   const tiles = footprint(definition, position);
   if (!tiles.every((p) => isInBounds(state.world, p.x, p.y))) return fail('out_of_bounds');
@@ -45,13 +59,25 @@ export function validatePlacement(
     return fail('invalid_terrain');
   }
   if (
-    definition.requiredTechnologyId &&
-    !state.research.completedTechnologyIds.includes(definition.requiredTechnologyId)
+    !technologiesForLevel(definition, level).every((id) =>
+      state.research.completedTechnologyIds.includes(id),
+    )
   ) {
     return fail('technology_required');
   }
+  const services = level > 1 ? (nextLevel(definition, level - 1)?.requiredServices ?? []) : [];
+  if (services.length > 0) {
+    const cache = grids ?? {};
+    const analysis = services.some((type) => !cache[type]) ? analyzeCity(state, data) : undefined;
+    for (const type of services) {
+      const grid = (cache[type] ??= serviceCoverageGrid(state, data, analysis!, type));
+      if (!tiles.some((p) => grid[tileIndex(state.world, p.x, p.y)] === 1))
+        return fail('service_required');
+    }
+  }
   const resources = state.city.economy.resources;
-  if (RESOURCE_IDS.some((id) => (definition.constructionCost[id] ?? 0) > resources[id])) {
+  const cost = buildCostAtLevel(definition, level);
+  if (RESOURCE_IDS.some((id) => (cost[id] ?? 0) > resources[id])) {
     return fail('insufficient_resources');
   }
   return ok;
@@ -72,13 +98,15 @@ function placeBuilding(
   data: GameData,
   buildingId: string,
   position: Position,
+  level: number,
 ): CommandResult {
-  const validation = validatePlacement(state, data, buildingId, position);
+  const validation = validatePlacement(state, data, buildingId, position, level);
   if (!validation.success) return validation;
 
   const definition = data.buildingsById.get(buildingId)!;
   const resources = state.city.economy.resources;
-  for (const id of RESOURCE_IDS) resources[id] -= definition.constructionCost[id] ?? 0;
+  const cost = buildCostAtLevel(definition, level);
+  for (const id of RESOURCE_IDS) resources[id] -= cost[id] ?? 0;
 
   const instance = {
     id: nextInstanceId(state),
@@ -86,7 +114,7 @@ function placeBuilding(
     position: { x: position.x, y: position.y },
     enabled: true,
     priority: DEFAULT_BUILDING_PRIORITY,
-    level: 1,
+    level,
   };
   state.city.buildings.push(instance);
   for (const p of footprint(definition, position)) {
@@ -160,7 +188,7 @@ export function executeCommand(
 ): CommandResult {
   switch (command.type) {
     case 'PLACE_BUILDING':
-      return placeBuilding(state, data, command.buildingId, command.position);
+      return placeBuilding(state, data, command.buildingId, command.position, command.level ?? 1);
     case 'DEMOLISH_BUILDING':
       return demolishBuilding(state, data, command.instanceId);
     case 'SET_BUILDING_PRIORITY':
@@ -179,6 +207,8 @@ export function executeCommand(
       refreshDerivedState(state, data);
       return ok;
     }
+    case 'SET_RESEARCH_QUEUE':
+      return setResearchQueue(state, data, command.technologyIds);
     case 'UPGRADE_BUILDING':
       return upgradeBuilding(state, data, command.instanceId);
   }

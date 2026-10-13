@@ -4,6 +4,11 @@ import { App } from '@/app/App';
 import { initializeGame } from '@/app/game';
 import { t } from '@/app/i18n';
 import { useUiStore } from '@/stores/uiStore';
+import '@fontsource/pixelify-sans/400.css';
+import '@fontsource/pixelify-sans/600.css';
+import '@fontsource/pixelify-sans/700.css';
+import '@fontsource/atkinson-hyperlegible/400.css';
+import '@fontsource/atkinson-hyperlegible/700.css';
 import '@/app/styles.css';
 
 const root = document.getElementById('root');

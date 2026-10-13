@@ -1,9 +1,13 @@
-import { BottomBar } from '@/components/BottomBar';
-import { BuildingCatalog } from '@/components/BuildingCatalog';
-import { DetailPanel } from '@/components/DetailPanel';
+import { BuildDock } from '@/components/hud/BuildDock';
+import { GoalTracker } from '@/components/hud/GoalTracker';
+import { Inspector } from '@/components/hud/Inspector';
+import { QuickBar } from '@/components/hud/QuickBar';
+import { TopHud } from '@/components/hud/TopHud';
+import { MapInfo } from '@/components/MapInfo';
 import { MapView } from '@/components/MapView';
-import { TopBar } from '@/components/TopBar';
 import { NewEraDialog } from '@/components/NewEraDialog';
+import { Notice } from '@/components/Notice';
+import { PanelHost } from '@/components/panels/PanelHost';
 import { VictoryDialog } from '@/components/VictoryDialog';
 import { useEffect } from 'react';
 import { controller } from './game';
@@ -24,13 +28,18 @@ export function App() {
     };
   }, []);
 
+  // Mapa je na celú obrazovku, ovládanie pláva nad ňou.
   return (
     <div className="game-layout">
-      <TopBar />
-      <BuildingCatalog />
       <MapView />
-      <DetailPanel />
-      <BottomBar />
+      <TopHud />
+      <GoalTracker />
+      <Inspector />
+      <BuildDock />
+      <QuickBar />
+      <MapInfo />
+      <Notice />
+      <PanelHost />
       <NewEraDialog />
       <VictoryDialog />
     </div>

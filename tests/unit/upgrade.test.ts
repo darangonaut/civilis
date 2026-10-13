@@ -134,3 +134,45 @@ describe('najvyššia úroveň', () => {
     expectRejected(engine, id, 'max_level');
   });
 });
+
+describe('stavba rovno na vyššej úrovni', () => {
+  it('murovaný dom sa dá postaviť rovno, ak je odomknutý a v dosahu vody', () => {
+    const engine = createTestCity({
+      population: 10,
+      resources: { wood: 100, stone: 100, tools: 50 },
+    });
+    const command = {
+      type: 'PLACE_BUILDING',
+      buildingId: 'house',
+      position: { x: 3, y: 3 },
+      level: 2,
+    } as const;
+    expect(engine.execute(command)).toEqual({ success: false, reason: 'technology_required' });
+    setCity(engine, {
+      completedTechnologyIds: [L2.requiredTechnologyId!],
+      resources: { wood: 100, stone: 100, tools: 50 },
+    });
+    expect(engine.execute(command)).toEqual({ success: false, reason: 'service_required' });
+    build(engine, 'well', { x: 4, y: 5 });
+    expect(engine.execute(command)).toEqual({ success: true });
+    const state = engine.getState();
+    const placed = state.city.buildings.at(-1)!;
+    expect(placed).toMatchObject({ definitionId: 'house', level: 2 });
+    // Cena = stavba + vylepšenie.
+    expect(state.city.economy.resources.wood).toBe(100 - house.constructionCost.wood!);
+    expect(state.city.economy.resources.stone).toBe(100 - L2.upgradeCost.stone!);
+    expect(state.city.population.housingCapacity).toBe(L2.housingCapacity);
+  });
+
+  it('neexistujúca úroveň je chyba', () => {
+    const engine = createTestCity();
+    expect(
+      engine.execute({
+        type: 'PLACE_BUILDING',
+        buildingId: 'farm',
+        position: { x: 3, y: 3 },
+        level: 2,
+      }),
+    ).toEqual({ success: false, reason: 'max_level' });
+  });
+});

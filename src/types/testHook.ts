@@ -1,4 +1,5 @@
 import type { GameState } from './game';
+import type { Resources } from './resources';
 import type { Position } from './world';
 
 /** Rozhranie pre E2E testy. Aktivuje sa len s parametrom `?e2e` v URL. */
@@ -10,6 +11,8 @@ export interface CivilisTestHook {
   effectsStats(): { walkers: number; particles: number; lights: number; night: number };
   /** Odsimuluje zadaný počet dní naraz. */
   advanceDays(days: number): void;
+  /** Pridá technológie a suroviny (príprava scenára v teste). */
+  grantForTest(grant: { technologies?: string[]; resources?: Partial<Resources> }): void;
 }
 
 declare global {

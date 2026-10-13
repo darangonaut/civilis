@@ -3,14 +3,12 @@ import { commandReasonLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
 import { currentMarkers } from '@/app/markers';
 import { installTestHook } from '@/app/testHook';
+import { registerCameraTarget } from '@/app/camera';
 import { gameData } from '@/data';
 import type { GameRenderer } from '@/renderer/GameRenderer';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUiStore } from '@/stores/uiStore';
 import type { Position } from '@/types';
-import { MapInfo } from './MapInfo';
-import { Notice } from './Notice';
-import { PanelHost } from './panels/PanelHost';
 
 /** Klik mimo režimu stavby vyberie budovu (stavba ide cez `handlePlaceMany`). */
 function handleTileClick(position: Position): void {
@@ -22,10 +20,11 @@ function handleTileClick(position: Position): void {
 /** Ťahanie v režime stavby: postaví budovy postupne a zhrnie výsledok. */
 function handlePlaceMany(buildingId: string, positions: Position[]): void {
   const ui = useUiStore.getState();
+  const level = ui.buildLevel;
   let placed = 0;
   let firstFailure: string | null = null;
   for (const position of positions) {
-    const result = controller.execute({ type: 'PLACE_BUILDING', buildingId, position });
+    const result = controller.execute({ type: 'PLACE_BUILDING', buildingId, position, level });
     if (result.success) placed++;
     else firstFailure ??= result.reason;
   }
@@ -65,7 +64,10 @@ export function MapView() {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),
             onTileClick: handleTileClick,
             onPlaceMany: handlePlaceMany,
-            canPlace: (buildingId, position) => controller.canPlace(buildingId, position).success,
+            canPlace: (buildingId, position) =>
+              controller.canPlace(buildingId, position, useUiStore.getState().buildLevel).success,
+            onCameraChange: (view) => useUiStore.getState().setCameraView(view),
+            onDayPhase: (phase) => useUiStore.getState().setDayPhase(phase),
           },
         ),
       )
@@ -80,7 +82,8 @@ export function MapView() {
         const display = useSettingsStore.getState();
         renderer.setEffectsOptions({ animations: display.animations, dayNight: display.dayNight });
         const ui = useUiStore.getState();
-        renderer.setBuildMode(ui.buildModeId);
+        renderer.setBuildMode(ui.buildModeId, ui.buildLevel);
+        registerCameraTarget((wx, wy) => created.centerOnWorld(wx, wy));
         renderer.setSelectedInstance(ui.selectedInstanceId);
 
         unsubscribers.push(
@@ -88,7 +91,8 @@ export function MapView() {
             created.sync(controller.state, currentMarkers(), controller.activity),
           ),
           useUiStore.subscribe((s, prev) => {
-            if (s.buildModeId !== prev.buildModeId) created.setBuildMode(s.buildModeId);
+            if (s.buildModeId !== prev.buildModeId || s.buildLevel !== prev.buildLevel)
+              created.setBuildMode(s.buildModeId, s.buildLevel);
             if (s.selectedInstanceId !== prev.selectedInstanceId)
               created.setSelectedInstance(s.selectedInstanceId);
           }),
@@ -106,6 +110,7 @@ export function MapView() {
     return () => {
       cancelled = true;
       unsubscribers.forEach((fn) => fn());
+      registerCameraTarget(null);
       renderer?.destroy();
     };
   }, []);
@@ -114,9 +119,6 @@ export function MapView() {
     <main className="map-view" data-testid="map-view" data-ready={ready}>
       <div ref={hostRef} className="map-host" />
       {!ready && <p className="map-loading muted">{t('map.loading')}</p>}
-      <MapInfo />
-      <PanelHost />
-      <Notice />
     </main>
   );
 }

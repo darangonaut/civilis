@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import type { CameraView } from '@/renderer/GameRenderer';
+import type { DayPhase } from '@/renderer/dayNight';
 import type { BuildingCategory, Position } from '@/types';
 
 export type PanelId = 'research' | 'milestones' | 'statistics' | 'saves' | 'settings';
@@ -13,11 +15,28 @@ export interface Notice {
 
 /** Najviac toľko hlásení naraz; staršie odpadnú. */
 const MAX_NOTICES = 4;
+/** Záznam udalostí (vľavo pod cieľom) si pamätá posledných N. */
+const MAX_LOG = 30;
+
+export interface LogEntry {
+  id: number;
+  day: number;
+  label: string;
+  text: string;
+  kind: NoticeKind;
+}
 
 interface UiState {
-  catalogCategory: BuildingCategory | 'all';
-  /** Typ budovy vybraný v katalógu = režim výstavby. */
+  catalogCategory: BuildingCategory;
+  /** Typ budovy vybraný v doku = režim výstavby. */
   buildModeId: string | null;
+  /** Úroveň, na ktorej sa budova postaví (vyššie úrovne domov rovno). */
+  buildLevel: number;
+  /** Dlaždica doku pod kurzorom (karta s detailom). */
+  hoveredDockTile: { id: string; level: number } | null;
+  log: LogEntry[];
+  dayPhase: DayPhase | null;
+  cameraView: CameraView | null;
   /** Budova vybraná na mape. */
   selectedInstanceId: string | null;
   hoveredTile: Position | null;
@@ -31,8 +50,13 @@ interface UiState {
   /** Éra, ktorej uvítaciu obrazovku treba zobraziť. */
   newEraId: string | null;
 
-  setCatalogCategory: (category: BuildingCategory | 'all') => void;
-  setBuildMode: (id: string | null) => void;
+  setCatalogCategory: (category: BuildingCategory) => void;
+  setBuildMode: (id: string | null, level?: number) => void;
+  setHoveredDockTile: (tile: { id: string; level: number } | null) => void;
+  addLog: (entry: Omit<LogEntry, 'id'>) => void;
+  clearLog: () => void;
+  setDayPhase: (phase: DayPhase | null) => void;
+  setCameraView: (view: CameraView) => void;
   selectInstance: (id: string | null) => void;
   setHoveredTile: (position: Position | null) => void;
   showNotice: (text: string, kind?: NoticeKind) => void;
@@ -48,8 +72,13 @@ interface UiState {
 let noticeSeq = 0;
 
 export const useUiStore = create<UiState>()((set, get) => ({
-  catalogCategory: 'all',
+  catalogCategory: 'housing',
   buildModeId: null,
+  buildLevel: 1,
+  hoveredDockTile: null,
+  log: [],
+  dayPhase: null,
+  cameraView: null,
   selectedInstanceId: null,
   hoveredTile: null,
   notices: [],
@@ -59,7 +88,14 @@ export const useUiStore = create<UiState>()((set, get) => ({
   newEraId: null,
 
   setCatalogCategory: (catalogCategory) => set({ catalogCategory }),
-  setBuildMode: (buildModeId) => set({ buildModeId, selectedInstanceId: null }),
+  setBuildMode: (buildModeId, buildLevel = 1) =>
+    set({ buildModeId, buildLevel, selectedInstanceId: null }),
+  setHoveredDockTile: (hoveredDockTile) => set({ hoveredDockTile }),
+  addLog: (entry) =>
+    set((s) => ({ log: [{ ...entry, id: ++noticeSeq }, ...s.log].slice(0, MAX_LOG) })),
+  clearLog: () => set({ log: [] }),
+  setDayPhase: (dayPhase) => set({ dayPhase }),
+  setCameraView: (cameraView) => set({ cameraView }),
   selectInstance: (selectedInstanceId) => set({ selectedInstanceId, buildModeId: null }),
   setHoveredTile: (hoveredTile) => set({ hoveredTile }),
   showNotice: (text, kind = 'info') =>

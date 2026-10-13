@@ -22,3 +22,14 @@ export function nightTint(night: number): number {
   const [r, g, b] = day.map((c, i) => Math.round(c + (dark[i]! - c) * night));
   return (r! << 16) | (g! << 8) | b!;
 }
+
+export type DayPhase = 'dawn' | 'day' | 'dusk' | 'night';
+
+/** Fáza dňa pre zobrazenie (ráno, deň, večer, noc). */
+export function dayPhase(phase: number): DayPhase {
+  const p = ((phase % 1) + 1) % 1;
+  if (p < 0.1 || p >= 0.9) return 'dawn';
+  if (p < 0.55) return 'day';
+  if (p < 0.65) return 'dusk';
+  return 'night';
+}

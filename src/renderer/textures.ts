@@ -34,6 +34,8 @@ export interface TextureAtlas {
   building(key: string): AnchoredTexture;
   outline: AnchoredTexture;
   marker(kind: MarkerKind): AnchoredTexture;
+  /** Vyhladzovanie (pri zoome pod 1×) alebo ostré pixely. */
+  setSmoothing(smooth: boolean): void;
   destroy(): void;
 }
 
@@ -77,6 +79,17 @@ export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas
     building,
     outline,
     marker,
+    setSmoothing(smooth: boolean) {
+      const mode = smooth ? 'linear' : 'nearest';
+      const all = [
+        ...Object.values(terrain).flat(),
+        ...buildings.values(),
+        ...markers.values(),
+        outline,
+      ];
+      for (const entry of all)
+        if (entry.texture.source.scaleMode !== mode) entry.texture.source.scaleMode = mode;
+    },
     destroy() {
       for (const variants of Object.values(terrain))
         variants.forEach((t) => t.texture.destroy(true));

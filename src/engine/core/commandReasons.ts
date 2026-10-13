@@ -19,6 +19,7 @@ export const COMMAND_FAILURE_REASONS = [
   'research_active',
   'prerequisites_missing',
   'era_locked',
+  'invalid_queue',
 ] as const;
 
 export type CommandFailureReason = (typeof COMMAND_FAILURE_REASONS)[number];

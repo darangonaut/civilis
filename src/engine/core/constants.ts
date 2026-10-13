@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const MIN_BUILDING_PRIORITY = 1;
 export const MAX_BUILDING_PRIORITY = 3;

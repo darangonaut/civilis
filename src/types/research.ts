@@ -37,6 +37,8 @@ export interface ResearchState {
   completedTechnologyIds: string[];
   activeTechnologyId: string | null;
   investedKnowledge: number;
+  /** Poradie výskumu: po dokončení sa začne prvá skúmateľná technológia (schéma v5). */
+  queue: string[];
 }
 
 export type MilestoneCondition =

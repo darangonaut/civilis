@@ -18,6 +18,8 @@
     "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
     "dexie": "^4.4.6",
     "pixi.js": "^8.22.0",
     "react": "^19.3.0",

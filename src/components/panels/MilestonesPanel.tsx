@@ -2,28 +2,11 @@ import { formatAmount } from '@/app/format';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { conditionProgress, currentMilestone, levelName, type ConditionProgress } from '@/engine';
+import { conditionProgress, currentMilestone, type ConditionProgress } from '@/engine';
 import { RESOURCE_IDS, type MilestoneCondition, type MilestoneDefinition } from '@/types';
+import { conditionLabel } from '@/app/conditions';
 import { PanelFrame } from './PanelFrame';
 import { Progress } from './Progress';
-
-function conditionLabel(condition: MilestoneCondition): string {
-  switch (condition.type) {
-    case 'building_count': {
-      const name = gameData.buildingsById.get(condition.buildingId)?.name ?? condition.buildingId;
-      return `${t('condition.building_count')}: ${name}`;
-    }
-    case 'building_level': {
-      const definition = gameData.buildingsById.get(condition.buildingId);
-      const name = definition ? levelName(definition, condition.level) : condition.buildingId;
-      return `${t('condition.building_level')}: ${name}`;
-    }
-    case 'resource_balance':
-      return `${t('condition.resource_balance')} (${resourceLabel(condition.resource).toLowerCase()})`;
-    default:
-      return t(`condition.${condition.type}`);
-  }
-}
 
 function rewardLabel(milestone: MilestoneDefinition): string {
   const { rewards } = milestone;
