@@ -47,6 +47,8 @@ export interface BuildingDefinition {
   storageCapacity: number;
 
   requiresRoad: boolean;
+  /** Pripojenie sa šíri cez susedné budovy rovnakého typu (bloky polí). Rozšírenie. */
+  connectsAdjacent?: boolean;
   allowedTerrain: TerrainType[];
   /** Výkon na danom teréne (0–1), chýbajúci terén = 1. Rozšírenie oproti špecifikácii. */
   terrainEfficiency?: Partial<Record<TerrainType, number>>;

@@ -7,7 +7,7 @@ import {
 } from '@/types';
 import type { GameData } from '../core/definitions';
 import { effectiveDefinition } from '../core/levels';
-import { computeRoadNetwork, isBuildingConnected } from '../world/connectivity';
+import { computeConnectedBuildings, computeRoadNetwork } from '../world/connectivity';
 import { getTile } from '../world/grid';
 import { maintenanceMultiplier, productionMultiplier } from './modifiers';
 
@@ -79,6 +79,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
   const { balance } = data;
   const economy = state.city.economy;
   const roadNetwork = computeRoadNetwork(state, data);
+  const connectedIds = computeConnectedBuildings(state, data, roadNetwork);
   const statuses = new Map<string, BuildingStatus>();
 
   // 1. Pripojenie a kapacity z pripojených budov.
@@ -89,7 +90,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
     const base = data.buildingsById.get(building.definitionId);
     if (!base) continue;
     const definition = effectiveDefinition(base, building.level);
-    const connected = isBuildingConnected(state, data, roadNetwork, building);
+    const connected = connectedIds.has(building.id);
     if (connected) {
       housingCapacity += definition.housingCapacity;
       storageCapacity += definition.storageCapacity;

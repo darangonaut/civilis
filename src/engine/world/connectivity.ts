@@ -54,7 +54,47 @@ export function computeRoadNetwork(state: Readonly<GameState>, data: GameData): 
   return network;
 }
 
-/** Či je budova funkčne pripojená: nepotrebuje cestu, alebo susedí s cestou zo siete. */
+/**
+ * ID všetkých funkčne pripojených budov. Budova s `connectsAdjacent` (polia, lesy, lomy) je
+ * pripojená aj vtedy, keď susedí s pripojenou budovou rovnakého typu — celý blok fariem tak
+ * stačí napojiť na cestu v jednom bode.
+ */
+export function computeConnectedBuildings(
+  state: Readonly<GameState>,
+  data: GameData,
+  network: ReadonlySet<number>,
+): Set<string> {
+  const connected = new Set<string>();
+  const queue: BuildingInstance[] = [];
+  for (const building of state.city.buildings) {
+    if (isBuildingConnected(state, data, network, building)) {
+      connected.add(building.id);
+      if (data.buildingsById.get(building.definitionId)?.connectsAdjacent) queue.push(building);
+    }
+  }
+  const byId = new Map(state.city.buildings.map((b) => [b.id, b]));
+  for (let head = 0; head < queue.length; head++) {
+    const building = queue[head]!;
+    const definition = data.buildingsById.get(building.definitionId)!;
+    for (const tile of footprint(definition, building.position)) {
+      for (const n of neighbors4(state.world, tile)) {
+        const neighborId = state.world.tiles[tileIndex(state.world, n.x, n.y)]?.buildingId;
+        const neighbor = neighborId ? byId.get(neighborId) : undefined;
+        if (
+          !neighbor ||
+          connected.has(neighbor.id) ||
+          neighbor.definitionId !== building.definitionId
+        )
+          continue;
+        connected.add(neighbor.id);
+        queue.push(neighbor);
+      }
+    }
+  }
+  return connected;
+}
+
+/** Či je budova priamo pripojená: nepotrebuje cestu, alebo susedí s cestou zo siete. */
 export function isBuildingConnected(
   state: Readonly<GameState>,
   data: GameData,

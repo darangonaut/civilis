@@ -1,6 +1,7 @@
 import { Application, Container, CullerPlugin, Sprite, extensions } from 'pixi.js';
 import type { GameState, Position } from '@/types';
 import { tileToWorld, worldBounds, worldToTile } from './iso';
+import { dragPositions, dragShapeFor } from './dragPath';
 import { buildingSpriteKey, type MarkerKind } from './pixel/sprites';
 import {
   TERRAIN_VARIANTS,
@@ -28,6 +29,8 @@ const MARKER_OFFSET = 14;
 export interface RendererCallbacks {
   onTileHover(position: Position | null): void;
   onTileClick(position: Position): void;
+  /** Ťahanie v režime stavby: postaviť budovu na všetky políčka (v poradí). */
+  onPlaceMany(buildingId: string, positions: Position[]): void;
   /** Či sa dá budova na políčko postaviť — pre farbu náhľadu. */
   canPlace(buildingId: string, position: Position): boolean;
 }
@@ -76,6 +79,10 @@ export class GameRenderer {
   private buildModeId: string | null = null;
   private selectedInstanceId: string | null = null;
 
+  /** Ťahanie v režime stavby: začiatočné a aktuálne políčko. */
+  private dragBuild: { start: Position; end: Position } | null = null;
+  private dragPreview: Sprite[] = [];
+
   private pointer: {
     id: number;
     startX: number;
@@ -83,6 +90,7 @@ export class GameRenderer {
     lastX: number;
     lastY: number;
     dragging: boolean;
+    mode: 'pan' | 'build';
   } | null = null;
   private destroyed = false;
   private cleanup: (() => void)[] = [];
@@ -305,7 +313,8 @@ export class GameRenderer {
     this.selectionOutline.visible = selected !== undefined;
     if (selected) placeOnTile(this.selectionOutline, selected.position);
 
-    const showPreview = this.buildModeId !== null && hovered !== null;
+    this.refreshDragPreview();
+    const showPreview = this.buildModeId !== null && hovered !== null && this.dragBuild === null;
     this.preview.visible = showPreview;
     if (showPreview) {
       const valid = this.callbacks.canPlace(this.buildModeId!, hovered);
@@ -322,6 +331,35 @@ export class GameRenderer {
     } else {
       this.hoverOutline.tint = 0xffffff;
     }
+  }
+
+  /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */
+  private refreshDragPreview(): void {
+    const drag = this.dragBuild;
+    const positions =
+      drag && this.buildModeId
+        ? dragPositions(dragShapeFor(this.buildModeId), drag.start, drag.end)
+        : [];
+    while (this.dragPreview.length < positions.length) {
+      const sprite = new Sprite();
+      sprite.alpha = 0.7;
+      this.buildingLayer.addChild(sprite);
+      this.dragPreview.push(sprite);
+    }
+    const key = this.buildModeId
+      ? buildingSpriteKey(this.buildModeId, 1, this.state?.research.completedTechnologyIds ?? [])
+      : null;
+    this.dragPreview.forEach((sprite, i) => {
+      const position = positions[i];
+      sprite.visible = position !== undefined && key !== null;
+      if (!position || !key) return;
+      applyTexture(sprite, this.atlas.building(key));
+      placeOnTile(sprite, position);
+      sprite.zIndex = position.x + position.y + 0.5;
+      sprite.tint = this.callbacks.canPlace(this.buildModeId!, position)
+        ? PREVIEW_VALID
+        : PREVIEW_INVALID;
+    });
   }
 
   // --- Kamera a vstup ---
@@ -376,7 +414,9 @@ export class GameRenderer {
     const canvas = this.app.canvas;
 
     const onPointerDown = (e: PointerEvent) => {
-      if (e.button !== 0 || this.pointer) return;
+      if (this.pointer || e.button > 2) return;
+      // Ľavé tlačidlo v režime stavby kreslí, inak (a pravé/stredné vždy) posúva mapu.
+      const mode: 'pan' | 'build' = e.button === 0 && this.buildModeId ? 'build' : 'pan';
       canvas.setPointerCapture(e.pointerId);
       this.pointer = {
         id: e.pointerId,
@@ -385,7 +425,12 @@ export class GameRenderer {
         lastX: e.clientX,
         lastY: e.clientY,
         dragging: false,
+        mode,
       };
+      if (mode === 'build') {
+        const tile = this.tileAt(e.clientX, e.clientY);
+        if (tile) this.dragBuild = { start: tile, end: tile };
+      }
     };
 
     const onPointerMove = (e: PointerEvent) => {
@@ -398,10 +443,17 @@ export class GameRenderer {
           p.dragging = true;
           canvas.classList.add('dragging');
         }
-        if (p.dragging) {
+        if (p.dragging && p.mode === 'pan') {
           this.camera.x += e.clientX - p.lastX;
           this.camera.y += e.clientY - p.lastY;
           this.clampCamera();
+        }
+        if (p.mode === 'build' && this.dragBuild) {
+          const tile = this.tileAt(e.clientX, e.clientY);
+          if (tile && (tile.x !== this.dragBuild.end.x || tile.y !== this.dragBuild.end.y)) {
+            this.dragBuild.end = tile;
+            this.refreshOverlay();
+          }
         }
         p.lastX = e.clientX;
         p.lastY = e.clientY;
@@ -415,10 +467,45 @@ export class GameRenderer {
       this.pointer = null;
       canvas.classList.remove('dragging');
       if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
-      if (!p.dragging) {
+      if (p.mode === 'build') {
+        const drag = this.dragBuild;
+        this.dragBuild = null;
+        if (drag && this.buildModeId) {
+          this.callbacks.onPlaceMany(
+            this.buildModeId,
+            dragPositions(dragShapeFor(this.buildModeId), drag.start, drag.end),
+          );
+        }
+        this.refreshOverlay();
+      } else if (!p.dragging && e.button === 0) {
         const tile = this.tileAt(e.clientX, e.clientY);
         if (tile) this.callbacks.onTileClick(tile);
       }
+    };
+
+    const onContextMenu = (e: MouseEvent) => e.preventDefault();
+
+    // Posun mapy šípkami / WASD.
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const step = 48;
+      const moves: Record<string, [number, number]> = {
+        ArrowLeft: [step, 0],
+        a: [step, 0],
+        ArrowRight: [-step, 0],
+        d: [-step, 0],
+        ArrowUp: [0, step],
+        w: [0, step],
+        ArrowDown: [0, -step],
+        s: [0, -step],
+      };
+      const move = moves[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+      if (!move) return;
+      e.preventDefault();
+      this.camera.x += move[0];
+      this.camera.y += move[1];
+      this.clampCamera();
     };
 
     const onPointerLeave = () => {
@@ -450,6 +537,8 @@ export class GameRenderer {
     canvas.addEventListener('pointercancel', onPointerUp);
     canvas.addEventListener('pointerleave', onPointerLeave);
     canvas.addEventListener('wheel', onWheel, { passive: false });
+    canvas.addEventListener('contextmenu', onContextMenu);
+    window.addEventListener('keydown', onKeyDown);
     this.cleanup.push(() => {
       canvas.removeEventListener('pointerdown', onPointerDown);
       canvas.removeEventListener('pointermove', onPointerMove);
@@ -457,6 +546,8 @@ export class GameRenderer {
       canvas.removeEventListener('pointercancel', onPointerUp);
       canvas.removeEventListener('pointerleave', onPointerLeave);
       canvas.removeEventListener('wheel', onWheel);
+      canvas.removeEventListener('contextmenu', onContextMenu);
+      window.removeEventListener('keydown', onKeyDown);
     });
   }
 }

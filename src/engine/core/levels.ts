@@ -64,3 +64,23 @@ export function nextLevel(
 export function levelName(definition: BuildingDefinition, level: number): string {
   return effectiveDefinition(definition, level).name;
 }
+
+/** Suroviny, ktoré vráti zbúranie: `share` zo stavby a všetkých vylepšení (zaokrúhlené nadol). */
+export function demolishRefund(
+  definition: BuildingDefinition,
+  level: number,
+  share: number,
+): Partial<Resources> {
+  const invested: Partial<Resources> = { ...definition.constructionCost };
+  for (const next of (definition.levels ?? []).slice(0, Math.max(0, level - 1))) {
+    for (const id of RESOURCE_IDS) {
+      if (next.upgradeCost[id]) invested[id] = (invested[id] ?? 0) + next.upgradeCost[id]!;
+    }
+  }
+  const refund: Partial<Resources> = {};
+  for (const id of RESOURCE_IDS) {
+    const amount = Math.floor((invested[id] ?? 0) * share);
+    if (amount > 0) refund[id] = amount;
+  }
+  return refund;
+}

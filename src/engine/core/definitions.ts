@@ -54,6 +54,7 @@ export const buildingDefinitionSchema = z.strictObject({
   moneyOutput: nonNegative,
   storageCapacity: z.number().int().nonnegative(),
   requiresRoad: z.boolean(),
+  connectsAdjacent: z.boolean().optional(),
   allowedTerrain: z.array(z.enum(TERRAIN_TYPES)).min(1),
   terrainEfficiency: z.partialRecord(z.enum(TERRAIN_TYPES), z.number().min(0).max(1)).optional(),
   toolUsePerWorker: nonNegative,
@@ -133,6 +134,8 @@ export const balanceSchema = z.strictObject({
   workforceShare: z.number().min(0).max(1),
   minimumPopulation: z.number().int().nonnegative(),
   foodPerCapita: nonNegative,
+  /** Podiel investovaných surovín, ktorý vráti zbúranie (recyklácia). */
+  demolishRefund: z.number().min(0).max(1),
   /** Základný zber bez budov — zabraňuje neobnoviteľnému stavu (žiadne drevo ani kameň). */
   baseProduction: partialResourcesSchema,
   noToolsEfficiency: z.number().min(0).max(1),

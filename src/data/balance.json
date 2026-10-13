@@ -10,6 +10,7 @@
   "workforceShare": 0.5,
   "minimumPopulation": 5,
   "foodPerCapita": 0.25,
+  "demolishRefund": 0.5,
   "baseProduction": { "wood": 1, "stone": 0.5 },
   "noToolsEfficiency": 0.5,
   "noFundsEfficiency": 0.5,

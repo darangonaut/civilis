@@ -236,3 +236,26 @@ describe('pozastavenie budovy', () => {
     );
   });
 });
+
+describe('recyklácia', () => {
+  it('zbúranie vráti polovicu stavebných nákladov', () => {
+    const engine = setup();
+    const position = findFreeTile(engine.getState(), 'grass');
+    engine.execute({ type: 'PLACE_BUILDING', buildingId: 'house', position });
+    const wood = engine.getState().city.economy.resources.wood;
+    const id = engine.getState().city.buildings.at(-1)!.id;
+    engine.execute({ type: 'DEMOLISH_BUILDING', instanceId: id });
+    expect(engine.getState().city.economy.resources.wood).toBe(wood + 5);
+  });
+
+  it('do vrátenej sumy sa počítajú aj vylepšenia', async () => {
+    const { demolishRefund } = await import('@/engine/core/levels');
+    const house = testData.buildingsById.get('house')!;
+    const l2 = house.levels![0]!.upgradeCost;
+    expect(demolishRefund(house, 2, 0.5)).toEqual({
+      wood: 5,
+      stone: Math.floor(l2.stone! / 2),
+      tools: Math.floor(l2.tools! / 2),
+    });
+  });
+});

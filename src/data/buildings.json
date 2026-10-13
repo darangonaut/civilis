@@ -87,6 +87,7 @@
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
+    "connectsAdjacent": true,
     "allowedTerrain": ["forest"],
     "toolUsePerWorker": 0.05
   },
@@ -111,6 +112,7 @@
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
+    "connectsAdjacent": true,
     "allowedTerrain": ["fertile", "grass"],
     "toolUsePerWorker": 0.05,
     "terrainEfficiency": {
@@ -138,6 +140,7 @@
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": true,
+    "connectsAdjacent": true,
     "allowedTerrain": ["rock"],
     "toolUsePerWorker": 0.05
   },

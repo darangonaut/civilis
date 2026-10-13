@@ -277,3 +277,32 @@ describe('pozastavená budova', () => {
     expect(resource(engine, 'stone')).toBe(10);
   });
 });
+
+describe('bloky polí (connectsAdjacent)', () => {
+  it('farmy susediace s pripojenou farmou sú pripojené cez ňu', () => {
+    const engine = createTestCity({
+      terrain: () => 'fertile',
+      population: 40,
+      resources: { tools: 50 },
+    });
+    // Blok 2 × 3 fariem; cestu (y = 2) má iba horný rad.
+    const ids = [3, 4, 5].flatMap((y) => [3, 4].map((x) => build(engine, 'farm', { x, y })));
+    for (const id of ids) expect(status(engine, id).connected, id).toBe(true);
+    expect(problems(engine, ids.at(-1)!)).not.toContain('no_road');
+  });
+
+  it('blok bez kontaktu s cestou ostane odpojený', () => {
+    const engine = createTestCity({ terrain: () => 'fertile', population: 40 });
+    const a = build(engine, 'farm', { x: 3, y: 5 });
+    const b = build(engine, 'farm', { x: 4, y: 5 });
+    expect(status(engine, a).connected).toBe(false);
+    expect(status(engine, b).connected).toBe(false);
+  });
+
+  it('pripojenie sa nešíri cez iný typ budovy', () => {
+    const engine = createTestCity({ terrain: () => 'fertile', population: 40 });
+    build(engine, 'farm', { x: 3, y: 3 });
+    const house = build(engine, 'house', { x: 3, y: 4 });
+    expect(status(engine, house).connected).toBe(false);
+  });
+});

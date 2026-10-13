@@ -11,19 +11,37 @@ import { MapInfo } from './MapInfo';
 import { Notice } from './Notice';
 import { PanelHost } from './panels/PanelHost';
 
+/** Klik mimo režimu stavby vyberie budovu (stavba ide cez `handlePlaceMany`). */
 function handleTileClick(position: Position): void {
   const ui = useUiStore.getState();
-  if (ui.buildModeId) {
-    const result = controller.execute({
-      type: 'PLACE_BUILDING',
-      buildingId: ui.buildModeId,
-      position,
-    });
-    if (!result.success) ui.showNotice(commandReasonLabel(result.reason));
-    return;
-  }
   const tile = controller.state.world.tiles[position.y * controller.state.world.width + position.x];
   ui.selectInstance(tile?.buildingId ?? null);
+}
+
+/** Ťahanie v režime stavby: postaví budovy postupne a zhrnie výsledok. */
+function handlePlaceMany(buildingId: string, positions: Position[]): void {
+  const ui = useUiStore.getState();
+  let placed = 0;
+  let firstFailure: string | null = null;
+  for (const position of positions) {
+    const result = controller.execute({ type: 'PLACE_BUILDING', buildingId, position });
+    if (result.success) placed++;
+    else firstFailure ??= result.reason;
+  }
+  if (positions.length === 1) {
+    if (firstFailure) ui.showNotice(commandReasonLabel(firstFailure));
+    return;
+  }
+  if (firstFailure) {
+    ui.showNotice(
+      t('build.partial', {
+        placed,
+        failed: positions.length - placed,
+        reason: commandReasonLabel(firstFailure),
+      }),
+      placed > 0 ? 'info' : 'warning',
+    );
+  }
 }
 
 export function MapView() {
@@ -45,6 +63,7 @@ export function MapView() {
           {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),
             onTileClick: handleTileClick,
+            onPlaceMany: handlePlaceMany,
             canPlace: (buildingId, position) => controller.canPlace(buildingId, position).success,
           },
         ),

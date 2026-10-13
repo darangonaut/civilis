@@ -10,6 +10,7 @@ import { footprint, getTile, isInBounds, tileIndex } from '../world/grid';
 import { refreshDerivedState } from '../economy/analysis';
 import { startResearch } from '../research/research';
 import { upgradeBuilding } from './upgrade';
+import { demolishRefund } from './levels';
 import type { CommandFailureReason } from './commandReasons';
 import {
   DEFAULT_BUILDING_PRIORITY,
@@ -110,6 +111,20 @@ function demolishBuilding(state: GameState, data: GameData, instanceId: string):
   for (const p of footprint(size, instance.position)) {
     const tile = getTile(state.world, p.x, p.y);
     if (tile?.buildingId === instance.id) delete tile.buildingId;
+  }
+  // Recyklácia: časť investovaných surovín sa vráti (do kapacity skladu, vedomosti bez limitu).
+  if (definition) {
+    const refund = demolishRefund(definition, instance.level, data.balance.demolishRefund);
+    const resources = state.city.economy.resources;
+    const capacity = state.city.economy.storageCapacity;
+    for (const id of RESOURCE_IDS) {
+      const amount = refund[id] ?? 0;
+      if (amount <= 0) continue;
+      resources[id] =
+        id === 'knowledge'
+          ? resources[id] + amount
+          : Math.max(resources[id], Math.min(capacity, resources[id] + amount));
+    }
   }
   state.city.buildings.splice(index, 1);
   refreshDerivedState(state, data);

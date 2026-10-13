@@ -3,7 +3,7 @@ import { commandReasonLabel, problemLabel, resourceLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { effectiveDefinition, maxLevel, upgradeRequirements } from '@/engine';
+import { demolishRefund, effectiveDefinition, maxLevel, upgradeRequirements } from '@/engine';
 import { TECH_LOOKS } from '@/renderer/pixel/sprites';
 import { useUiStore } from '@/stores/uiStore';
 import {
@@ -77,6 +77,7 @@ function InstanceSection({ instance }: { instance: BuildingInstance }) {
 
   const problems = status?.problems ?? [];
   const baseDefinition = gameData.buildingsById.get(instance.definitionId)!;
+  const refund = demolishRefund(baseDefinition, instance.level, gameData.balance.demolishRefund);
   const techId = TECH_LOOKS[instance.definitionId];
   const research = useGameState((s) => s.research.completedTechnologyIds);
   const lookTech =
@@ -172,6 +173,12 @@ function InstanceSection({ instance }: { instance: BuildingInstance }) {
         )}
         <button className="danger" onClick={demolish} data-testid="demolish">
           {t('detail.demolish')}
+          {hasAny(refund) && (
+            <span className="muted">
+              {' '}
+              ({t('detail.refund')} {formatResources(refund)})
+            </span>
+          )}
         </button>
       </div>
     </div>

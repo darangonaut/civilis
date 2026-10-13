@@ -96,19 +96,83 @@ test('výber budovy na mape, zbúranie a Escape', async ({ page }) => {
   await expect(page.getByTestId('top-bar')).toContainText('10 / 0');
 });
 
-test('ťahanie myšou posúva mapu bez umiestnenia budovy', async ({ page }) => {
+test('pravé tlačidlo posúva mapu aj v režime stavby', async ({ page }) => {
   await openGame(page);
   const before = await buildingCount(page);
   await page.getByTestId('building-catalog').locator('[data-building-id="road"]').click();
   const { tile, client } = await findPlaceableTile(page, 'road');
 
   await page.mouse.move(client.x, client.y);
-  await page.mouse.down();
+  await page.mouse.down({ button: 'right' });
   await page.mouse.move(client.x + 120, client.y + 60, { steps: 5 });
-  await page.mouse.up();
+  await page.mouse.up({ button: 'right' });
 
   expect(await buildingCount(page)).toBe(before);
   const moved = await page.evaluate((t) => window.__civilis!.tileToClient(t), tile);
   expect(moved.x).toBeCloseTo(client.x + 120, 0);
   expect(moved.y).toBeCloseTo(client.y + 60, 0);
+});
+
+test('ťahaním sa postaví celá cesta naraz', async ({ page }) => {
+  await openGame(page);
+  // Nájde 5 voľných políčok v rade.
+  const row = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const s = hook.getState();
+    const w = s.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let y = w.y - 6; y <= w.y + 6; y++) {
+      for (let x = w.x - 8; x <= w.x + 4; x++) {
+        const tiles = [0, 1, 2, 3, 4].map((d) => ({ x: x + d, y }));
+        if (tiles.every((t) => hook.canPlace('road', t))) {
+          return { tiles, from: hook.tileToClient(tiles[0]!), to: hook.tileToClient(tiles[4]!) };
+        }
+      }
+    }
+    throw new Error('Žiadny voľný rad');
+  });
+  const before = await buildingCount(page);
+  await page.getByTestId('building-catalog').locator('[data-building-id="road"]').click();
+  await page.mouse.move(row.from.x, row.from.y);
+  await page.mouse.down();
+  await page.mouse.move(row.to.x, row.to.y, { steps: 8 });
+  await page.mouse.up();
+
+  expect(await buildingCount(page)).toBe(before + 5);
+  const roads = await page.evaluate(() =>
+    window
+      .__civilis!.getState()
+      .city.buildings.filter((b) => b.definitionId === 'road')
+      .map((b) => b.position),
+  );
+  for (const tile of row.tiles) expect(roads).toContainEqual(tile);
+});
+
+test('ťahaním sa vyplní obdĺžnik budov a pri nedostatku surovín sa zobrazí zhrnutie', async ({
+  page,
+}) => {
+  await openGame(page);
+  const area = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const s = hook.getState();
+    const w = s.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let y = w.y - 8; y <= w.y + 6; y++) {
+      for (let x = w.x - 8; x <= w.x + 6; x++) {
+        const tiles = [0, 1, 2].flatMap((dy) => [0, 1, 2].map((dx) => ({ x: x + dx, y: y + dy })));
+        if (tiles.every((t) => hook.canPlace('house', t))) {
+          return { from: hook.tileToClient(tiles[0]!), to: hook.tileToClient(tiles[8]!) };
+        }
+      }
+    }
+    throw new Error('Žiadna voľná plocha 3 × 3');
+  });
+  const before = await buildingCount(page);
+  await page.getByTestId('building-catalog').locator('[data-building-id="house"]').click();
+  await page.mouse.move(area.from.x, area.from.y);
+  await page.mouse.down();
+  await page.mouse.move(area.to.x, area.to.y, { steps: 8 });
+  await page.mouse.up();
+
+  // 80 dreva = 8 domov z 9.
+  expect(await buildingCount(page)).toBe(before + 8);
+  await expect(page.getByTestId('notice').filter({ hasText: 'Postavené: 8' })).toBeVisible();
 });
