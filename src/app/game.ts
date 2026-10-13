@@ -5,6 +5,7 @@ import { SaveService } from '@/persistence/saveService';
 import { takeUnloadSnapshot } from '@/persistence/unloadSnapshot';
 import type { GameState } from '@/types';
 import { GameController } from './GameController';
+import { createGameId } from './ids';
 
 const params = new URLSearchParams(window.location.search);
 
@@ -21,7 +22,7 @@ function randomSeed(): number {
 export function createFreshGame(seed: number = randomSeed()): GameState {
   return createNewGame(gameData, {
     seed,
-    gameId: crypto.randomUUID(),
+    gameId: createGameId(),
     now: new Date().toISOString(),
   });
 }
