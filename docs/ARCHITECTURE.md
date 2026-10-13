@@ -9,16 +9,16 @@ PixiJS Renderer (src/renderer) ─────┘           │
 
 ## Vrstvy a pravidlá závislostí
 
-| Adresár            | Zodpovednosť                                                         | Smie importovať                                                |
-| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `src/types/`       | Dátový kontrakt zo špecifikácie (sekcie 5–6). Iba typy a konštanty.  | nič                                                            |
-| `src/engine/`      | Čistá deterministická simulácia, validácia dát a príkazov.           | `@/types`, `zod`                                               |
-| `src/data/`        | Deklaratívne JSON definície + načítanie cez `loadGameData`.          | `@/engine/core`, `@/types`                                     |
-| `src/persistence/` | Dexie, save sloty, export/import, migrácie.                          | `@/engine`, `@/types`, `dexie`                                 |
-| `src/app/`         | Game Controller (herná slučka, napojenie engine ↔ store), i18n, App. | všetko                                                         |
-| `src/stores/`      | Zustand — iba UI stav a snapshot herného stavu pre React.            | `@/types`, `zustand`                                           |
-| `src/renderer/`    | PixiJS izometrický renderer, kamera, picking.                        | `@/types`, `@/data`, `pixi.js`                                 |
-| `src/components/`  | React komponenty.                                                    | `@/app`, `@/stores`, `@/data`, `@/types`, `@/renderer/palette` |
+| Adresár            | Zodpovednosť                                                         | Smie importovať                                                      |
+| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `src/types/`       | Dátový kontrakt zo špecifikácie (sekcie 5–6). Iba typy a konštanty.  | nič                                                                  |
+| `src/engine/`      | Čistá deterministická simulácia, validácia dát a príkazov.           | `@/types`, `zod`                                                     |
+| `src/data/`        | Deklaratívne JSON definície + načítanie cez `loadGameData`.          | `@/engine/core`, `@/types`                                           |
+| `src/persistence/` | Dexie, save sloty, export/import, migrácie.                          | `@/engine`, `@/types`, `dexie`                                       |
+| `src/app/`         | Game Controller (herná slučka, napojenie engine ↔ store), i18n, App. | všetko                                                               |
+| `src/stores/`      | Zustand — iba UI stav a snapshot herného stavu pre React.            | `@/types`, `zustand`                                                 |
+| `src/renderer/`    | PixiJS izometrický renderer, kamera, picking.                        | `@/types`, `@/data`, `pixi.js`                                       |
+| `src/components/`  | React komponenty.                                                    | `@/app`, `@/stores`, `@/data`, `@/types`, `@/renderer/pixel/sprites` |
 
 Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslint.config.js`
 (React, PixiJS, Zustand, Dexie ani vyššie vrstvy nesmú byť v `src/engine/**`).
@@ -73,3 +73,15 @@ Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslin
 - `tests/e2e` — Playwright v Chromiu a Firefoxe; `PW_WEBKIT=1` pridá WebKit (potrebuje
   `sudo npx playwright install-deps webkit`). Testy používajú `?seed=42&e2e&paused`; `?e2e`
   sprístupní `window.__civilis` (čítanie stavu, `canPlace`, `tileToClient`, `advanceDays`).
+
+## Grafika — pixel art
+
+- `renderer/pixel/PixelCanvas.ts` — RGBA plátno bez vyhladzovania: polygóny testom stredu pixela
+  (čisté schodíky 2:1, políčka sa skladajú bez medzier a prekryvov), ASCII sprity, obrys.
+  Čistý TypeScript, testované v `tests/unit/pixelCanvas.test.ts`.
+- `renderer/pixel/sprites.ts` — paleta a všetky sprity (terén vo 4 variantoch, budovy, obrys
+  políčka, výstražná značka). Políčko má 32 × 16 logických pixelov.
+- `renderer/textures.ts` — sprity → Pixi textúry s filtrom `nearest`; aplikácia beží s
+  `antialias: false` a `roundPixels: true`, kamera má celočíselné úrovne zoomu (½, 1, 2, 3, 4)
+  a zaokrúhľuje polohu na celé pixely.
+- Katalóg budov používa tie isté sprity ako ikony (`components/BuildingIcon.tsx`, 2×).

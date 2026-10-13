@@ -1,7 +1,7 @@
 import { categoryLabel, t } from '@/app/i18n';
 import { gameData } from '@/data';
-import { buildingSwatchColor } from '@/renderer/palette';
 import { useUiStore } from '@/stores/uiStore';
+import { BuildingIcon } from './BuildingIcon';
 import { useGameState } from '@/app/useGameState';
 import {
   BUILDING_CATEGORIES,
@@ -81,11 +81,7 @@ export function BuildingCatalog() {
                   data-building-id={b.id}
                   onClick={() => setBuildMode(buildModeId === b.id ? null : b.id)}
                 >
-                  <span
-                    className="building-swatch"
-                    style={{ background: buildingSwatchColor(b.id) }}
-                    aria-hidden
-                  />
+                  <BuildingIcon definitionId={b.id} />
                   <span className="building-name">{b.name}</span>
                   <span className="building-cost">{formatCost(b.constructionCost, resources)}</span>
                 </button>

@@ -10,9 +10,9 @@ import {
 
 extensions.add(CullerPlugin);
 
-const MIN_ZOOM = 0.35;
-const MAX_ZOOM = 2.5;
-const ZOOM_STEP = 1.15;
+/** Celočíselné úrovne zoomu drží pixely rovnako veľké (½ je prehľad celej mapy). */
+const ZOOM_LEVELS = [0.5, 1, 2, 3, 4] as const;
+const DEFAULT_ZOOM = 2;
 /** Posun myšou väčší ako toto (px) sa berie ako ťahanie, nie klik. */
 const DRAG_THRESHOLD = 5;
 
@@ -21,8 +21,8 @@ const PREVIEW_INVALID = 0xff6b6b;
 const SELECTION_COLOR = 0xffd75e;
 /** Strana bloku terénu pre culling. */
 const TERRAIN_CHUNK = 16;
-/** Výška výstražnej značky nad stredom políčka. */
-const MARKER_OFFSET = 26;
+/** Výška výstražnej značky nad stredom políčka (logické pixely). */
+const MARKER_OFFSET = 14;
 
 export interface RendererCallbacks {
   onTileHover(position: Position | null): void;
@@ -105,13 +105,14 @@ export class GameRenderer {
     await this.app.init({
       resizeTo: this.host,
       background: 0x15171b,
-      antialias: true,
+      antialias: false,
+      roundPixels: true,
       autoDensity: true,
       resolution: window.devicePixelRatio || 1,
     });
     this.app.canvas.classList.add('map-canvas');
     this.host.appendChild(this.app.canvas);
-    this.atlas = createTextureAtlas(this.app.renderer, buildingIds);
+    this.atlas = createTextureAtlas(buildingIds);
 
     this.camera.addChild(
       this.terrainLayer,
@@ -308,10 +309,10 @@ export class GameRenderer {
       y: Math.floor(state.world.height / 2),
     };
     const world = tileToWorld(anchor.x, anchor.y);
-    this.camera.scale.set(1);
+    this.camera.scale.set(DEFAULT_ZOOM);
     this.camera.position.set(
-      this.app.screen.width / 2 - world.x,
-      this.app.screen.height / 2 - world.y,
+      this.app.screen.width / 2 - world.x * DEFAULT_ZOOM,
+      this.app.screen.height / 2 - world.y * DEFAULT_ZOOM,
     );
     this.clampCamera();
   }
@@ -325,7 +326,8 @@ export class GameRenderer {
     const cy = this.app.screen.height / 2;
     const worldCx = Math.min(bounds.maxX, Math.max(bounds.minX, (cx - this.camera.x) / scale));
     const worldCy = Math.min(bounds.maxY, Math.max(bounds.minY, (cy - this.camera.y) / scale));
-    this.camera.position.set(cx - worldCx * scale, cy - worldCy * scale);
+    // Celé obrazovkové pixely — pixel art ostane ostrý.
+    this.camera.position.set(Math.round(cx - worldCx * scale), Math.round(cy - worldCy * scale));
   }
 
   private tileAt(clientX: number, clientY: number): Position | null {
@@ -404,9 +406,12 @@ export class GameRenderer {
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
+      if (e.deltaY === 0) return;
       const oldScale = this.camera.scale.x;
-      const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-      const newScale = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, oldScale * factor));
+      const level = ZOOM_LEVELS.findIndex((z) => z >= oldScale - 1e-6);
+      const next = Math.min(ZOOM_LEVELS.length - 1, Math.max(0, level + (e.deltaY < 0 ? 1 : -1)));
+      const newScale = ZOOM_LEVELS[next]!;
+      if (newScale === oldScale) return;
       // Bod pod kurzorom zostane na mieste.
       const wx = (sx - this.camera.x) / oldScale;
       const wy = (sy - this.camera.y) / oldScale;

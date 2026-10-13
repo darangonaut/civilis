@@ -1,8 +1,8 @@
 import type { Position } from '@/types';
 
-/** Rozmery izometrického políčka v pixeloch pri zoome 1. */
-export const TILE_WIDTH = 64;
-export const TILE_HEIGHT = 32;
+/** Rozmery izometrického políčka v logických pixeloch (pixel art) pri zoome 1. */
+export const TILE_WIDTH = 32;
+export const TILE_HEIGHT = 16;
 const HALF_W = TILE_WIDTH / 2;
 const HALF_H = TILE_HEIGHT / 2;
 
