@@ -7,6 +7,8 @@ Pixel art grafika.
 
 TypeScript · React · Vite · PixiJS 8 · Zustand · Dexie · Zod · Vitest · Playwright
 
+**Hrať online:** https://darangonaut.github.io/civilis/
+
 ## Spustenie
 
 ```sh
@@ -15,6 +17,7 @@ npm run dev          # http://localhost:5173
 ```
 
 Produkčný build: `npm run build` → statické súbory v `dist/` (stačí ich servovať, žiadny backend).
+Nasadenie na GitHub Pages: `npm run deploy:pages` (vetva `gh-pages`).
 Náhľad buildu: `npm run preview`.
 
 ## Ako hrať

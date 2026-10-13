@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:full": "CIVILIS_FULL=1 vitest run tests/integration/playthrough.test.ts"
+    "test:full": "CIVILIS_FULL=1 vitest run tests/integration/playthrough.test.ts",
+    "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "dependencies": {
     "dexie": "^4.4.6",
