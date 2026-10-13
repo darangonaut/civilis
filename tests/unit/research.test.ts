@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CivilisEngine } from '@/engine/core/engine';
 import { createTestCity, setCity } from '../helpers/fixtures';
+import { economyTestData } from '../helpers/gameData';
 
 const research = (engine: CivilisEngine) => engine.getState().research;
 const knowledge = (engine: CivilisEngine) => engine.getState().city.economy.resources.knowledge;
@@ -16,6 +17,7 @@ function expectRejected(engine: CivilisEngine, technologyId: string, reason: str
 
 describe('výskum', () => {
   it('postupne spotrebúva vedomosti a po zaplatení ceny aktivuje technológiu', () => {
+    const cost = economyTestData.technologiesById.get('woodworking')!.cost;
     const engine = createTestCity({ resources: { knowledge: 6, food: 100 } });
     expect(engine.execute({ type: 'START_RESEARCH', technologyId: 'woodworking' })).toEqual({
       success: true,
@@ -27,14 +29,14 @@ describe('výskum', () => {
     });
     expect(knowledge(engine)).toBe(0);
 
-    setCity(engine, { resources: { knowledge: 10, food: 100 } });
+    setCity(engine, { resources: { knowledge: cost, food: 100 } });
     engine.tick();
     expect(research(engine)).toEqual({
       completedTechnologyIds: ['woodworking'],
       activeTechnologyId: null,
       investedKnowledge: 0,
     });
-    // Investuje sa len zvyšok ceny (10 − 6 = 4).
+    // Investuje sa len zvyšok ceny (cena − 6).
     expect(knowledge(engine)).toBe(6);
     expect(engine.takeEvents()).toContainEqual({
       type: 'research_completed',

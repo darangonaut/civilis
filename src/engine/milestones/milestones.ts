@@ -42,6 +42,13 @@ function conditionValue(state: Readonly<GameState>, data: GameData, condition: M
         current: city.buildings.filter((b) => b.definitionId === condition.buildingId).length,
         target: condition.minimum,
       };
+    case 'building_level':
+      return {
+        current: city.buildings.filter(
+          (b) => b.definitionId === condition.buildingId && b.level >= condition.level,
+        ).length,
+        target: condition.minimum,
+      };
     case 'completed_research':
       return { current: research.completedTechnologyIds.length, target: condition.minimum };
     case 'all_research_completed':

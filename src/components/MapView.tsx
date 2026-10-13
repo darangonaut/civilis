@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { commandReasonLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
+import { currentMarkers } from '@/app/markers';
 import { installTestHook } from '@/app/testHook';
 import { gameData } from '@/data';
 import type { GameRenderer } from '@/renderer/GameRenderer';
@@ -23,15 +24,6 @@ function handleTileClick(position: Position): void {
   }
   const tile = controller.state.world.tiles[position.y * controller.state.world.width + position.x];
   ui.selectInstance(tile?.buildingId ?? null);
-}
-
-/** Budovy s aspoň jedným problémom (okrem zámerne vypnutých). */
-function problemIds(): Set<string> {
-  const ids = new Set<string>();
-  for (const status of controller.analysis.statuses.values()) {
-    if (status.problems.some((p) => p.code !== 'disabled')) ids.add(status.instanceId);
-  }
-  return ids;
 }
 
 export function MapView() {
@@ -64,13 +56,13 @@ export function MapView() {
           return;
         }
         renderer = created;
-        renderer.sync(controller.state, problemIds());
+        renderer.sync(controller.state, currentMarkers());
         const ui = useUiStore.getState();
         renderer.setBuildMode(ui.buildModeId);
         renderer.setSelectedInstance(ui.selectedInstanceId);
 
         unsubscribers.push(
-          controller.subscribe(() => created.sync(controller.state, problemIds())),
+          controller.subscribe(() => created.sync(controller.state, currentMarkers())),
           useUiStore.subscribe((s, prev) => {
             if (s.buildModeId !== prev.buildModeId) created.setBuildMode(s.buildModeId);
             if (s.selectedInstanceId !== prev.selectedInstanceId)

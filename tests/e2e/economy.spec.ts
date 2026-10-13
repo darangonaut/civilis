@@ -48,6 +48,9 @@ test('nepripojená budova ukáže „Chýba cesta“, po dostavaní cesty funguj
   await page.mouse.click(spot.house.x, spot.house.y);
   const status = page.getByTestId('building-status');
   await expect(status).toContainText('Chýba cesta');
+  // Dôvod značky sa ukáže aj pri prejdení myšou nad budovou.
+  await page.mouse.move(spot.house.x, spot.house.y);
+  await expect(page.getByTestId('map-info')).toContainText('Chýba cesta');
   await expect(page.getByTestId('top-bar')).toContainText('10 / 10');
 
   await catalog.locator('[data-building-id="road"]').click();

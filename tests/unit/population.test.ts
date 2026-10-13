@@ -75,22 +75,29 @@ describe('spokojnosť', () => {
 });
 
 describe('populácia', () => {
-  it('pri spokojnosti ≥ 60, voľnom bývaní a jedle rastie', () => {
+  it('pri spokojnosti ≥ 60, voľnom bývaní a jedle rastie plynulo (zlomky sa sčítavajú)', () => {
+    const { populationBaseGrowth: base, populationGrowthRate: rate } = economyTestData.balance;
     const engine = cityWithHouses(4, { population: 10 });
     setCity(engine, { happiness: 80 });
+    const perDay = base + 10 * rate;
+    const daysToFirst = Math.ceil(1 / perDay);
+    for (let i = 0; i < daysToFirst - 1; i++) engine.tick();
+    expect(population(engine).total).toBe(10);
+    expect(population(engine).growthProgress).toBeCloseTo((daysToFirst - 1) * perDay);
+    engine.takeEvents();
     engine.tick();
     expect(population(engine).total).toBe(11);
     expect(engine.takeEvents()).toContainEqual({ type: 'population_changed', delta: 1 });
   });
 
-  it('rast je percento populácie (min. 1) a neprekročí kapacitu bývania', () => {
+  it('rast neprekročí kapacitu bývania', () => {
     const engine = cityWithHouses(5, { population: 45 });
-    setCity(engine, { happiness: 100 });
-    engine.tick();
-    const rate = economyTestData.balance.populationGrowthRate;
-    expect(population(engine).total).toBe(45 + Math.max(1, Math.floor(45 * rate)));
-    for (let i = 0; i < 10; i++) engine.tick();
+    for (let i = 0; i < 200; i++) {
+      setCity(engine, { happiness: 100 });
+      engine.tick();
+    }
     expect(population(engine).total).toBe(50);
+    expect(population(engine).growthProgress).toBe(0);
   });
 
   it('bez jedla nerastie', () => {
@@ -128,8 +135,7 @@ describe('populácia', () => {
   it('rast populácie zvýši počet pracovníkov', () => {
     const engine = cityWithHouses(4, { population: 10 });
     setCity(engine, { happiness: 80 });
-    for (let i = 0; i < 3; i++) engine.tick();
-    expect(population(engine).total).toBe(13);
+    while (population(engine).total < 12) engine.tick();
     expect(population(engine).availableWorkers).toBe(6);
   });
 });

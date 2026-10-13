@@ -6,6 +6,7 @@ import {
   type Resources,
 } from '@/types';
 import type { GameData } from '../core/definitions';
+import { effectiveDefinition } from '../core/levels';
 import { computeRoadNetwork, isBuildingConnected } from '../world/connectivity';
 import { getTile } from '../world/grid';
 import { maintenanceMultiplier, productionMultiplier } from './modifiers';
@@ -85,8 +86,9 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
   let storageCapacity = balance.baseStorageCapacity;
   let maintenanceBase = 0;
   for (const building of state.city.buildings) {
-    const definition = data.buildingsById.get(building.definitionId);
-    if (!definition) continue;
+    const base = data.buildingsById.get(building.definitionId);
+    if (!base) continue;
+    const definition = effectiveDefinition(base, building.level);
     const connected = isBuildingConnected(state, data, roadNetwork, building);
     if (connected) {
       housingCapacity += definition.housingCapacity;
@@ -129,8 +131,9 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
   let moneyIncome = 0;
   for (const building of ordered) {
     const status = statuses.get(building.id);
-    const definition = data.buildingsById.get(building.definitionId);
-    if (!status || !definition) continue;
+    const base = data.buildingsById.get(building.definitionId);
+    if (!status || !base) continue;
+    const definition = effectiveDefinition(base, building.level);
     status.maintenance = definition.maintenanceCost * maintenanceFactor;
 
     if (!building.enabled) {

@@ -68,3 +68,26 @@ Konkrétne čísla sú v `docs/BALANCING.md`.
   IndexedDB by prehliadač nemusel dokončiť. Pri ďalšom štarte sa táto záloha prednostne načíta
   a presunie do automatického uloženia.
 - Pri štarte sa automaticky obnoví rozohraná hra. `?seed=N` alebo `?new` vždy založí novú hru.
+
+## Úrovne budov a vzhľad (2026-10-13, na želanie)
+
+- **Dom** má 3 úrovne: Dom (10 obyvateľov) → Murovaný dom (20; Kamenárstvo, studňa v dosahu) →
+  Meštiansky dom (35; Mestská správa, studňa aj fungujúca škola v dosahu). **Sklad** má 2 úrovne
+  (Veľký sklad; Organizácia práce). Vylepšuje sa príkazom `UPGRADE_BUILDING` za suroviny.
+- Úrovne sú v dátach (`levels`), engine počíta s efektívnymi parametrami (`effectiveDefinition`).
+  Na úrovni závisí aj vzhľad (`house@2`, `house@3`, `warehouse@2`).
+- **Technológie menia vzhľad** výroby (efekty ostávajú zo špecifikácie): píla (Spracovanie dreva),
+  zavlažovanie s veterným kolesom (Zavlažovanie), žeriav a otesané bloky (Kamenárstvo), kováčska
+  vyhňa (Organizácia práce), zvonica školy (Vzdelávanie), tretí stánok trhoviska (Mestská správa).
+- **Cesty** sú hlinené chodníky, po Kamenárstve dláždené.
+- **Pozastavenie budovy** (`SET_BUILDING_ENABLED`): pozastavená budova nezamestnáva, nevyrába ani
+  nespotrebúva — napr. dielňa, keď je nástrojov dosť (inak by minula všetok kameň).
+- **Plynulý rast populácie:** denne 0,3 + 0,5 % populácie, zlomky sa sčítavajú v
+  `population.growthProgress`.
+
+## Značky nad budovami
+
+Bublina so symbolom ukazuje najvážnejší problém: cesta (chýba napojenie), postavička (žiadni /
+málo pracovníkov — oranžová), debnička (chýba surovina alebo nástroje), minca (prázdna pokladnica),
+žltá debna (plný sklad), zelená šípka (budovu možno vylepšiť). Dôvod sa zobrazí aj pri prejdení
+myšou nad budovou; legenda je v Nastaveniach.

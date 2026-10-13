@@ -2,43 +2,79 @@
   {
     "id": "woodworking",
     "name": "Spracovanie dreva",
-    "cost": 10,
+    "cost": 20,
     "prerequisites": [],
-    "effects": [{ "type": "production_multiplier", "target": "wood", "multiplier": 1.2 }]
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "wood",
+        "multiplier": 1.2
+      }
+    ]
   },
   {
     "id": "irrigation",
     "name": "Zavlažovanie",
-    "cost": 15,
+    "cost": 30,
     "prerequisites": [],
-    "effects": [{ "type": "production_multiplier", "target": "food", "multiplier": 1.2 }]
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "food",
+        "multiplier": 1.2
+      }
+    ]
   },
   {
     "id": "masonry",
     "name": "Kamenárstvo",
-    "cost": 15,
+    "cost": 30,
     "prerequisites": [],
-    "effects": [{ "type": "production_multiplier", "target": "stone", "multiplier": 1.2 }]
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "stone",
+        "multiplier": 1.2
+      }
+    ]
   },
   {
     "id": "labor_organization",
     "name": "Organizácia práce",
-    "cost": 20,
+    "cost": 40,
     "prerequisites": ["woodworking"],
-    "effects": [{ "type": "production_multiplier", "target": "all", "multiplier": 1.1 }]
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "all",
+        "multiplier": 1.1
+      }
+    ]
   },
   {
     "id": "education",
     "name": "Vzdelávanie",
-    "cost": 25,
+    "cost": 50,
     "prerequisites": [],
-    "effects": [{ "type": "production_multiplier", "target": "knowledge", "multiplier": 1.5 }]
+    "effects": [
+      {
+        "type": "production_multiplier",
+        "target": "knowledge",
+        "multiplier": 1.5
+      }
+    ]
   },
   {
     "id": "city_administration",
     "name": "Mestská správa",
-    "cost": 30,
+    "cost": 60,
     "prerequisites": ["labor_organization"],
-    "effects": [{ "type": "maintenance_multiplier", "target": "all", "multiplier": 0.8 }]
+    "effects": [
+      {
+        "type": "maintenance_multiplier",
+        "target": "all",
+        "multiplier": 0.8
+      }
+    ]
   }
 ]

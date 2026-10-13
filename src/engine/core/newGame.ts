@@ -33,6 +33,7 @@ function placeStartingBuildings(world: World, data: GameData): BuildingInstance[
       position: { x: center.x + offset.x, y: center.y + offset.y },
       enabled: true,
       priority: DEFAULT_BUILDING_PRIORITY,
+      level: 1,
     };
     for (const p of footprint(definition, instance.position)) {
       // Počiatočné budovy stoja vždy na tráve, bez ohľadu na vygenerovaný terén.
@@ -69,6 +70,7 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
         employedWorkers: 0,
         happiness: start.happiness,
         happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
+        growthProgress: 0,
       },
       economy: {
         resources: { ...start.resources },

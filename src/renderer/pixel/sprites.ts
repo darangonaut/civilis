@@ -297,147 +297,296 @@ function finish(pc: PixelCanvas, cx: number, cy: number): PixelSprite {
   return sprite(pc, cx, cy);
 }
 
-type Drawer = () => PixelSprite;
+/** Výška plátna nad políčkom pre všetky budovy (spoločná, aby varianty mohli pridávať detaily). */
+const BUILDING_TOP = 32;
 
-const BUILDINGS: Record<string, Drawer> = {
-  road: () => {
-    const { pc, cx, cy } = tileCanvas(0);
-    pc.fillDiamond(cx, cy, HW, (x, y) => {
-      // Dlažba: tmavé škáry v mriežke, svetlé kamene.
-      const joint = (x + 2 * y) % 6 === 0 || (x - 2 * y + 600) % 8 === 0;
-      if (joint) return P.roadDark;
-      return pixelNoise(x, y, 31) < 0.08 ? P.roadLight : P.road;
-    });
-    return sprite(pc, cx, cy);
-  },
+type Painter = (pc: PixelCanvas, cx: number, cy: number) => void;
 
-  house: () => {
-    const { pc, cx, cy } = tileCanvas(20);
-    const hw = 10;
-    isoBox(pc, cx, cy, hw, 9, { top: P.plaster, left: P.plaster, right: P.plasterShade });
-    hipRoof(pc, cx, cy, hw, 9, 9, P.roof, P.roofShade);
-    pc.stamp(...leftWall(cx, cy, hw, 4, 7), WINDOW, DETAIL_PAL);
-    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
-    pc.fillRect(cx + 4, cy - 21, 2, 4, P.brickShade);
-    return finish(pc, cx, cy);
-  },
+const LOG_PILE = (pc: PixelCanvas, x: number, y: number) => pc.stamp(x, y, LOGS, LOGS_PAL);
 
-  lumberjack: () => {
-    const { pc, cx, cy } = tileCanvas(16);
-    const hw = 8;
-    isoBox(pc, cx + 2, cy - 1, hw, 7, { top: P.wood, left: P.wood, right: P.woodShade });
-    hipRoof(pc, cx + 2, cy - 1, hw, 7, 6, P.woodShade, P.woodDark);
-    pc.stamp(...rightWall(cx + 2, cy - 1, hw, 3, 4), DOOR, DETAIL_PAL);
-    pc.stamp(cx - 13, cy - 1, LOGS, LOGS_PAL);
-    pc.stamp(cx - 9, cy + 2, LOGS, LOGS_PAL);
-    return finish(pc, cx, cy);
-  },
+const paintHouse: Painter = (pc, cx, cy) => {
+  const hw = 10;
+  isoBox(pc, cx, cy, hw, 9, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+  hipRoof(pc, cx, cy, hw, 9, 9, P.roof, P.roofShade);
+  pc.stamp(...leftWall(cx, cy, hw, 4, 7), WINDOW, DETAIL_PAL);
+  pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+  pc.fillRect(cx + 4, cy - 21, 2, 4, P.brickShade);
+};
 
-  farm: () => {
-    const { pc, cx, cy } = tileCanvas(10);
-    // Pole s klasmi v radoch.
+const paintLumberjack: Painter = (pc, cx, cy) => {
+  const hw = 8;
+  isoBox(pc, cx + 2, cy - 1, hw, 7, { top: P.wood, left: P.wood, right: P.woodShade });
+  hipRoof(pc, cx + 2, cy - 1, hw, 7, 6, P.woodShade, P.woodDark);
+  pc.stamp(...rightWall(cx + 2, cy - 1, hw, 3, 4), DOOR, DETAIL_PAL);
+  LOG_PILE(pc, cx - 13, cy - 1);
+  LOG_PILE(pc, cx - 9, cy + 2);
+};
+
+const paintFarm =
+  (irrigated: boolean): Painter =>
+  (pc, cx, cy) => {
     pc.fillDiamond(cx, cy, HW - 1, (x, y) => {
-      const row = (((x >> 1) + y) & 3) < 2;
-      if (!row) return P.soilDark;
+      const band = ((x >> 1) + y) & 7;
+      if (irrigated && band === 0) return P.water;
+      if ((band & 3) >= 2) return P.soilDark;
       return pixelNoise(x, y, 77) < 0.25 ? P.wheatLight : P.wheat;
     });
-    // Stodola v zadnom rohu.
     isoBox(pc, cx, cy - 4, 5, 5, { top: P.roof, left: P.roof, right: P.roofShade });
     hipRoof(pc, cx, cy - 4, 5, 5, 4, P.roofShade, P.roofDark);
-    return finish(pc, cx, cy);
-  },
-
-  quarry: () => {
-    const { pc, cx, cy } = tileCanvas(6);
-    pc.fillDiamond(cx, cy, 13, dither([P.stoneDark, P.stoneDeep], [0.7, 0.3], 5));
-    pc.fillDiamond(cx, cy + 1, 8, P.stoneDeep);
-    pc.stamp(cx - 10, cy - 6, BOULDER_BIG, BOULDER_PAL);
-    pc.stamp(cx + 4, cy - 5, BOULDER_BIG, BOULDER_PAL);
-    pc.stamp(cx - 2, cy + 1, BOULDER, BOULDER_PAL);
-    // Kopáč (krompáč) opretý o kameň.
-    pc.fillRect(cx + 9, cy - 2, 1, 5, P.woodShade);
-    pc.fillRect(cx + 7, cy - 3, 5, 1, P.stoneLight);
-    return finish(pc, cx, cy);
-  },
-
-  well: () => {
-    const { pc, cx, cy } = tileCanvas(16);
-    isoBox(pc, cx, cy, 6, 4, { top: P.stone, left: P.stone, right: P.stoneDark });
-    pc.fillDiamond(cx, cy - 4, 4, P.waterDeep);
-    pc.fillRect(cx - 6, cy - 14, 1, 10, P.woodDark);
-    pc.fillRect(cx + 5, cy - 14, 1, 10, P.woodDark);
-    hipRoof(pc, cx, cy - 6, 6, 8, 4, P.roof, P.roofShade);
-    pc.fillRect(cx - 1, cy - 9, 3, 1, P.woodShade);
-    return finish(pc, cx, cy);
-  },
-
-  warehouse: () => {
-    const { pc, cx, cy } = tileCanvas(16);
-    const hw = 13;
-    isoBox(pc, cx, cy, hw, 10, { top: P.wood, left: P.wood, right: P.woodShade });
-    // Doskové obloženie.
-    for (let dx = 3; dx < hw; dx += 3) {
-      const [x, y] = leftWall(cx, cy, hw, dx, 10);
-      pc.fillRect(x, y + 1, 1, 9, P.woodShade);
+    if (irrigated) {
+      // Veterné koleso čerpadla.
+      pc.fillRect(cx + 9, cy - 10, 1, 9, P.woodDark);
+      pc.stamp(cx + 6, cy - 13, ['w.w.w', '.www.', 'wwHww', '.www.', 'w.w.w'], {
+        w: P.plaster,
+        H: P.woodDark,
+      });
     }
-    hipRoof(pc, cx, cy, hw, 10, 5, P.stoneDark, P.stoneDeep);
+  };
+
+const paintQuarry: Painter = (pc, cx, cy) => {
+  pc.fillDiamond(cx, cy, 13, dither([P.stoneDark, P.stoneDeep], [0.7, 0.3], 5));
+  pc.fillDiamond(cx, cy + 1, 8, P.stoneDeep);
+  pc.stamp(cx - 10, cy - 6, BOULDER_BIG, BOULDER_PAL);
+  pc.stamp(cx + 4, cy - 5, BOULDER_BIG, BOULDER_PAL);
+  pc.stamp(cx - 2, cy + 1, BOULDER, BOULDER_PAL);
+  pc.fillRect(cx + 9, cy - 2, 1, 5, P.woodShade);
+  pc.fillRect(cx + 7, cy - 3, 5, 1, P.stoneLight);
+};
+
+const paintWarehouse =
+  (big: boolean): Painter =>
+  (pc, cx, cy) => {
+    const hw = big ? 14 : 13;
+    const h = big ? 13 : 10;
+    if (big) isoBox(pc, cx, cy, hw, 4, { top: P.stone, left: P.stone, right: P.stoneDark });
+    isoBox(pc, cx, cy - (big ? 4 : 0), hw, h - (big ? 4 : 0), {
+      top: P.wood,
+      left: P.wood,
+      right: P.woodShade,
+    });
+    for (let dx = 3; dx < hw; dx += 3) {
+      const [x, y] = leftWall(cx, cy, hw, dx, h);
+      pc.fillRect(x, y + 1, 1, big ? 8 : 9, P.woodShade);
+    }
+    hipRoof(
+      pc,
+      cx,
+      cy,
+      hw,
+      h,
+      big ? 7 : 5,
+      big ? P.roof : P.stoneDark,
+      big ? P.roofShade : P.stoneDeep,
+    );
     const [dx, dy] = rightWall(cx, cy, hw, 4, 7);
     pc.stamp(dx, dy, ['dddd', 'dDDd', 'dDDd', 'dDDd', 'dDDd', 'dDDd', 'dDDd'], DETAIL_PAL);
-    return finish(pc, cx, cy);
-  },
+    if (big) pc.stamp(...rightWall(cx, cy, hw, 9, 12), ['ddd', 'dDd', 'dDd'], DETAIL_PAL);
+  };
 
-  workshop: () => {
-    const { pc, cx, cy } = tileCanvas(20);
-    const hw = 11;
-    isoBox(pc, cx, cy, hw, 8, { top: P.brick, left: P.brick, right: P.brickShade });
-    hipRoof(pc, cx, cy, hw, 8, 7, P.stoneDark, P.stoneDeep);
-    pc.stamp(...leftWall(cx, cy, hw, 4, 6), WINDOW, DETAIL_PAL);
-    pc.stamp(...rightWall(cx, cy, hw, 3, 5), DOOR, DETAIL_PAL);
-    // Komín s dymom.
-    pc.fillRect(cx + 5, cy - 19, 3, 6, P.stoneDeep);
-    pc.set(cx + 6, cy - 21, P.smoke);
-    pc.set(cx + 7, cy - 22, P.smoke);
-    pc.set(cx + 8, cy - 23, P.smoke);
-    return finish(pc, cx, cy);
-  },
+const paintWorkshop: Painter = (pc, cx, cy) => {
+  const hw = 11;
+  isoBox(pc, cx, cy, hw, 8, { top: P.brick, left: P.brick, right: P.brickShade });
+  hipRoof(pc, cx, cy, hw, 8, 7, P.stoneDark, P.stoneDeep);
+  pc.stamp(...leftWall(cx, cy, hw, 4, 6), WINDOW, DETAIL_PAL);
+  pc.stamp(...rightWall(cx, cy, hw, 3, 5), DOOR, DETAIL_PAL);
+  pc.fillRect(cx + 5, cy - 19, 3, 6, P.stoneDeep);
+  pc.set(cx + 6, cy - 21, P.smoke);
+  pc.set(cx + 7, cy - 22, P.smoke);
+  pc.set(cx + 8, cy - 23, P.smoke);
+};
 
-  school: () => {
-    const { pc, cx, cy } = tileCanvas(30);
-    const hw = 11;
-    isoBox(pc, cx, cy, hw, 13, { top: P.plaster, left: P.plaster, right: P.plasterShade });
-    hipRoof(pc, cx, cy, hw, 13, 8, P.purple, P.purpleShade);
-    pc.stamp(...leftWall(cx, cy, hw, 3, 10), WINDOW, DETAIL_PAL);
-    pc.stamp(...leftWall(cx, cy, hw, 7, 10), WINDOW, DETAIL_PAL);
-    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
-    pc.stamp(...rightWall(cx, cy, hw, 8, 10), WINDOW, DETAIL_PAL);
-    // Stožiar s vlajkou.
-    pc.fillRect(cx, cy - 30, 1, 9, P.woodDark);
-    pc.fillRect(cx + 1, cy - 30, 4, 3, P.roof);
-    return finish(pc, cx, cy);
-  },
+const paintSchool: Painter = (pc, cx, cy) => {
+  const hw = 11;
+  isoBox(pc, cx, cy, hw, 13, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+  hipRoof(pc, cx, cy, hw, 13, 8, P.purple, P.purpleShade);
+  pc.stamp(...leftWall(cx, cy, hw, 3, 10), WINDOW, DETAIL_PAL);
+  pc.stamp(...leftWall(cx, cy, hw, 7, 10), WINDOW, DETAIL_PAL);
+  pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+  pc.stamp(...rightWall(cx, cy, hw, 8, 10), WINDOW, DETAIL_PAL);
+  pc.fillRect(cx, cy - 30, 1, 9, P.woodDark);
+  pc.fillRect(cx + 1, cy - 30, 4, 3, P.roof);
+};
 
-  market: () => {
-    const { pc, cx, cy } = tileCanvas(12);
-    // Dva stánky s pruhovanými markízami.
-    for (const [ox, oy] of [
-      [-6, -2],
-      [6, 2],
-    ] as const) {
+const paintMarket =
+  (stalls: number): Painter =>
+  (pc, cx, cy) => {
+    const spots: [number, number][] =
+      stalls >= 3
+        ? [
+            [-7, -1],
+            [0, -4],
+            [7, 1],
+          ]
+        : [
+            [-6, -2],
+            [6, 2],
+          ];
+    for (const [ox, oy] of spots) {
       isoBox(pc, cx + ox, cy + oy, 5, 4, { top: P.wood, left: P.wood, right: P.woodShade });
       pc.fillRect(cx + ox - 5, cy + oy - 9, 1, 6, P.woodDark);
       pc.fillRect(cx + ox + 4, cy + oy - 9, 1, 6, P.woodDark);
       pc.fillDiamond(cx + ox, cy + oy - 9, 6, (x) => ((x >> 1) & 1 ? P.roof : P.white));
     }
     pc.stamp(cx - 2, cy + 3, ['.oo.', 'oYYo', 'oYYo', '.oo.'], { o: P.woodDark, Y: P.wheat });
-    return finish(pc, cx, cy);
+  };
+
+/** Kreslenie budov podľa kľúča sprite-u (`id`, `id@úroveň`, `id+` = vzhľad po technológii). */
+const PAINTERS: Record<string, Painter> = {
+  house: paintHouse,
+
+  'house@2': (pc, cx, cy) => {
+    // Murovaný dom: kamenný, väčší, škridlová strecha, dve okná.
+    const hw = 11;
+    isoBox(pc, cx, cy, hw, 11, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    for (let dx = 2; dx < hw; dx += 4) {
+      const [x, y] = leftWall(cx, cy, hw, dx, 6);
+      pc.fillRect(x, y, 2, 1, P.stone);
+    }
+    hipRoof(pc, cx, cy, hw, 11, 10, P.roof, P.roofShade);
+    pc.stamp(...leftWall(cx, cy, hw, 3, 8), WINDOW, DETAIL_PAL);
+    pc.stamp(...leftWall(cx, cy, hw, 8, 8), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 8, 9), WINDOW, DETAIL_PAL);
+    pc.fillRect(cx - 5, cy - 25, 2, 5, P.stoneDeep);
+  },
+
+  'house@3': (pc, cx, cy) => {
+    // Meštiansky dom: dvojpodlažný, tehlové prízemie, omietnuté poschodie, tmavá strecha.
+    const hw = 12;
+    isoBox(pc, cx, cy, hw, 8, { top: P.brick, left: P.brick, right: P.brickShade });
+    isoBox(pc, cx, cy - 8, hw, 9, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    hipRoof(pc, cx, cy, hw, 17, 10, P.purpleShade, P.ink);
+    for (const dx of [3, 8]) {
+      pc.stamp(...leftWall(cx, cy, hw, dx, 6), WINDOW, DETAIL_PAL);
+      pc.stamp(...leftWall(cx, cy, hw, dx, 14), WINDOW, DETAIL_PAL);
+    }
+    pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 9, 14), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 4, 14), WINDOW, DETAIL_PAL);
+    // Balkón s kvetmi.
+    const [bx, by] = rightWall(cx, cy, hw, 3, 9);
+    pc.fillRect(bx, by, 5, 1, P.woodDark);
+    pc.set(bx + 1, by - 1, P.roof);
+    pc.set(bx + 3, by - 1, P.glow);
+  },
+
+  lumberjack: paintLumberjack,
+  'lumberjack+': (pc, cx, cy) => {
+    paintLumberjack(pc, cx, cy);
+    // Píla: kotúč so zubami a kopa dosiek.
+    pc.stamp(cx + 5, cy - 4, ['.s.s.', 'sSSSs', '.SoS.', 'sSSSs', '.s.s.'], {
+      s: P.stone,
+      S: P.stoneLight,
+      o: P.stoneDeep,
+    });
+    pc.stamp(cx - 2, cy + 3, ['pppppp', 'PPPPPP', 'pppppp'], { p: P.soilLight, P: P.wood });
+  },
+
+  farm: paintFarm(false),
+  'farm+': paintFarm(true),
+
+  quarry: paintQuarry,
+  'quarry+': (pc, cx, cy) => {
+    paintQuarry(pc, cx, cy);
+    // Drevený žeriav s lanom a otesané bloky.
+    pc.fillRect(cx - 8, cy - 22, 1, 18, P.woodDark);
+    pc.fillRect(cx - 8, cy - 22, 12, 1, P.woodDark);
+    pc.fillRect(cx + 3, cy - 21, 1, 8, P.stoneDeep);
+    pc.stamp(cx + 1, cy - 13, ['SSSS', 'SLLS', 'SSSS'], { S: P.stoneDark, L: P.stoneLight });
+    pc.stamp(cx - 13, cy + 1, ['LLL', 'SSS'], { S: P.stone, L: P.stoneLight });
+  },
+
+  well: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 6, 4, { top: P.stone, left: P.stone, right: P.stoneDark });
+    pc.fillDiamond(cx, cy - 4, 4, P.waterDeep);
+    pc.fillRect(cx - 6, cy - 14, 1, 10, P.woodDark);
+    pc.fillRect(cx + 5, cy - 14, 1, 10, P.woodDark);
+    hipRoof(pc, cx, cy - 6, 6, 8, 4, P.roof, P.roofShade);
+    pc.fillRect(cx - 1, cy - 9, 3, 1, P.woodShade);
+  },
+
+  warehouse: paintWarehouse(false),
+  'warehouse@2': paintWarehouse(true),
+
+  workshop: paintWorkshop,
+  'workshop+': (pc, cx, cy) => {
+    paintWorkshop(pc, cx, cy);
+    // Kováčska vyhňa: žeravý otvor a nákova.
+    const [fx, fy] = leftWall(cx, cy, 11, 8, 4);
+    pc.stamp(fx, fy, ['ooo', 'oGo', 'GGG'], { o: P.stoneDeep, G: P.glow });
+    pc.stamp(cx - 13, cy + 1, ['.SSSS', 'SSSS.', '..S..', '.SSS.'], { S: P.stoneDeep });
+  },
+
+  school: paintSchool,
+  'school+': (pc, cx, cy) => {
+    paintSchool(pc, cx, cy);
+    // Zvonica na streche.
+    isoBox(pc, cx - 4, cy - 24, 3, 6, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    pc.set(cx - 4, cy - 26, P.wheat);
+    pc.fillDiamond(cx - 4, cy - 31, 4, P.purpleShade);
+  },
+
+  market: paintMarket(2),
+  'market+': (pc, cx, cy) => {
+    paintMarket(3)(pc, cx, cy);
+    pc.fillRect(cx + 11, cy - 16, 1, 14, P.woodDark);
+    pc.stamp(cx + 12, cy - 16, ['yy', 'rr', 'yy'], { y: P.wheat, r: P.roof });
   },
 };
 
-export function drawBuilding(definitionId: string): PixelSprite {
-  const drawer = BUILDINGS[definitionId];
-  if (drawer) return drawer();
-  const { pc, cx, cy } = tileCanvas(10);
-  isoBox(pc, cx, cy, 8, 8, { top: 0xff00ff, left: 0xcc00cc, right: 0x990099 });
+const FLAT: Record<string, Painter> = {
+  // Hlinený chodník (pred Kamenárstvom).
+  road: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, HW, (x, y) => {
+      const rut = ((x >> 1) + y) % 8 === 2 || ((x >> 1) + y) % 8 === 5;
+      if (rut) return P.soilDark;
+      return pixelNoise(x, y, 41) < 0.1 ? P.soilLight : P.soil;
+    });
+  },
+  // Dláždená cesta (po Kamenárstve).
+  'road+': (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, HW, (x, y) => {
+      const joint = (x + 2 * y) % 6 === 0 || (x - 2 * y + 600) % 8 === 0;
+      if (joint) return P.roadDark;
+      return pixelNoise(x, y, 31) < 0.08 ? P.roadLight : P.road;
+    });
+  },
+};
+
+/** Technológia, ktorá zmení vzhľad budovy (rozpoznávací znak „+“ v kľúči sprite-u). */
+export const TECH_LOOKS: Readonly<Record<string, string>> = {
+  road: 'masonry',
+  lumberjack: 'woodworking',
+  farm: 'irrigation',
+  quarry: 'masonry',
+  workshop: 'labor_organization',
+  school: 'education',
+  market: 'city_administration',
+};
+
+/** Kľúč sprite-u podľa typu, úrovne a preskúmaných technológií. */
+export function buildingSpriteKey(
+  definitionId: string,
+  level: number,
+  completedTechnologyIds: readonly string[],
+): string {
+  if (level > 1 && PAINTERS[`${definitionId}@${level}`]) return `${definitionId}@${level}`;
+  const tech = TECH_LOOKS[definitionId];
+  if (tech && completedTechnologyIds.includes(tech)) return `${definitionId}+`;
+  return definitionId;
+}
+
+export function drawBuilding(key: string): PixelSprite {
+  const flat = FLAT[key];
+  if (flat) {
+    const { pc, cx, cy } = tileCanvas(0);
+    flat(pc, cx, cy);
+    return sprite(pc, cx, cy);
+  }
+  const { pc, cx, cy } = tileCanvas(BUILDING_TOP);
+  const painter = PAINTERS[key];
+  if (painter) painter(pc, cx, cy);
+  else isoBox(pc, cx, cy, 8, 8, { top: 0xff00ff, left: 0xcc00cc, right: 0x990099 });
   return finish(pc, cx, cy);
 }
 
@@ -454,25 +603,46 @@ export function drawTileOutline(): PixelSprite {
   return sprite(pc, cx, cy);
 }
 
-/** Výstražná bublina „!“; kotva v dolnom hrote. */
-export function drawMarker(): PixelSprite {
-  const pc = new PixelCanvas(9, 12);
+export type MarkerKind =
+  'road' | 'workers' | 'understaffed' | 'goods' | 'money' | 'storage' | 'upgrade';
+
+const MARKER_GLYPHS: Record<MarkerKind, { bubble: Rgb; glyph: string[] }> = {
+  // Cesta s prerušovanou stredovou čiarou.
+  road: { bubble: P.roof, glyph: ['w...w', 'w.y.w', 'w...w', 'w.y.w', 'w...w'] },
+  // Postavička.
+  workers: { bubble: P.roof, glyph: ['.www.', '.www.', 'wwwww', '.www.', '.w.w.'] },
+  understaffed: { bubble: 0xf77622, glyph: ['.www.', '.www.', 'wwwww', '.www.', '.w.w.'] },
+  // Debnička (chýba surovina alebo nástroje).
+  goods: { bubble: P.roof, glyph: ['wwwww', 'w.w.w', 'wwwww', 'w.w.w', 'wwwww'] },
+  // Minca.
+  money: { bubble: P.roof, glyph: ['.yyy.', 'yyoyy', 'yoyyy', 'yyoyy', '.yyy.'] },
+  // Plný sklad — tmavá debna na žltej.
+  storage: { bubble: P.wheat, glyph: ['ooooo', 'o.o.o', 'ooooo', 'o.o.o', 'ooooo'] },
+  // Šípka hore — budova sa dá vylepšiť.
+  upgrade: { bubble: 0x3e8948, glyph: ['..w..', '.www.', 'wwwww', '..w..', '..w..'] },
+};
+
+/** Bublina so symbolom nad budovou; kotva v dolnom hrote. */
+export function drawMarker(kind: MarkerKind): PixelSprite {
+  const { bubble, glyph } = MARKER_GLYPHS[kind];
+  const pc = new PixelCanvas(9, 10);
   pc.stamp(
     0,
     0,
     [
       '.ooooooo.',
-      'oRRRWRRRo',
-      'oRRRWRRRo',
-      'oRRRWRRRo',
-      'oRRRWRRRo',
-      'oRRRRRRRo',
-      'oRRRWRRRo',
+      'oBBBBBBBo',
+      'oBBBBBBBo',
+      'oBBBBBBBo',
+      'oBBBBBBBo',
+      'oBBBBBBBo',
+      'oBBBBBBBo',
       '.ooooooo.',
-      '...oRo...',
+      '...oBo...',
       '....o....',
     ],
-    { o: P.ink, R: P.roof, W: P.white },
+    { o: P.ink, B: bubble },
   );
-  return { canvas: pc, anchorX: 4, anchorY: 10 };
+  pc.stamp(2, 1, glyph, { w: P.white, y: P.glow, o: P.ink });
+  return { canvas: pc, anchorX: 4, anchorY: 9 };
 }

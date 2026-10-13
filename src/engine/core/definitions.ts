@@ -28,6 +28,18 @@ export const resourcesSchema = z.strictObject({
 
 export const partialResourcesSchema = resourcesSchema.partial();
 
+const buildingLevelSchema = z.strictObject({
+  name: z.string().min(1),
+  upgradeCost: partialResourcesSchema,
+  requiredTechnologyId: id.optional(),
+  requiredServices: z.array(z.enum(SERVICE_TYPES)).optional(),
+  housingCapacity: z.number().int().nonnegative().optional(),
+  storageCapacity: z.number().int().nonnegative().optional(),
+  workersRequired: z.number().int().nonnegative().optional(),
+  maintenanceCost: nonNegative.optional(),
+  productionMultiplier: z.number().positive().optional(),
+});
+
 export const buildingDefinitionSchema = z.strictObject({
   id,
   name: z.string().min(1),
@@ -47,6 +59,7 @@ export const buildingDefinitionSchema = z.strictObject({
   toolUsePerWorker: nonNegative,
   service: z.strictObject({ type: z.enum(SERVICE_TYPES), radius: positiveInt }).optional(),
   requiredTechnologyId: id.optional(),
+  levels: z.array(buildingLevelSchema).optional(),
 }) satisfies z.ZodType<BuildingDefinition>;
 
 export const technologyDefinitionSchema = z.strictObject({
@@ -73,6 +86,12 @@ const milestoneConditionSchema = z.discriminatedUnion('type', [
     consecutiveDays: positiveInt.optional(),
   }),
   z.strictObject({ type: z.literal('building_count'), buildingId: id, minimum: positiveInt }),
+  z.strictObject({
+    type: z.literal('building_level'),
+    buildingId: id,
+    level: z.number().int().min(2),
+    minimum: positiveInt,
+  }),
   z.strictObject({ type: z.literal('completed_research'), minimum: positiveInt }),
   z.strictObject({ type: z.literal('all_research_completed') }),
   z.strictObject({
@@ -127,6 +146,7 @@ export const balanceSchema = z.strictObject({
   happinessGrowthThreshold: z.number().min(0).max(100),
   happinessChangePerDay: z.number().positive(),
   housingComfortMargin: z.number().positive().max(1),
+  populationBaseGrowth: nonNegative,
   populationGrowthRate: z.number().min(0).max(1),
   populationDeclineRate: z.number().min(0).max(1),
   happinessDeclineThreshold: z.number().min(0).max(100),
@@ -235,6 +255,13 @@ export function loadGameData(raw: RawGameData): GameData {
   }
 
   for (const building of buildings.data) {
+    for (const level of building.levels ?? []) {
+      if (level.requiredTechnologyId && !technologyIds.has(level.requiredTechnologyId)) {
+        issues.push(
+          `buildings[${building.id}]: úroveň "${level.name}" vyžaduje neznámu technológiu "${level.requiredTechnologyId}"`,
+        );
+      }
+    }
     if (building.requiredTechnologyId && !technologyIds.has(building.requiredTechnologyId)) {
       issues.push(
         `buildings[${building.id}]: neznáma technológia "${building.requiredTechnologyId}"`,
@@ -264,7 +291,19 @@ export function loadGameData(raw: RawGameData): GameData {
 
   for (const milestone of milestones.data) {
     for (const condition of milestone.conditions) {
-      if (condition.type === 'building_count' && !buildingIds.has(condition.buildingId)) {
+      if (condition.type === 'building_level') {
+        const levels =
+          buildings.data.find((b) => b.id === condition.buildingId)?.levels?.length ?? 0;
+        if (condition.level > levels + 1) {
+          issues.push(
+            `milestones[${milestone.id}]: budova "${condition.buildingId}" nemá úroveň ${condition.level}`,
+          );
+        }
+      }
+      if (
+        (condition.type === 'building_count' || condition.type === 'building_level') &&
+        !buildingIds.has(condition.buildingId)
+      ) {
         issues.push(`milestones[${milestone.id}]: neznáma budova "${condition.buildingId}"`);
       }
       if (condition.type === 'completed_research' && condition.minimum > technologyIds.size) {

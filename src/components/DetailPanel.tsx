@@ -3,6 +3,8 @@ import { commandReasonLabel, problemLabel, resourceLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
+import { effectiveDefinition, maxLevel, upgradeRequirements } from '@/engine';
+import { TECH_LOOKS } from '@/renderer/pixel/sprites';
 import { useUiStore } from '@/stores/uiStore';
 import {
   RESOURCE_IDS,
@@ -26,7 +28,9 @@ export function DetailPanel() {
   );
 
   const definitionId = instance?.definitionId ?? buildModeId;
-  const definition = definitionId ? gameData.buildingsById.get(definitionId) : undefined;
+  const base = definitionId ? gameData.buildingsById.get(definitionId) : undefined;
+  // Parametre a názov podľa aktuálnej úrovne budovy.
+  const definition = base && instance ? effectiveDefinition(base, instance.level) : base;
 
   return (
     <aside className="right-panel" data-testid="detail-panel">
@@ -72,6 +76,20 @@ function InstanceSection({ instance }: { instance: BuildingInstance }) {
   };
 
   const problems = status?.problems ?? [];
+  const baseDefinition = gameData.buildingsById.get(instance.definitionId)!;
+  const techId = TECH_LOOKS[instance.definitionId];
+  const research = useGameState((s) => s.research.completedTechnologyIds);
+  const lookTech =
+    techId && research.includes(techId) ? gameData.technologiesById.get(techId)?.name : undefined;
+
+  const toggleEnabled = () => {
+    const result = controller.execute({
+      type: 'SET_BUILDING_ENABLED',
+      instanceId: instance.id,
+      enabled: !instance.enabled,
+    });
+    if (!result.success) showNotice(commandReasonLabel(result.reason));
+  };
   const usesPriority =
     status !== undefined && (status.workersRequired > 0 || hasAny(status.consumed));
 
@@ -89,6 +107,20 @@ function InstanceSection({ instance }: { instance: BuildingInstance }) {
         )}
       </ul>
       <dl className="detail-list">
+        {maxLevel(baseDefinition) > 1 && (
+          <>
+            <dt>{t('detail.level')}</dt>
+            <dd data-testid="building-level">
+              {instance.level} / {maxLevel(baseDefinition)}
+            </dd>
+          </>
+        )}
+        {lookTech && (
+          <>
+            <dt>{t('detail.lookUpgraded')}</dt>
+            <dd>{lookTech}</dd>
+          </>
+        )}
         <dt>{t('detail.position')}</dt>
         <dd>
           [{instance.position.x}, {instance.position.y}]
@@ -131,10 +163,70 @@ function InstanceSection({ instance }: { instance: BuildingInstance }) {
           ))}
         </div>
       )}
-      <button className="danger" onClick={demolish} data-testid="demolish">
-        {t('detail.demolish')}
+      <UpgradeSection instance={instance} />
+      <div className="instance-actions">
+        {(status?.workersRequired ?? 0) > 0 && (
+          <button onClick={toggleEnabled} data-testid="toggle-enabled">
+            {instance.enabled ? t('detail.pause') : t('detail.resume')}
+          </button>
+        )}
+        <button className="danger" onClick={demolish} data-testid="demolish">
+          {t('detail.demolish')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function UpgradeSection({ instance }: { instance: BuildingInstance }) {
+  const showNotice = useUiStore((s) => s.showNotice);
+  const requirements = useGameState((s) =>
+    upgradeRequirements(s, gameData, instance, controller.analysis),
+  );
+  const definition = gameData.buildingsById.get(instance.definitionId)!;
+  if (maxLevel(definition) <= 1) return null;
+  if (!requirements) return <p className="muted hint">{t('detail.maxLevel')}</p>;
+
+  const { next, technologyMet, services, affordable } = requirements;
+  const ready = technologyMet && affordable && services.every((s) => s.met);
+  const tech = next.requiredTechnologyId
+    ? gameData.technologiesById.get(next.requiredTechnologyId)
+    : undefined;
+
+  const upgrade = () => {
+    const result = controller.execute({ type: 'UPGRADE_BUILDING', instanceId: instance.id });
+    if (result.success) showNotice(`${t('detail.upgraded')}: ${next.name}`, 'success');
+    else showNotice(commandReasonLabel(result.reason));
+  };
+
+  return (
+    <div className="upgrade-section" data-testid="upgrade-section">
+      <h3>
+        {t('detail.upgradeTo')}: {next.name}
+      </h3>
+      <ul className="requirement-list">
+        {tech && <Requirement met={technologyMet}>{tech.name}</Requirement>}
+        {services.map((service) => (
+          <Requirement key={service.type} met={service.met}>
+            {t(`detail.service.${service.type}`)}
+          </Requirement>
+        ))}
+        <Requirement met={affordable}>
+          {t('detail.upgradeCost')}: {formatResources(next.upgradeCost)}
+        </Requirement>
+      </ul>
+      <button className="primary" disabled={!ready} onClick={upgrade} data-testid="upgrade">
+        {t('detail.upgrade')}
       </button>
     </div>
+  );
+}
+
+function Requirement({ met, children }: { met: boolean; children: React.ReactNode }) {
+  return (
+    <li className={met ? 'met' : 'unmet'}>
+      {met ? '✓' : '✗'} {children}
+    </li>
   );
 }
 

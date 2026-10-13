@@ -264,3 +264,16 @@ describe('suroviny nikdy nie sú záporné', () => {
     }
   });
 });
+
+describe('pozastavená budova', () => {
+  it('nespotrebúva vstupy, nezamestnáva a hlási „Vypnutá“', () => {
+    const engine = createTestCity({ population: 10, resources: { wood: 10, stone: 10 } });
+    const workshop = build(engine, 'workshop', { x: 3, y: 3 });
+    engine.execute({ type: 'SET_BUILDING_ENABLED', instanceId: workshop, enabled: false });
+    expect(status(engine, workshop).workersAssigned).toBe(0);
+    expect(problems(engine, workshop)).toEqual(['disabled']);
+    engine.tick();
+    expect(resource(engine, 'wood')).toBe(10);
+    expect(resource(engine, 'stone')).toBe(10);
+  });
+});

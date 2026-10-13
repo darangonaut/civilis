@@ -9,7 +9,17 @@ export type Migration = (raw: Record<string, unknown>) => Record<string, unknown
  * Registrované migrácie: kľúč = zdrojová verzia. Pri zmene `GameState` zvýš SCHEMA_VERSION
  * a pridaj sem funkciu, ktorá prevedie staré dáta na nové.
  */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+export const MIGRATIONS: Readonly<Record<number, Migration>> = {
+  /** v1 → v2: budovy dostali úroveň (všetky doterajšie sú na úrovni 1). */
+  1: (raw) => {
+    const city = raw.city as { buildings?: Record<string, unknown>[] } | undefined;
+    if (!city || !Array.isArray(city.buildings)) return raw;
+    return {
+      ...raw,
+      city: { ...city, buildings: city.buildings.map((b) => ({ level: 1, ...b })) },
+    };
+  },
+};
 
 export type SaveErrorCode =
   'invalid_format' | 'newer_version' | 'missing_migration' | 'invalid_state';

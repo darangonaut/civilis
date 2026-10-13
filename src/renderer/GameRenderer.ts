@@ -1,6 +1,7 @@
 import { Application, Container, CullerPlugin, Sprite, extensions } from 'pixi.js';
 import type { GameState, Position } from '@/types';
 import { tileToWorld, worldBounds, worldToTile } from './iso';
+import { buildingSpriteKey, type MarkerKind } from './pixel/sprites';
 import {
   TERRAIN_VARIANTS,
   createTextureAtlas,
@@ -149,14 +150,14 @@ export class GameRenderer {
 
   /**
    * Synchronizuje sprity s herným stavom. Volá sa po každej zmene stavu.
-   * `problemIds` sú budovy, nad ktorými sa zobrazí výstražná značka.
+   * `markers` určuje, nad ktorými budovami sa zobrazí značka a akého druhu.
    */
-  sync(state: Readonly<GameState>, problemIds: ReadonlySet<string> = new Set()): void {
+  sync(state: Readonly<GameState>, markers: ReadonlyMap<string, MarkerKind> = new Map()): void {
     const worldChanged = this.renderedWorld !== state.world;
     this.state = state;
     if (worldChanged) this.buildTerrain(state.world);
     this.syncBuildings(state);
-    this.syncMarkers(state, problemIds);
+    this.syncMarkers(state, markers);
     // Nová alebo načítaná hra: kamera späť na mesto.
     if (worldChanged) this.centerOnStart();
     this.refreshOverlay();
@@ -230,13 +231,27 @@ export class GameRenderer {
     const present = new Set<string>();
     for (const building of state.city.buildings) {
       present.add(building.id);
+      // Vzhľad závisí od úrovne a preskúmaných technológií.
+      const key = buildingSpriteKey(
+        building.definitionId,
+        building.level,
+        state.research.completedTechnologyIds,
+      );
       let sprite = this.buildingSprites.get(building.id);
-      if (!sprite || sprite.label !== building.definitionId) {
+      if (
+        sprite &&
+        sprite.label !== key &&
+        sprite.label.split(/[@+]/)[0] === building.definitionId
+      ) {
+        sprite.label = key;
+        applyTexture(sprite, this.atlas.building(key));
+      }
+      if (!sprite || sprite.label !== key) {
         sprite?.destroy();
         sprite = new Sprite();
-        sprite.label = building.definitionId;
+        sprite.label = key;
         sprite.cullable = true;
-        applyTexture(sprite, this.atlas.building(building.definitionId));
+        applyTexture(sprite, this.atlas.building(key));
         (building.definitionId === 'road' ? this.roadLayer : this.buildingLayer).addChild(sprite);
         this.buildingSprites.set(building.id, sprite);
       }
@@ -251,22 +266,26 @@ export class GameRenderer {
     }
   }
 
-  private syncMarkers(state: Readonly<GameState>, problemIds: ReadonlySet<string>): void {
+  private syncMarkers(state: Readonly<GameState>, markers: ReadonlyMap<string, MarkerKind>): void {
     for (const [id, sprite] of this.markerSprites) {
-      if (!problemIds.has(id)) {
+      if (!markers.has(id)) {
         sprite.destroy();
         this.markerSprites.delete(id);
       }
     }
     for (const building of state.city.buildings) {
-      if (!problemIds.has(building.id)) continue;
+      const kind = markers.get(building.id);
+      if (!kind) continue;
       let marker = this.markerSprites.get(building.id);
       if (!marker) {
         marker = new Sprite();
         marker.cullable = true;
-        applyTexture(marker, this.atlas.marker);
         this.markerLayer.addChild(marker);
         this.markerSprites.set(building.id, marker);
+      }
+      if (marker.label !== kind) {
+        marker.label = kind;
+        applyTexture(marker, this.atlas.marker(kind));
       }
       const world = tileToWorld(building.position.x, building.position.y);
       marker.position.set(world.x, world.y - MARKER_OFFSET);
@@ -290,7 +309,12 @@ export class GameRenderer {
     this.preview.visible = showPreview;
     if (showPreview) {
       const valid = this.callbacks.canPlace(this.buildModeId!, hovered);
-      applyTexture(this.preview, this.atlas.building(this.buildModeId!));
+      const previewKey = buildingSpriteKey(
+        this.buildModeId!,
+        1,
+        this.state.research.completedTechnologyIds,
+      );
+      applyTexture(this.preview, this.atlas.building(previewKey));
       placeOnTile(this.preview, hovered);
       this.preview.zIndex = hovered.x + hovered.y + 0.5;
       this.preview.tint = valid ? PREVIEW_VALID : PREVIEW_INVALID;

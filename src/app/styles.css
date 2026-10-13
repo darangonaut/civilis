@@ -800,3 +800,72 @@ button.primary {
 .new-game-form input[aria-invalid='true'] {
   border-color: #d9534f;
 }
+
+.map-info-building {
+  margin: 2px 0 4px;
+}
+
+.map-info-problem {
+  color: #ffb3aa;
+}
+
+.map-info-ok {
+  color: #a8dca8;
+}
+
+.map-info-upgrade {
+  color: #8fd18f;
+}
+
+.marker-legend {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.marker-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.marker-icon {
+  image-rendering: pixelated;
+  flex-shrink: 0;
+}
+
+.upgrade-section {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+}
+
+.upgrade-section h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.requirement-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  font-size: 13px;
+}
+
+.requirement-list .met {
+  color: #a8dca8;
+}
+
+.requirement-list .unmet {
+  color: #ffb3aa;
+}
+
+.instance-actions {
+  display: flex;
+  gap: 6px;
+}

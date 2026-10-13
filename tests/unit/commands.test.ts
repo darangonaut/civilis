@@ -213,3 +213,26 @@ describe('engine', () => {
     expect(engine.getState().city.economy.money).toBe(0);
   });
 });
+
+describe('pozastavenie budovy', () => {
+  it('pozastavená budova nevyrába ani nezamestnáva a dá sa znova spustiť', () => {
+    const engine = setup();
+    const position = findFreeTile(engine.getState(), 'forest');
+    const roadless = engine.execute({ type: 'PLACE_BUILDING', buildingId: 'lumberjack', position });
+    expect(roadless.success).toBe(true);
+    const id = engine.getState().city.buildings.at(-1)!.id;
+    expect(
+      engine.execute({ type: 'SET_BUILDING_ENABLED', instanceId: id, enabled: false }),
+    ).toEqual({ success: true });
+    expect(engine.getState().city.buildings.at(-1)!.enabled).toBe(false);
+    expect(engine.execute({ type: 'SET_BUILDING_ENABLED', instanceId: id, enabled: true })).toEqual(
+      { success: true },
+    );
+    expect(engine.getState().city.buildings.at(-1)!.enabled).toBe(true);
+    expectRejected(
+      engine,
+      { type: 'SET_BUILDING_ENABLED', instanceId: 'nope', enabled: false },
+      'unknown_instance',
+    );
+  });
+});

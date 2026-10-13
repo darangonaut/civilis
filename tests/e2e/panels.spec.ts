@@ -98,3 +98,12 @@ test('katalóg ukazuje cenu a nedostupnosť pri nedostatku surovín', async ({ p
     'false',
   );
 });
+
+test('nastavenia obsahujú legendu značiek', async ({ page }) => {
+  await openGame(page);
+  await page.getByTestId('open-settings').click();
+  const legend = page.getByTestId('marker-legend');
+  await expect(legend.locator('li')).toHaveCount(7);
+  await expect(legend).toContainText('Chýba cesta');
+  await expect(legend).toContainText('vylepšiť');
+});

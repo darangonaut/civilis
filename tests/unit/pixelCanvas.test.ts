@@ -55,3 +55,29 @@ describe('pixelový rasterizér', () => {
     expect(canvas.get(4, 4)).toBeNull();
   });
 });
+
+describe('sprity budov', () => {
+  it('každá budova z dát má vlastný sprite (nie náhradný fialový kváder)', async () => {
+    const { drawBuilding, buildingSpriteKey, TECH_LOOKS } =
+      await import('@/renderer/pixel/sprites');
+    const { testData } = await import('../helpers/gameData');
+    const isFallback = (key: string) => {
+      const { canvas } = drawBuilding(key);
+      for (let i = 0; i < canvas.data.length; i += 4) {
+        if (canvas.data[i] === 0xff && canvas.data[i + 1] === 0 && canvas.data[i + 2] === 0xff)
+          return true;
+      }
+      return false;
+    };
+    const keys = new Set<string>();
+    for (const b of testData.buildings) {
+      for (let level = 1; level <= 1 + (b.levels?.length ?? 0); level++) {
+        keys.add(buildingSpriteKey(b.id, level, []));
+        keys.add(buildingSpriteKey(b.id, level, Object.values(TECH_LOOKS)));
+      }
+    }
+    for (const key of keys) expect(isFallback(key), key).toBe(false);
+    expect(keys.has('house@3')).toBe(true);
+    expect(keys.has('road+')).toBe(true);
+  });
+});

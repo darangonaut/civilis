@@ -1,19 +1,26 @@
-import type { GameState, HappinessFactors, ServiceType } from '@/types';
+import type {
+  BuildingDefinition,
+  BuildingInstance,
+  GameState,
+  HappinessFactors,
+  ServiceType,
+} from '@/types';
+import { effectiveDefinition } from '../core/levels';
 import type { GameData } from '../core/definitions';
 import type { CityAnalysis } from '../economy/analysis';
 import { footprint, tileIndex } from '../world/grid';
 
 /**
- * Podiel kapacity bývania (0–1) v dosahu aktívnej služby daného typu. Dosah je štvorec
- * (Chebyševova vzdialenosť ≤ radius) okolo budovy služby. Služba je aktívna, ak beží
- * (efektivita > 0) — studňa vždy, škola iba s pracovníkmi a cestou.
+ * Mriežka políčok v dosahu aktívnej služby daného typu. Dosah je štvorec (Chebyševova
+ * vzdialenosť ≤ radius) okolo budovy služby. Služba je aktívna, ak beží (efektivita > 0) —
+ * studňa vždy, škola iba s pracovníkmi a cestou.
  */
-export function serviceCoverage(
+export function serviceCoverageGrid(
   state: Readonly<GameState>,
   data: GameData,
   analysis: CityAnalysis,
   type: ServiceType,
-): number {
+): Uint8Array {
   const world = state.world;
   const covered = new Uint8Array(world.width * world.height);
   for (const building of state.city.buildings) {
@@ -35,21 +42,37 @@ export function serviceCoverage(
       }
     }
   }
+  return covered;
+}
 
+export function isBuildingCovered(
+  state: Readonly<GameState>,
+  definition: BuildingDefinition,
+  building: BuildingInstance,
+  grid: Uint8Array,
+): boolean {
+  return footprint(definition, building.position).some(
+    (p) => grid[tileIndex(state.world, p.x, p.y)] === 1,
+  );
+}
+
+/** Podiel kapacity bývania pripojených domov (0–1) v dosahu služby. */
+export function serviceCoverage(
+  state: Readonly<GameState>,
+  data: GameData,
+  analysis: CityAnalysis,
+  type: ServiceType,
+): number {
+  const grid = serviceCoverageGrid(state, data, analysis, type);
   let total = 0;
   let inRange = 0;
   for (const building of state.city.buildings) {
-    const definition = data.buildingsById.get(building.definitionId);
-    if (
-      !definition ||
-      definition.housingCapacity <= 0 ||
-      !analysis.statuses.get(building.id)?.connected
-    )
-      continue;
+    const base = data.buildingsById.get(building.definitionId);
+    if (!base || !analysis.statuses.get(building.id)?.connected) continue;
+    const definition = effectiveDefinition(base, building.level);
+    if (definition.housingCapacity <= 0) continue;
     total += definition.housingCapacity;
-    if (footprint(definition, building.position).some((p) => covered[tileIndex(world, p.x, p.y)])) {
-      inRange += definition.housingCapacity;
-    }
+    if (isBuildingCovered(state, definition, building, grid)) inRange += definition.housingCapacity;
   }
   return total > 0 ? inRange / total : 0;
 }
@@ -115,12 +138,21 @@ export function simulatePopulation(
   if (free < 0) {
     // Bez strechy nad hlavou obyvatelia odchádzajú bez ohľadu na spokojnosť.
     total -= Math.max(1, Math.ceil(-free * 0.5));
+    population.growthProgress = 0;
   } else if (population.happiness >= balance.happinessGrowthThreshold) {
     if (free > 0 && foodSatisfaction >= 1) {
-      total += Math.min(free, Math.max(1, Math.floor(total * balance.populationGrowthRate)));
+      // Plynulý rast: zlomky obyvateľov sa sčítavajú, kým nevznikne celý obyvateľ.
+      const progress =
+        population.growthProgress +
+        balance.populationBaseGrowth +
+        total * balance.populationGrowthRate;
+      const arrivals = Math.min(free, Math.floor(progress));
+      total += arrivals;
+      population.growthProgress = arrivals === free ? 0 : progress - Math.floor(progress);
     }
   } else if (population.happiness < balance.happinessDeclineThreshold) {
     total -= Math.max(1, Math.floor(total * balance.populationDeclineRate));
+    population.growthProgress = 0;
   }
 
   population.total = Math.max(balance.minimumPopulation, total);

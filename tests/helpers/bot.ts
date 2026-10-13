@@ -1,5 +1,6 @@
 import { analyzeCity } from '@/engine/economy/analysis';
 import { validatePlacement } from '@/engine/core/commands';
+import { upgradableBuildings } from '@/engine/core/upgrade';
 import { validateResearch } from '@/engine/research/research';
 import type { CivilisEngine } from '@/engine/core/engine';
 import type { GameData } from '@/engine/core/definitions';
@@ -189,16 +190,17 @@ export class Bot {
       wells.some(
         (w) => Math.max(Math.abs(w.position.x - p.x), Math.abs(w.position.y - p.y)) <= radius,
       );
-    const house = this.state.city.buildings.find(
+    const uncovered = this.state.city.buildings.filter(
       (b) => b.definitionId === 'house' && !covered(b.position),
     );
-    if (!house) return false;
-    for (let d = 1; d <= 3; d++) {
-      for (let dy = -d; dy <= d; dy++) {
-        for (let dx = -d; dx <= d; dx++) {
-          const p = { x: house.position.x + dx, y: house.position.y + dy };
-          if (getTile(world, p.x, p.y) && !this.isStreet(p) && this.canPlace('well', p))
-            return this.place('well', p);
+    for (const house of uncovered) {
+      for (let d = 1; d <= radius; d++) {
+        for (let dy = -d; dy <= d; dy++) {
+          for (let dx = -d; dx <= d; dx++) {
+            const p = { x: house.position.x + dx, y: house.position.y + dy };
+            if (getTile(world, p.x, p.y) && !this.isStreet(p) && this.canPlace('well', p))
+              return this.place('well', p);
+          }
         }
       }
     }
@@ -242,6 +244,18 @@ export class Bot {
       if (this.build('lumberjack', HIGH)) return true;
     }
 
+    // 2b. Dielne pozastaviť, keď je nástrojov dosť (žerú drevo a kameň), spustiť, keď dochádzajú.
+    for (const workshop of city.buildings.filter((b) => b.definitionId === 'workshop')) {
+      const enable = r.tools < 15 ? true : r.tools > 40 ? false : workshop.enabled;
+      if (enable !== workshop.enabled) {
+        this.engine.execute({
+          type: 'SET_BUILDING_ENABLED',
+          instanceId: workshop.id,
+          enabled: enable,
+        });
+      }
+    }
+
     // 3. Nástroje, keď zásoba vydrží menej ako 15 dní.
     let toolsNeeded = 0;
     for (const status of analysis.statuses.values()) {
@@ -272,6 +286,18 @@ export class Bot {
     // 4. Voda pre všetky domy.
     if (population.happinessFactors.water < 100 && this.affordable('well')) {
       if (this.buildWell()) return true;
+    }
+
+    // 5a. Vylepšenie budovy, ak to ide (domy dávajú viac bývania, míľniky ich vyžadujú).
+    const upgradable = upgradableBuildings(this.state, this.data, analysis);
+    const toUpgrade =
+      city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'house') ??
+      city.buildings.find((b) => upgradable.has(b.id));
+    if (toUpgrade && r.stone > 10) {
+      if (this.engine.execute({ type: 'UPGRADE_BUILDING', instanceId: toUpgrade.id }).success) {
+        this.log.push(`deň ${this.state.simulation.day}: vylepšenie ${toUpgrade.definitionId}`);
+        return true;
+      }
     }
 
     // 5. Bývanie s rezervou nad 10 %.

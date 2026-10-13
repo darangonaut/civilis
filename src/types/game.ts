@@ -18,6 +18,8 @@ export interface PopulationState {
   happiness: number;
   /** Zložky spokojnosti z posledného dňa (0–100). Rozšírenie oproti špecifikácii. */
   happinessFactors: HappinessFactors;
+  /** Rozpracovaný prírastok (0–1) — zlomky obyvateľov z plynulého rastu (schéma v2). */
+  growthProgress: number;
 }
 
 export interface EconomyState {
@@ -73,6 +75,10 @@ export type GameCommand =
   | { type: 'PLACE_BUILDING'; buildingId: string; position: Position }
   | { type: 'DEMOLISH_BUILDING'; instanceId: string }
   | { type: 'SET_BUILDING_PRIORITY'; instanceId: string; priority: number }
+  /** Rozšírenie oproti špecifikácii: pozastavenie / spustenie budovy (pole `enabled`). */
+  | { type: 'SET_BUILDING_ENABLED'; instanceId: string; enabled: boolean }
+  /** Rozšírenie oproti špecifikácii: vylepšenie budovy na ďalšiu úroveň. */
+  | { type: 'UPGRADE_BUILDING'; instanceId: string }
   | { type: 'START_RESEARCH'; technologyId: string }
   /** Rozšírenie oproti špecifikácii: aj rýchlosť je súčasť herného stavu. */
   | { type: 'SET_SPEED'; speed: SimulationSpeed };

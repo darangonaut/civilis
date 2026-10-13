@@ -80,7 +80,7 @@ test('výber budovy na mape, zbúranie a Escape', async ({ page }) => {
 
   await page.mouse.click(house.client.x, house.client.y);
   const detail = page.getByTestId('detail-panel');
-  await expect(detail.getByRole('heading', { name: 'Dom' })).toBeVisible();
+  await expect(detail.getByRole('heading', { name: 'Dom', exact: true })).toBeVisible();
 
   await page.keyboard.press('Escape');
   await expect(detail).toContainText('Vyber budovu');

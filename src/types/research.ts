@@ -29,6 +29,7 @@ export type MilestoneCondition =
   | { type: 'population'; minimum: number }
   | { type: 'happiness'; minimum: number; consecutiveDays?: number }
   | { type: 'building_count'; buildingId: string; minimum: number }
+  | { type: 'building_level'; buildingId: string; level: number; minimum: number }
   | { type: 'completed_research'; minimum: number }
   | { type: 'all_research_completed' }
   | { type: 'resource_balance'; resource: ResourceId; minimum: number; consecutiveDays: number }

@@ -1,18 +1,37 @@
-import { t } from '@/app/i18n';
+import { controller } from '@/app/game';
+import { problemLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
+import { levelName } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 
-/** Informácia o políčku pod kurzorom a aktívnom režime výstavby. */
+/** Informácia o políčku a budove pod kurzorom — vrátane dôvodu výstražnej značky. */
 export function MapInfo() {
   const hovered = useUiStore((s) => s.hoveredTile);
   const buildModeId = useUiStore((s) => s.buildModeId);
-  const tile = useGameState((state) =>
-    hovered ? state.world.tiles[hovered.y * state.world.width + hovered.x] : undefined,
-  );
+  const info = useGameState((state) => {
+    if (!hovered) return null;
+    const tile = state.world.tiles[hovered.y * state.world.width + hovered.x];
+    if (!tile) return null;
+    const building = tile.buildingId
+      ? state.city.buildings.find((b) => b.id === tile.buildingId)
+      : undefined;
+    const definition = building ? gameData.buildingsById.get(building.definitionId) : undefined;
+    const problems = building
+      ? (controller.analysis.statuses.get(building.id)?.problems ?? []).filter(
+          (p) => p.code !== 'disabled',
+        )
+      : [];
+    return {
+      tile,
+      buildingName: building && definition ? levelName(definition, building.level) : null,
+      problems,
+      canUpgrade: building ? controller.upgradable.has(building.id) : false,
+    };
+  });
   const buildName = buildModeId ? gameData.buildingsById.get(buildModeId)?.name : undefined;
 
-  if (!tile && !buildName) return null;
+  if (!info && !buildName) return null;
   return (
     <div className="map-info" data-testid="map-info">
       {buildName && (
@@ -20,10 +39,25 @@ export function MapInfo() {
           <span className="muted">{t('map.buildMode')}:</span> {buildName}
         </div>
       )}
-      {tile && hovered && (
-        <div>
-          <span className="muted">{t('map.tile')}</span> [{hovered.x}, {hovered.y}] ·{' '}
-          {t(`terrain.${tile.terrain}`)} · {t('map.fertility')} {tile.fertility}
+      {info?.buildingName && (
+        <div className="map-info-building">
+          <strong>{info.buildingName}</strong>
+          {info.problems.length > 0 ? (
+            info.problems.map((problem, i) => (
+              <div key={i} className="map-info-problem">
+                ⚠ {problemLabel(problem)}
+              </div>
+            ))
+          ) : (
+            <div className="map-info-ok">✓ {t('map.ok')}</div>
+          )}
+          {info.canUpgrade && <div className="map-info-upgrade">⬆ {t('map.canUpgrade')}</div>}
+        </div>
+      )}
+      {info && hovered && (
+        <div className="muted">
+          {t('map.tile')} [{hovered.x}, {hovered.y}] · {t(`terrain.${info.tile.terrain}`)} ·{' '}
+          {t('map.fertility')} {info.tile.fertility}
         </div>
       )}
     </div>

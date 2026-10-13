@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { t, type TranslationKey } from '@/app/i18n';
 import { startNewGame } from '@/app/saving';
 import { useGameState } from '@/app/useGameState';
+import { MARKER_LEGEND } from '@/app/markers';
+import { MarkerIcon } from '../MarkerIcon';
 import { PanelFrame } from './PanelFrame';
 
 const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
@@ -51,6 +53,16 @@ export function SettingsPanel() {
       <p className="muted hint">
         {t('settings.currentSeed')}: {seed}
       </p>
+
+      <h3>{t('settings.markers')}</h3>
+      <ul className="marker-legend" data-testid="marker-legend">
+        {MARKER_LEGEND.map(([kind, label]) => (
+          <li key={kind}>
+            <MarkerIcon kind={kind} />
+            <span>{t(label)}</span>
+          </li>
+        ))}
+      </ul>
 
       <h3>{t('settings.shortcuts')}</h3>
       <dl className="detail-list">

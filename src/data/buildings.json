@@ -19,7 +19,30 @@
     "storageCapacity": 0,
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
-    "toolUsePerWorker": 0
+    "toolUsePerWorker": 0,
+    "levels": [
+      {
+        "name": "Murovaný dom",
+        "upgradeCost": {
+          "stone": 15,
+          "tools": 4
+        },
+        "requiredTechnologyId": "masonry",
+        "requiredServices": ["water"],
+        "housingCapacity": 20
+      },
+      {
+        "name": "Meštiansky dom",
+        "upgradeCost": {
+          "wood": 20,
+          "stone": 25,
+          "tools": 8
+        },
+        "requiredTechnologyId": "city_administration",
+        "requiredServices": ["water", "education"],
+        "housingCapacity": 35
+      }
+    ]
   },
   {
     "id": "road",
@@ -166,7 +189,20 @@
     "storageCapacity": 200,
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
-    "toolUsePerWorker": 0
+    "toolUsePerWorker": 0,
+    "levels": [
+      {
+        "name": "Veľký sklad",
+        "upgradeCost": {
+          "wood": 30,
+          "stone": 30,
+          "tools": 5
+        },
+        "requiredTechnologyId": "labor_organization",
+        "storageCapacity": 450,
+        "maintenanceCost": 1
+      }
+    ]
   },
   {
     "id": "workshop",

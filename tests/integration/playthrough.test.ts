@@ -5,8 +5,8 @@ import { playthrough } from '../helpers/bot';
 import { testData } from '../helpers/gameData';
 
 const SEEDS = [1, 2, 3, 7, 42, 99, 1234];
-/** Horná hranica dní pre bota s jednou stavebnou akciou denne (≈ 13 minút pri 1×). */
-const MAX_DAYS = 400;
+/** Horná hranica dní pre bota s jednou stavebnou akciou denne (bot dnes potrebuje ~330–370). */
+const MAX_DAYS = 500;
 
 describe('hrateľnosť (test F)', () => {
   it.each(SEEDS)(
@@ -22,7 +22,7 @@ describe('hrateľnosť (test F)', () => {
       // Míľniky sa plnia v poradí a v rozumnom tempe.
       const days = testData.milestones.map((m) => result.completedAt[m.id]!);
       expect([...days].sort((a, b) => a - b)).toEqual(days);
-      expect(days[0]).toBeGreaterThan(5);
+      expect(days[0]).toBeGreaterThan(15);
       expect(days.at(-1)).toBeLessThanOrEqual(MAX_DAYS);
     },
   );

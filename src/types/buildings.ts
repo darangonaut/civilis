@@ -7,6 +7,21 @@ export type BuildingCategory = (typeof BUILDING_CATEGORIES)[number];
 export const SERVICE_TYPES = ['water', 'education'] as const;
 export type ServiceType = (typeof SERVICE_TYPES)[number];
 
+/** Vyššia úroveň budovy (2, 3, …). Neuvedené hodnoty sa preberú z predchádzajúcej úrovne. */
+export interface BuildingLevelDefinition {
+  name: string;
+  upgradeCost: Partial<Resources>;
+  requiredTechnologyId?: string;
+  /** Služby, v ktorých dosahu musí budova stáť (napr. voda pre murovaný dom). */
+  requiredServices?: ServiceType[];
+  housingCapacity?: number;
+  storageCapacity?: number;
+  workersRequired?: number;
+  maintenanceCost?: number;
+  /** Násobič výroby aj spotreby oproti základnej úrovni. */
+  productionMultiplier?: number;
+}
+
 export interface BuildingDefinition {
   id: string;
   name: string;
@@ -44,6 +59,9 @@ export interface BuildingDefinition {
   };
 
   requiredTechnologyId?: string;
+
+  /** Úrovne 2, 3, … (rozšírenie oproti špecifikácii). */
+  levels?: BuildingLevelDefinition[];
 }
 
 export interface BuildingInstance {
@@ -52,4 +70,6 @@ export interface BuildingInstance {
   position: Position;
   enabled: boolean;
   priority: number;
+  /** Úroveň budovy od 1 (rozšírenie oproti špecifikácii, schéma v2). */
+  level: number;
 }

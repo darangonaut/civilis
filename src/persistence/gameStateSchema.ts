@@ -19,6 +19,7 @@ const buildingInstanceSchema = z.strictObject({
   position: z.strictObject({ x: nonNegativeInt, y: nonNegativeInt }),
   enabled: z.boolean(),
   priority: z.number().int(),
+  level: z.number().int().min(1),
 });
 
 /** Validácia uloženého herného stavu (aktuálna verzia schémy). */
@@ -53,6 +54,7 @@ export const gameStateSchema = z
           water: nonNegative,
           education: nonNegative,
         }),
+        growthProgress: z.number().min(0).max(1),
       }),
       economy: z.strictObject({
         resources: resourcesSchema,

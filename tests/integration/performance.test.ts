@@ -20,7 +20,14 @@ function buildDenseCity(): GameState {
   let n = 0;
   const place = (definitionId: string, x: number, y: number) => {
     const id = `b${++n}`;
-    state.city.buildings.push({ id, definitionId, position: { x, y }, enabled: true, priority: 2 });
+    state.city.buildings.push({
+      id,
+      definitionId,
+      position: { x, y },
+      enabled: true,
+      priority: 2,
+      level: 1,
+    });
     state.world.tiles[y * width + x]!.buildingId = id;
   };
   place('warehouse', 0, 0);

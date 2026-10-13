@@ -18,6 +18,7 @@
   "happinessDeclineThreshold": 40,
   "happinessChangePerDay": 5,
   "housingComfortMargin": 0.1,
-  "populationGrowthRate": 0.02,
+  "populationBaseGrowth": 0.3,
+  "populationGrowthRate": 0.005,
   "populationDeclineRate": 0.03
 }

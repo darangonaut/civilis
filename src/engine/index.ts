@@ -23,3 +23,10 @@ export {
   type BuildingStatus,
   type CityAnalysis,
 } from './economy/analysis';
+export { effectiveDefinition, levelName, maxLevel, nextLevel } from './core/levels';
+export {
+  upgradableBuildings,
+  upgradeRequirements,
+  validateUpgrade,
+  type UpgradeRequirements,
+} from './core/upgrade';

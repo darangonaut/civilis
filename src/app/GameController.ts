@@ -1,6 +1,7 @@
 import {
   analyzeCity,
   createGameEngine,
+  upgradableBuildings,
   validatePlacement,
   type CityAnalysis,
   type CivilisEngine,
@@ -25,6 +26,7 @@ export class GameController {
   private readonly dayListeners = new Set<DayListener>();
   private readonly loop: GameLoop;
   private cachedAnalysis: CityAnalysis | null = null;
+  private cachedUpgradable: Set<string> | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
   private resumeSpeed: Exclude<SimulationSpeed, 0> = 1;
 
@@ -47,6 +49,12 @@ export class GameController {
   get analysis(): CityAnalysis {
     this.cachedAnalysis ??= analyzeCity(this.engine.getState(), this.data);
     return this.cachedAnalysis;
+  }
+
+  /** Budovy, ktoré sa dajú práve vylepšiť. */
+  get upgradable(): Set<string> {
+    this.cachedUpgradable ??= upgradableBuildings(this.engine.getState(), this.data, this.analysis);
+    return this.cachedUpgradable;
   }
 
   execute(command: GameCommand): CommandResult {
@@ -116,6 +124,7 @@ export class GameController {
 
   private notify(): void {
     this.cachedAnalysis = null;
+    this.cachedUpgradable = null;
     this.listeners.forEach((listener) => listener());
   }
 }

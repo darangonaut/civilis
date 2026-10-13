@@ -12,6 +12,8 @@ export const COMMAND_FAILURE_REASONS = [
   'last_warehouse',
   'invalid_priority',
   'invalid_speed',
+  'max_level',
+  'service_required',
   'unknown_technology',
   'technology_completed',
   'research_active',

@@ -9,6 +9,7 @@ import {
 import { footprint, getTile, isInBounds, tileIndex } from '../world/grid';
 import { refreshDerivedState } from '../economy/analysis';
 import { startResearch } from '../research/research';
+import { upgradeBuilding } from './upgrade';
 import type { CommandFailureReason } from './commandReasons';
 import {
   DEFAULT_BUILDING_PRIORITY,
@@ -84,6 +85,7 @@ function placeBuilding(
     position: { x: position.x, y: position.y },
     enabled: true,
     priority: DEFAULT_BUILDING_PRIORITY,
+    level: 1,
   };
   state.city.buildings.push(instance);
   for (const p of footprint(definition, position)) {
@@ -155,5 +157,14 @@ export function executeCommand(
       return ok;
     case 'START_RESEARCH':
       return startResearch(state, data, command.technologyId);
+    case 'SET_BUILDING_ENABLED': {
+      const instance = state.city.buildings.find((b) => b.id === command.instanceId);
+      if (!instance) return fail('unknown_instance');
+      instance.enabled = command.enabled;
+      refreshDerivedState(state, data);
+      return ok;
+    }
+    case 'UPGRADE_BUILDING':
+      return upgradeBuilding(state, data, command.instanceId);
   }
 }

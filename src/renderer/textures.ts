@@ -5,6 +5,7 @@ import {
   drawMarker,
   drawTerrain,
   drawTileOutline,
+  type MarkerKind,
   type PixelSprite,
 } from './pixel/sprites';
 
@@ -29,9 +30,10 @@ function toTexture(sprite: PixelSprite): AnchoredTexture {
 
 export interface TextureAtlas {
   terrain: Record<TerrainType, AnchoredTexture[]>;
-  building(definitionId: string): AnchoredTexture;
+  /** Textúra podľa kľúča sprite-u (`buildingSpriteKey`). */
+  building(key: string): AnchoredTexture;
   outline: AnchoredTexture;
-  marker: AnchoredTexture;
+  marker(kind: MarkerKind): AnchoredTexture;
   destroy(): void;
 }
 
@@ -49,18 +51,26 @@ export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas
   ) as Record<TerrainType, AnchoredTexture[]>;
 
   const buildings = new Map<string, AnchoredTexture>();
-  const building = (definitionId: string): AnchoredTexture => {
-    let texture = buildings.get(definitionId);
+  const building = (key: string): AnchoredTexture => {
+    let texture = buildings.get(key);
     if (!texture) {
-      texture = toTexture(drawBuilding(definitionId));
-      buildings.set(definitionId, texture);
+      texture = toTexture(drawBuilding(key));
+      buildings.set(key, texture);
     }
     return texture;
   };
   buildingIds.forEach(building);
 
   const outline = toTexture(drawTileOutline());
-  const marker = toTexture(drawMarker());
+  const markers = new Map<MarkerKind, AnchoredTexture>();
+  const marker = (kind: MarkerKind): AnchoredTexture => {
+    let texture = markers.get(kind);
+    if (!texture) {
+      texture = toTexture(drawMarker(kind));
+      markers.set(kind, texture);
+    }
+    return texture;
+  };
 
   return {
     terrain,
@@ -72,7 +82,7 @@ export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas
         variants.forEach((t) => t.texture.destroy(true));
       buildings.forEach((t) => t.texture.destroy(true));
       outline.texture.destroy(true);
-      marker.texture.destroy(true);
+      markers.forEach((t) => t.texture.destroy(true));
     },
   };
 }
