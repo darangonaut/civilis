@@ -32,8 +32,23 @@ Konkrétne čísla sú v `docs/BALANCING.md`.
 - **Poradie spracovania** pre pracovníkov aj vstupy: vyššia priorita skôr, pri zhode staršia
   budova. Trhovisko si rezervuje potraviny pred spotrebou obyvateľov (krok 4 pred krokom 6).
 
-## Schválené návrhy pre etapu 4
+## Populácia, spokojnosť, výskum, míľniky (etapa 4)
 
-- **Zložka „Bývanie“ v spokojnosti:** 100 pri voľnej kapacite ≥ 10 %, lineárne klesá k 0 pri
-  plnej obsadenosti.
-- **Zložky „Voda“ a „Vzdelanie“:** podiel domov v dosahu aspoň jednej studne / školy.
+- **Zložky spokojnosti (0–100):**
+  - potraviny = podiel potravín, ktoré obyvatelia v daný deň zjedli;
+  - bývanie = 100 pri voľnej kapacite ≥ 10 %, lineárne k 0 pri plnej obsadenosti;
+  - voda / vzdelanie = podiel kapacity pripojených domov v dosahu studne / fungujúcej školy
+    (dosah je štvorec, Chebyševova vzdialenosť ≤ radius; škola musí mať pracovníkov).
+- **Spokojnosť sa k cieľovej hodnote (vážený priemer) posúva najviac o 5 bodov za deň.**
+  Odchýlka od špecifikácie, ktorá hovorí len o váženom priemere — okamžitá zmena by na začiatku
+  hry (10/10 obyvateľov, bez studne) zhodila spokojnosť zo 70 na 40 hneď v prvý deň a hráč
+  by nemal čas reagovať.
+- **Rast:** pri spokojnosti ≥ 60, voľnom bývaní a plne nasýtených obyvateľoch +5 % populácie
+  (min. 1, max. voľná kapacita). **Pokles:** pri spokojnosti < 40 −3 % (min. 1). Pri 40–59
+  stagnuje. Ak je obyvateľov viac ako bývania, polovica prebytku denne odíde. Nikdy pod 5.
+- **Výskum:** každý deň sa do aktívnej technológie investujú všetky dostupné vedomosti (najviac
+  zvyšok ceny). Prepnutie na inú technológiu vráti investované vedomosti do zásob.
+- **Míľniky** sú sekvenčné. Podmienky s `consecutiveDays` majú počítadlo v `progressDays`
+  (kľúč `<míľnik>:<index podmienky>`), ktoré sa pri nesplnení vynuluje. Odmena sa pripíše
+  raz pri splnení; suroviny z odmeny nie sú obmedzené kapacitou skladu. Po poslednom míľniku
+  sa hra pozastaví, zobrazí obrazovku úspechu a pokračuje ako sandbox.

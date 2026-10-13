@@ -1,5 +1,6 @@
 import { createGameEngine } from '@/engine/core/engine';
 import { SCHEMA_VERSION } from '@/engine/core/constants';
+import type { CivilisEngine } from '@/engine/core/engine';
 import type { GameEngine, GameState, Position, Resources, TerrainType, Tile } from '@/types';
 import { testData } from './gameData';
 
@@ -17,7 +18,7 @@ export interface TestCityOptions {
  * Malé syntetické mesto pre ekonomické testy: sklad na [1, 1] a cesta po celom riadku y = 2.
  * Budovy umiestnené na y = 3 (alebo y = 1) sú teda pripojené k sieti.
  */
-export function createTestCity(options: TestCityOptions = {}): GameEngine {
+export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
   const width = options.width ?? 16;
   const height = options.height ?? 8;
   const tiles: Tile[] = [];
@@ -42,6 +43,7 @@ export function createTestCity(options: TestCityOptions = {}): GameEngine {
         availableWorkers: 0,
         employedWorkers: 0,
         happiness: 70,
+        happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
       },
       economy: {
         resources: { food: 0, wood: 0, stone: 0, tools: 0, knowledge: 0 },
@@ -90,6 +92,7 @@ export function setCity(
     resources?: Partial<Resources>;
     money?: number;
     completedTechnologyIds?: string[];
+    happiness?: number;
   },
 ): void {
   const state = engine.serialize();
@@ -107,5 +110,6 @@ export function setCity(
   if (values.money !== undefined) state.city.economy.money = values.money;
   if (values.completedTechnologyIds)
     state.research.completedTechnologyIds = values.completedTechnologyIds;
+  if (values.happiness !== undefined) state.city.population.happiness = values.happiness;
   engine.load(state);
 }

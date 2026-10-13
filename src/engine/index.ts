@@ -1,4 +1,13 @@
-export { createGameEngine } from './core/engine';
+export { createGameEngine, type CivilisEngine } from './core/engine';
+export type { GameEvent } from './core/events';
+export { validateResearch } from './research/research';
+export {
+  currentMilestone,
+  isConditionMetToday,
+  progressKey,
+  requiredDays,
+} from './milestones/milestones';
+export { targetHappiness } from './population/population';
 export { createNewGame, type NewGameOptions } from './core/newGame';
 export { validatePlacement } from './core/commands';
 export { COMMAND_FAILURE_REASONS, type CommandFailureReason } from './core/commandReasons';

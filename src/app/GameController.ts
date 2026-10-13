@@ -3,27 +3,24 @@ import {
   createGameEngine,
   validatePlacement,
   type CityAnalysis,
+  type CivilisEngine,
   type GameData,
+  type GameEvent,
 } from '@/engine';
-import type {
-  CommandResult,
-  GameCommand,
-  GameEngine,
-  GameState,
-  Position,
-  SimulationSpeed,
-} from '@/types';
+import type { CommandResult, GameCommand, GameState, Position, SimulationSpeed } from '@/types';
 import { GameLoop } from './gameLoop';
 
 type Listener = () => void;
+type EventListener = (events: GameEvent[]) => void;
 
 /**
  * Jediný vstupný bod UI a renderera do enginu. Posiela príkazy, riadi hernú slučku
  * a po každej zmene stavu upozorní odberateľov.
  */
 export class GameController {
-  private readonly engine: GameEngine;
+  private readonly engine: CivilisEngine;
   private readonly listeners = new Set<Listener>();
+  private readonly eventListeners = new Set<EventListener>();
   private readonly loop: GameLoop;
   private cachedAnalysis: CityAnalysis | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
@@ -72,6 +69,14 @@ export class GameController {
   tick(): void {
     this.engine.tick();
     this.notify();
+    const events = this.engine.takeEvents();
+    if (events.length > 0) this.eventListeners.forEach((listener) => listener(events));
+  }
+
+  /** Odber udalostí zo simulácie (dokončený výskum, míľnik, hlad…). */
+  onEvents(listener: EventListener): () => void {
+    this.eventListeners.add(listener);
+    return () => this.eventListeners.delete(listener);
   }
 
   startLoop(): void {

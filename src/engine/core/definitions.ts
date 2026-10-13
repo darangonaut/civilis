@@ -123,6 +123,10 @@ export const balanceSchema = z.strictObject({
     education: nonNegative,
   }),
   happinessGrowthThreshold: z.number().min(0).max(100),
+  happinessChangePerDay: z.number().positive(),
+  housingComfortMargin: z.number().positive().max(1),
+  populationGrowthRate: z.number().min(0).max(1),
+  populationDeclineRate: z.number().min(0).max(1),
   happinessDeclineThreshold: z.number().min(0).max(100),
 });
 

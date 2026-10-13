@@ -3,12 +3,21 @@ import type { Resources } from './resources';
 import type { MilestoneState, ResearchState } from './research';
 import type { Position, World } from './world';
 
+export interface HappinessFactors {
+  food: number;
+  housing: number;
+  water: number;
+  education: number;
+}
+
 export interface PopulationState {
   total: number;
   housingCapacity: number;
   availableWorkers: number;
   employedWorkers: number;
   happiness: number;
+  /** Zložky spokojnosti z posledného dňa (0–100). Rozšírenie oproti špecifikácii. */
+  happinessFactors: HappinessFactors;
 }
 
 export interface EconomyState {

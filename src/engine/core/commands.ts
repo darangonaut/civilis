@@ -8,6 +8,7 @@ import {
 } from '@/types';
 import { footprint, getTile, isInBounds, tileIndex } from '../world/grid';
 import { refreshDerivedState } from '../economy/analysis';
+import { startResearch } from '../research/research';
 import type { CommandFailureReason } from './commandReasons';
 import {
   DEFAULT_BUILDING_PRIORITY,
@@ -153,7 +154,6 @@ export function executeCommand(
       state.simulation.speed = command.speed;
       return ok;
     case 'START_RESEARCH':
-      // Výskum pribudne v etape 4.
-      return fail('not_implemented');
+      return startResearch(state, data, command.technologyId);
   }
 }

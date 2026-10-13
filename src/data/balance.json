@@ -14,5 +14,9 @@
   "noFundsEfficiency": 0.5,
   "happinessWeights": { "food": 0.4, "housing": 0.25, "water": 0.2, "education": 0.15 },
   "happinessGrowthThreshold": 60,
-  "happinessDeclineThreshold": 40
+  "happinessDeclineThreshold": 40,
+  "happinessChangePerDay": 5,
+  "housingComfortMargin": 0.1,
+  "populationGrowthRate": 0.05,
+  "populationDeclineRate": 0.03
 }

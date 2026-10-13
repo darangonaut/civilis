@@ -1,5 +1,9 @@
 import { RESOURCE_IDS, type GameState, type Resources } from '@/types';
+import type { GameEvent } from '../core/events';
 import type { GameData } from '../core/definitions';
+import { evaluateMilestones } from '../milestones/milestones';
+import { simulatePopulation } from '../population/population';
+import { advanceResearch } from '../research/research';
 import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
 
 function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
@@ -9,11 +13,9 @@ function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
   }
 }
 
-/**
- * Jeden herný deň v pevnom poradí zo špecifikácie 2.4. Kroky 7, 9 a 10
- * (populácia, výskum, míľniky) pribudnú v etape 4.
- */
-export function simulateDay(state: GameState, data: GameData): void {
+/** Jeden herný deň v pevnom poradí zo špecifikácie 2.4. Vráti udalosti pre UI. */
+export function simulateDay(state: GameState, data: GameData): GameEvent[] {
+  const events: GameEvent[] = [];
   const economy = state.city.economy;
 
   // 1.–4. Pripojenie, pracovníci, kapacita, rezervácia vstupov.
@@ -41,17 +43,34 @@ export function simulateDay(state: GameState, data: GameData): void {
   const foodEaten = Math.min(resources.food, foodNeeded);
   resources.food -= foodEaten;
   if (foodEaten > 0) consumption.food = (consumption.food ?? 0) + foodEaten;
-
-  // 8. Peniaze: príjem z trhovísk, údržba (pokladnica neklesne pod nulu).
-  economy.money = Math.max(0, economy.money + analysis.moneyIncome - analysis.maintenanceTotal);
-  economy.dailyIncome = analysis.moneyIncome;
-  economy.dailyExpenses = analysis.maintenanceTotal;
+  const foodSatisfaction = foodNeeded > 0 ? foodEaten / foodNeeded : 1;
+  if (foodSatisfaction < 1) events.push({ type: 'food_shortage' });
 
   for (const id of RESOURCE_IDS) resources[id] = Math.max(0, resources[id]);
   economy.resources = resources;
   economy.dailyProduction = production;
   economy.dailyConsumption = consumption;
 
+  // 7. Spokojnosť a rast populácie.
+  const populationBefore = state.city.population.total;
+  simulatePopulation(state, data, analysis, foodSatisfaction);
+  const populationDelta = state.city.population.total - populationBefore;
+  if (populationDelta !== 0) events.push({ type: 'population_changed', delta: populationDelta });
+
+  // 8. Peniaze: príjem z trhovísk, údržba (pokladnica neklesne pod nulu).
+  economy.money = Math.max(0, economy.money + analysis.moneyIncome - analysis.maintenanceTotal);
+  economy.dailyIncome = analysis.moneyIncome;
+  economy.dailyExpenses = analysis.maintenanceTotal;
+
+  // 9. Výskum.
+  const technologyId = advanceResearch(state, data);
+  if (technologyId) events.push({ type: 'research_completed', technologyId });
+
+  // 10. Civilizačné míľniky.
+  const milestoneId = evaluateMilestones(state, data);
+  if (milestoneId) events.push({ type: 'milestone_completed', milestoneId });
+
   state.simulation.day += 1;
   refreshDerivedState(state, data);
+  return events;
 }

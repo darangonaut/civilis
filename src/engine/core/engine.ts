@@ -3,9 +3,17 @@ import { refreshDerivedState } from '../economy/analysis';
 import { simulateDay } from '../economy/simulateDay';
 import { executeCommand } from './commands';
 import type { GameData } from './definitions';
+import type { GameEvent } from './events';
 
-class SimulationEngine implements GameEngine {
+/** GameEngine zo špecifikácie rozšírený o udalosti z posledných krokov. */
+export interface CivilisEngine extends GameEngine {
+  /** Vráti a vyprázdni udalosti nazbierané od posledného volania. */
+  takeEvents(): GameEvent[];
+}
+
+class SimulationEngine implements CivilisEngine {
   private state: GameState;
+  private events: GameEvent[] = [];
 
   constructor(
     private readonly data: GameData,
@@ -25,7 +33,13 @@ class SimulationEngine implements GameEngine {
 
   /** Jeden herný deň (simulačný krok). */
   tick(): void {
-    simulateDay(this.state, this.data);
+    this.events.push(...simulateDay(this.state, this.data));
+  }
+
+  takeEvents(): GameEvent[] {
+    const events = this.events;
+    this.events = [];
+    return events;
   }
 
   serialize(): GameState {
@@ -34,11 +48,12 @@ class SimulationEngine implements GameEngine {
 
   load(state: GameState): void {
     this.state = structuredClone(state);
+    this.events = [];
     // Odvodené hodnoty sa po načítaní vždy prepočítajú zo stavu.
     refreshDerivedState(this.state, this.data);
   }
 }
 
-export function createGameEngine(data: GameData, initialState: GameState): GameEngine {
+export function createGameEngine(data: GameData, initialState: GameState): CivilisEngine {
   return new SimulationEngine(data, initialState);
 }

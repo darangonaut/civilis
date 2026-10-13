@@ -12,7 +12,10 @@ export const COMMAND_FAILURE_REASONS = [
   'last_warehouse',
   'invalid_priority',
   'invalid_speed',
-  'not_implemented',
+  'unknown_technology',
+  'technology_completed',
+  'research_active',
+  'prerequisites_missing',
 ] as const;
 
 export type CommandFailureReason = (typeof COMMAND_FAILURE_REASONS)[number];

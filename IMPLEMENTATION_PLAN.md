@@ -14,8 +14,8 @@ Zadanie: `docs/SPEC.md` · Architektúra: `docs/ARCHITECTURE.md` · Doplnenia pr
 | 1 – Inicializácia projektu     | ✅ hotovo |
 | 2 – Herná mapa a renderer      | ✅ hotovo |
 | 3 – Ekonomický engine          | ✅ hotovo |
-| 4 – Populácia, výskum, míľniky | ⏳ ďalšia |
-| 5 – Používateľské rozhranie    | —         |
+| 4 – Populácia, výskum, míľniky | ✅ hotovo |
+| 5 – Používateľské rozhranie    | ⏳ ďalšia |
 | 6 – Ukladanie a dokončenie     | —         |
 
 ## Etapa 1 – Inicializácia projektu ✅
@@ -70,21 +70,26 @@ Testy: 11 unit (validácia dát, zhoda so špecifikáciou), 2 E2E (layout, katal
       sieť, 300 dní bez záporných hodnôt, test A — 1 000 krokov, výkon 500 budov ≈ 1 ms/tick,
       herná slučka), 9 E2E (beh času a pauza, „Chýba cesta“ → pripojenie, denná bilancia)
 
-## Etapa 4 – Populácia a výskum
+## Etapa 4 – Populácia a výskum ✅
 
-- [ ] Spokojnosť (4 zložky, pokrytie studňami/školami), rast a pokles populácie, minimum 5
-- [ ] Výskum (jedna aktívna technológia, postupné investovanie vedomostí, prerekvizity)
-- [ ] Efekty technológií (aditívne multiplikátory produkcie, údržba)
-- [ ] Míľniky (sekvenčné, `progressDays` pre po sebe idúce dni, odmena presne raz)
-- [ ] Udalosti/upozornenia z ticku (míľnik splnený, technológia dokončená, nedostatok potravín)
-- [ ] Testy: test E, výskum, spokojnosť
+- [x] Spokojnosť zo 4 zložiek (`engine/population/population.ts`), pokrytie studňami a školami,
+      postupná zmena max. 5 bodov/deň, zložky uložené v `population.happinessFactors`
+- [x] Rast (+5 %) a pokles (−3 %) populácie, odchod pri nedostatku bývania, minimum 5
+- [x] Výskum (`engine/research/research.ts`): `START_RESEARCH` s validáciou prerekvizít,
+      postupné investovanie vedomostí, vrátenie vedomostí pri prepnutí
+- [x] Efekty technológií (z etapy 3) sa uplatnia po dokončení výskumu
+- [x] Míľniky (`engine/milestones/milestones.ts`): sekvenčné, počítadlá po sebe idúcich dní,
+      odmena presne raz
+- [x] Udalosti z ticku (`GameEvent`: výskum, míľnik, hlad, zmena populácie) → hlásenia v UI
+      (`app/gameEvents.ts`), obrazovka úspechu po 5. míľniku (pauza → sandbox)
+- [x] Testy: 92 unit/integration (spokojnosť, rast/pokles, výskum, test E), 10 E2E (hlad)
 
 ## Etapa 5 – UI
 
 - [ ] Horná lišta napojená na stav + ovládanie rýchlosti (medzerník, 1/2/3)
 - [ ] Katalóg: dostupnosť podľa surovín a technológií, režim výstavby
 - [ ] Detail inštancie budovy: výroba, spotreba, pracovníci, problémy, priorita, zbúranie
-- [ ] Obrazovka výskumu, panel míľnikov, štatistiky, obrazovka úspechu po 5. míľniku
+- [ ] Obrazovka výskumu, panel míľnikov, štatistiky (obrazovka úspechu je hotová z etapy 4)
 
 ## Etapa 6 – Ukladanie a dokončenie
 
@@ -119,3 +124,7 @@ Testy: 11 unit (validácia dát, zhoda so špecifikáciou), 2 E2E (layout, katal
 | 2026-10-13 | Cestná sieť začína pri akomkoľvek sklade, nielen pri prvom.                                                                                                                                             |
 | 2026-10-13 | Odvodené hodnoty (`housingCapacity`, `storageCapacity`, `availableWorkers`, `employedWorkers`) sa prepočítavajú po každom príkaze, ticku a `load()` (`refreshDerivedState`).                            |
 | 2026-10-13 | `?paused` spustí hru v pauze; test hook má `advanceDays(n)` (len pre E2E).                                                                                                                              |
+| 2026-10-13 | `PopulationState.happinessFactors` — zložky spokojnosti z posledného dňa (rozšírenie modelu, potrebné pre UI a štatistiky).                                                                             |
+| 2026-10-13 | Spokojnosť sa mení postupne (max. 5 bodov/deň), nie skokom na vážený priemer — dôvod v `docs/GAME_DESIGN.md`.                                                                                           |
+| 2026-10-13 | `GameEngine` rozšírený na `CivilisEngine` o `takeEvents()`; `tick()` ostáva `void` podľa špecifikácie.                                                                                                  |
+| 2026-10-13 | Prepnutie výskumu vráti investované vedomosti (špecifikácia prepínanie nerieši).                                                                                                                        |

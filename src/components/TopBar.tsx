@@ -29,7 +29,15 @@ export function TopBar() {
         label={t('topbar.workers')}
         value={`${population.employedWorkers} / ${population.availableWorkers}`}
       />
-      <Stat label={t('topbar.happiness')} value={Math.round(population.happiness)} />
+      <Stat
+        label={t('topbar.happiness')}
+        value={Math.round(population.happiness)}
+        warn={population.happiness < 40}
+        title={`${t('happiness.factors')}: ${(['food', 'housing', 'water', 'education'] as const)
+          .map((key) => `${t(`happiness.${key}`)} ${population.happinessFactors[key]}`)
+          .join(', ')}`}
+        testId="happiness"
+      />
       {RESOURCE_IDS.map((id) => {
         const delta = (economy.dailyProduction[id] ?? 0) - (economy.dailyConsumption[id] ?? 0);
         const capped = id !== 'knowledge';
@@ -39,7 +47,10 @@ export function TopBar() {
             label={resourceLabel(id)}
             value={Math.floor(economy.resources[id])}
             delta={day > 0 ? delta : undefined}
-            warn={capped && economy.resources[id] >= economy.storageCapacity}
+            warn={
+              (capped && economy.resources[id] >= economy.storageCapacity) ||
+              (id === 'food' && economy.resources.food <= 0)
+            }
             title={capped ? `${t('topbar.storage')}: ${economy.storageCapacity}` : undefined}
             testId={`resource-${id}`}
           />

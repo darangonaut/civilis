@@ -4,6 +4,7 @@ import { footprint, tileIndex } from '../world/grid';
 import { DEFAULT_BUILDING_PRIORITY, SCHEMA_VERSION } from './constants';
 import type { GameData } from './definitions';
 import { refreshDerivedState } from '../economy/analysis';
+import { computeHappinessFactors } from '../population/population';
 import { normalizeSeed } from './random';
 
 export interface NewGameOptions {
@@ -67,6 +68,7 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
         availableWorkers: Math.floor(start.population * data.balance.workforceShare),
         employedWorkers: 0,
         happiness: start.happiness,
+        happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
       },
       economy: {
         resources: { ...start.resources },
@@ -82,6 +84,7 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
     research: { completedTechnologyIds: [], activeTechnologyId: null, investedKnowledge: 0 },
     milestones: { completedIds: [], progressDays: {} },
   };
-  refreshDerivedState(state, data);
+  const analysis = refreshDerivedState(state, data);
+  state.city.population.happinessFactors = computeHappinessFactors(state, data, analysis, 1);
   return state;
 }

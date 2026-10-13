@@ -67,3 +67,13 @@ test('po dni sa v hornej lište zobrazí denná bilancia', async ({ page }) => {
   await expect(page.getByTestId('money')).toContainText('499');
   await expect(page.getByTestId('day')).toContainText('1');
 });
+
+test('keď dôjdu potraviny, zobrazí sa upozornenie a spokojnosť klesá', async ({ page }) => {
+  await openGame(page);
+  // 100 potravín pri spotrebe 2,5 / deň vydrží 40 dní.
+  await page.evaluate(() => window.__civilis!.advanceDays(41));
+  await expect(page.getByTestId('notice').filter({ hasText: 'hladujú' })).toBeVisible();
+  const state = await page.evaluate(() => window.__civilis!.getState().city.population);
+  expect(state.happinessFactors.food).toBeLessThan(100);
+  expect(state.total).toBeGreaterThanOrEqual(5);
+});
