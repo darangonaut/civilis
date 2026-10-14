@@ -830,6 +830,23 @@ button.danger:hover:not(:disabled),
   color: var(--red-text);
 }
 
+.upgrade-gain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.upgrade-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.upgrade-actions .btn {
+  flex: 1;
+}
+
 .inspector-actions {
   display: flex;
   gap: 8px;

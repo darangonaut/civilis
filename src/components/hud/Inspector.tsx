@@ -226,6 +226,15 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
     upgradeRequirements(s, gameData, instance, controller.analysis),
   );
   const resources = useGameState((s) => s.city.economy.resources);
+  const sameReady = useGameState(
+    (s) =>
+      s.city.buildings.filter(
+        (b) =>
+          b.definitionId === instance.definitionId &&
+          b.level === instance.level &&
+          controller.upgradable.has(b.id),
+      ).length,
+  );
   const base = gameData.buildingsById.get(instance.definitionId)!;
   if (maxLevel(base) <= 1) return null;
   if (!requirements) return <p className="muted hint">{t('detail.maxLevel')}</p>;
@@ -247,6 +256,25 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
     else showNotice(commandReasonLabel(result.reason));
   };
 
+  // Rovnaké budovy na rovnakej úrovni, ktoré sa dajú hneď vylepšiť (bloky polí, lesov…).
+  const upgradeAll = () => {
+    const ids = controller.state.city.buildings
+      .filter(
+        (b) =>
+          b.definitionId === instance.definitionId &&
+          b.level === instance.level &&
+          controller.upgradable.has(b.id),
+      )
+      .map((b) => b.id);
+    let upgraded = 0;
+    for (const id of ids) {
+      const result = controller.execute({ type: 'UPGRADE_BUILDING', instanceId: id });
+      if (!result.success) break;
+      upgraded++;
+    }
+    showNotice(t('detail.upgradedMany', { n: upgraded }), upgraded > 0 ? 'success' : 'info');
+  };
+
   return (
     <div className="upgrade-box" data-testid="upgrade-section">
       <h3>
@@ -258,6 +286,13 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
           </span>
         )}
       </h3>
+      {hasAny(nextDefinition.outputs) && (
+        <div className="upgrade-gain">
+          <span className="muted">{t('detail.outputs')}:</span>{' '}
+          <Amounts resources={effectiveDefinition(base, instance.level).outputs} money={0} /> →{' '}
+          <Amounts resources={nextDefinition.outputs} money={0} />
+        </div>
+      )}
       <ul className="requirement-list">
         {tech && <Requirement met={technologyMet}>{techName(tech.id)}</Requirement>}
         {services.map((service) => (
@@ -267,9 +302,16 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
         ))}
       </ul>
       <Cost cost={next.upgradeCost} stock={resources} />
-      <button className="btn primary" disabled={!ready} onClick={upgrade} data-testid="upgrade">
-        {t('detail.upgrade')}
-      </button>
+      <div className="upgrade-actions">
+        <button className="btn primary" disabled={!ready} onClick={upgrade} data-testid="upgrade">
+          {t('detail.upgrade')}
+        </button>
+        {ready && sameReady > 1 && (
+          <button className="btn" onClick={upgradeAll} data-testid="upgrade-all">
+            {t('detail.upgradeAll', { n: sameReady })}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

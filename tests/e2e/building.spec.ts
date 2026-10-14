@@ -177,3 +177,36 @@ test('ťahaním sa vyplní obdĺžnik budov a pri nedostatku surovín sa zobraz�
   expect(await buildingCount(page)).toBe(before + 8);
   await expect(page.getByTestId('notice').filter({ hasText: 'Postavené: 8' })).toBeVisible();
 });
+
+test('vylepšenie všetkých rovnakých budov naraz (blok fariem)', async ({ page }) => {
+  await openGame(page);
+  const row = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    hook.grantForTest({
+      technologies: ['crop_rotation'],
+      resources: { wood: 500, stone: 500, bricks: 200, tools: 100 },
+    });
+    for (const road of hook.getState().city.buildings.filter((b) => b.definitionId === 'road')) {
+      const tiles = [0, 1, 2].map((d) => ({ x: road.position.x + d, y: road.position.y + 1 }));
+      if (tiles.every((t) => hook.canPlace('farm', t)))
+        return tiles.map((t) => ({ tile: t, client: hook.tileToClient(t) }));
+    }
+    throw new Error('Žiadne miesto pre farmy');
+  });
+  await pickBuilding(page, 'farm');
+  for (const { client } of row) await page.mouse.click(client.x, client.y);
+  await page.keyboard.press('Escape');
+
+  await page.mouse.click(row[0]!.client.x, row[0]!.client.y);
+  const upgradeAll = page.getByTestId('upgrade-all');
+  await expect(upgradeAll).toContainText('3');
+  await upgradeAll.click();
+  await expect(page.getByTestId('notice').filter({ hasText: '3' })).toBeVisible();
+  const levels = await page.evaluate(() =>
+    window
+      .__civilis!.getState()
+      .city.buildings.filter((b) => b.definitionId === 'farm')
+      .map((b) => b.level),
+  );
+  expect(levels).toEqual([2, 2, 2]);
+});

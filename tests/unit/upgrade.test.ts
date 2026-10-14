@@ -171,8 +171,39 @@ describe('stavba rovno na vyššej úrovni', () => {
         type: 'PLACE_BUILDING',
         buildingId: 'farm',
         position: { x: 3, y: 3 },
-        level: 2,
+        level: 4,
       }),
     ).toEqual({ success: false, reason: 'max_level' });
+  });
+});
+
+describe('vylepšenie výrobných budov', () => {
+  it('ťažobné a výrobné budovy majú 3 úrovne s rastúcou výrobou', () => {
+    for (const id of ['lumberjack', 'farm', 'quarry', 'workshop', 'fishery', 'mine']) {
+      const definition = def(id);
+      expect(definition.levels, id).toHaveLength(2);
+      const [l1, l2, l3] = [1, 2, 3].map((l) => effectiveDefinition(definition, l));
+      const resource = Object.keys(l1!.outputs)[0] as keyof typeof definition.outputs;
+      expect(l2!.outputs[resource]!, id).toBeGreaterThan(l1!.outputs[resource]!);
+      expect(l3!.outputs[resource]!, id).toBeGreaterThan(l2!.outputs[resource]!);
+      // Výroba na pracovníka rastie — vylepšenie sa oplatí.
+      expect(l3!.outputs[resource]! / l3!.workersRequired).toBeGreaterThan(
+        l1!.outputs[resource]! / l1!.workersRequired,
+      );
+    }
+  });
+
+  it('farma sa vylepší po technológii a zaplatení ceny (bez služieb)', () => {
+    const farm = def('farm');
+    const next = farm.levels![0]!;
+    const engine = createTestCity({
+      resources: { wood: 200, stone: 200, bricks: 100, tools: 100, food: 500 },
+    });
+    const id = build(engine, 'farm', { x: 3, y: 4 });
+    expectRejected(engine, id, 'technology_required');
+    setCity(engine, { completedTechnologyIds: [next.requiredTechnologyId!] });
+    expect(upgrade(engine, id)).toEqual({ success: true });
+    expect(level(engine, id)).toBe(2);
+    expect(engine.getState().city.economy.resources.bricks).toBe(100 - next.upgradeCost.bricks!);
   });
 });

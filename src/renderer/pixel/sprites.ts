@@ -1175,6 +1175,238 @@ const PAINTERS: Record<string, Painter> = {
   },
 };
 
+// --- Úrovne výrobných budov -------------------------------------------------------------
+
+/** Komín: obdĺžnik šírky 3 px od `top` nadol. */
+const chimney = (pc: PixelCanvas, x: number, top: number, h: number, color: Rgb = P.stoneDeep) =>
+  pc.fillRect(x, top, 3, h, color);
+
+const CRATES = ['oooo', 'oWWo', 'oWWo', 'oooo'];
+const CRATES_PAL = { o: P.woodDark, W: P.wood };
+const BRICK_PILE = ['rrrr', 'RRRR', 'rrrr', 'RRRR'];
+const BRICK_PAL = { r: P.brick, R: P.brickShade };
+const SHEEP = ['.ww.', 'wwww', 'kwwk', '.k.k'];
+const SHEEP_PAL = { w: P.white, k: P.ink };
+const HAY = ['.yy.', 'yYYy', 'YYYY'];
+const HAY_PAL = { y: P.wheatLight, Y: P.wheat };
+
+const pastureGround: Painter = (pc, cx, cy) =>
+  pc.fillDiamond(cx, cy, HW - 1, (x, y) => (pixelNoise(x, y, 13) < 0.08 ? P.grassLight : P.grass));
+
+const pastureFence: Painter = (pc, cx, cy) => {
+  for (let dx = -14; dx <= 14; dx += 4)
+    pc.fillRect(cx + dx, cy + 6 - Math.abs(dx) / 2 - 2, 1, 3, P.woodDark);
+};
+
+/** Ťažná veža nad šachtou (drevená alebo oceľová). */
+function headframe(pc: PixelCanvas, x: number, top: number, bottom: number, color: Rgb, thick = 1) {
+  pc.fillRect(x, top, thick, bottom - top, color);
+  pc.fillRect(x + 6, top, thick, bottom - top, color);
+  pc.fillRect(x, top, 6 + thick, 1, color);
+  for (let y = top + 4; y < bottom - 2; y += 5) pc.fillRect(x, y, 6 + thick, 1, color);
+  pc.stamp(x + 1, top - 4, ['.ooo.', 'o.o.o', '.ooo.'], { o: P.ink });
+}
+
+const LEVEL_PAINTERS: Record<string, Painter> = {
+  'lumberjack@2': (pc, cx, cy) => {
+    // Píla: kryté skladisko dosiek vzadu, píla a viac dreva.
+    isoBox(pc, cx - 6, cy - 5, 5, 5, { top: P.wood, left: P.wood, right: P.woodShade });
+    hipRoof(pc, cx - 6, cy - 5, 5, 5, 4, P.roof, P.roofShade);
+    PAINTERS['lumberjack+']!(pc, cx, cy);
+    LOG_PILE(pc, cx + 7, cy + 2);
+  },
+  'lumberjack@3': (pc, cx, cy) => {
+    // Lesný závod: tehlová hala s parnou pílou a komínom.
+    const hw = 11;
+    isoBox(pc, cx + 1, cy - 1, hw, 9, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx + 1, cy - 1, hw, 9, 6, P.stoneDark, P.stoneDeep);
+    chimney(pc, cx + 6, cy - 27, 15);
+    pc.stamp(...leftWall(cx + 1, cy - 1, hw, 3, 7), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx + 1, cy - 1, hw, 3, 5), DOOR, DETAIL_PAL);
+    pc.stamp(
+      ...rightWall(cx + 1, cy - 1, hw, 7, 7),
+      ['.s.s.', 'sSSSs', '.SoS.', 'sSSSs', '.s.s.'],
+      {
+        s: P.stone,
+        S: P.stoneLight,
+        o: P.stoneDeep,
+      },
+    );
+    LOG_PILE(pc, cx - 14, cy);
+    LOG_PILE(pc, cx - 10, cy + 3);
+    pc.stamp(cx - 4, cy + 4, ['pppppp', 'PPPPPP', 'pppppp'], { p: P.soilLight, P: P.wood });
+  },
+
+  'farm@2': (pc, cx, cy) => {
+    // Statok: zavlažované polia, veterník a stoh sena.
+    paintFarm(true)(pc, cx, cy);
+    pc.stamp(cx - 11, cy, HAY, HAY_PAL);
+    pc.stamp(cx - 7, cy + 3, HAY, HAY_PAL);
+  },
+  'farm@3': (pc, cx, cy) => {
+    // Mechanizovaná farma: silo a traktor.
+    paintFarm(true)(pc, cx, cy);
+    isoBox(pc, cx - 9, cy - 3, 3, 14, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    pc.fillDiamond(cx - 9, cy - 18, 3, P.roof);
+    pc.stamp(cx + 1, cy + 2, ['.rr...', '.rRr..', 'rrrrrr', 'kok.kk', '.k...k'], {
+      r: P.roof,
+      R: P.window,
+      k: P.ink,
+      o: P.stoneDeep,
+    });
+  },
+
+  'quarry@2': (pc, cx, cy) => {
+    // Veľký lom: drevený žeriav a viac otesaných blokov.
+    PAINTERS['quarry+']!(pc, cx, cy);
+    pc.stamp(cx + 7, cy + 1, ['LLL', 'SSS'], { S: P.stone, L: P.stoneLight });
+    pc.stamp(cx - 6, cy + 4, ['LLLL', 'SSSS'], { S: P.stone, L: P.stoneLight });
+  },
+  'quarry@3': (pc, cx, cy) => {
+    // Strojový lom: oceľový žeriav a parný stroj.
+    paintQuarry(pc, cx, cy);
+    pc.fillRect(cx - 10, cy - 26, 2, 22, P.stoneDeep);
+    pc.fillRect(cx - 10, cy - 26, 16, 2, P.stoneDeep);
+    for (let x = cx - 8; x < cx + 6; x += 3) pc.set(x, cy - 24, P.stoneDeep);
+    pc.fillRect(cx + 4, cy - 24, 1, 9, P.ink);
+    pc.stamp(cx + 2, cy - 15, ['SSSS', 'SLLS', 'SSSS'], { S: P.stoneDark, L: P.stoneLight });
+    isoBox(pc, cx + 9, cy, 4, 5, { top: P.brick, left: P.brick, right: P.brickShade });
+    chimney(pc, cx + 9, cy - 15, 9, P.ink);
+  },
+
+  'workshop@2': (pc, cx, cy) => {
+    // Remeselnícka dielňa: vyhňa, debny s tovarom a vývesný štít.
+    PAINTERS['workshop+']!(pc, cx, cy);
+    pc.stamp(cx + 8, cy + 1, CRATES, CRATES_PAL);
+    pc.fillRect(cx + 11, cy - 10, 1, 5, P.woodDark);
+    pc.stamp(cx + 12, cy - 10, ['yyy', 'yoy', 'yyy'], { y: P.wheat, o: P.woodDark });
+  },
+  'workshop@3': (pc, cx, cy) => {
+    // Manufaktúra: veľká tehlová hala s radom okien a dvoma komínmi.
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 10, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx, cy, hw, 10, 6, P.stoneDark, P.stoneDeep);
+    for (const dx of [2, 6, 10]) pc.stamp(...leftWall(cx, cy, hw, dx, 8), WINDOW, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 3, 5), DOOR, DETAIL_PAL);
+    pc.stamp(...rightWall(cx, cy, hw, 8, 8), WINDOW, DETAIL_PAL);
+    chimney(pc, cx + 3, cy - 26, 10);
+    chimney(pc, cx + 8, cy - 25, 9);
+  },
+
+  'brickworks@2': (pc, cx, cy) => {
+    // Kruhová pec: druhý komín a viac tehál.
+    chimney(pc, cx - 3, cy - 24, 10, P.brickShade);
+    PAINTERS.brickworks!(pc, cx, cy);
+    pc.stamp(cx + 8, cy + 2, BRICK_PILE, BRICK_PAL);
+  },
+  'brickworks@3': (pc, cx, cy) => {
+    // Parná tehelňa: dlhá hala a vysoký komín.
+    const hw = 13;
+    isoBox(pc, cx, cy, hw, 9, { top: P.brick, left: P.brick, right: P.brickShade });
+    hipRoof(pc, cx, cy, hw, 9, 5, P.soilDark, P.woodDark);
+    for (const dx of [3, 8]) {
+      const [fx, fy] = leftWall(cx, cy, hw, dx, 5);
+      pc.stamp(fx, fy, ['ooo', 'oGo', 'GGG'], { o: P.stoneDeep, G: P.glow });
+    }
+    chimney(pc, cx + 6, cy - 34, 22, P.brickShade);
+    pc.stamp(cx - 15, cy + 1, BRICK_PILE, BRICK_PAL);
+    pc.stamp(cx + 9, cy + 3, BRICK_PILE, BRICK_PAL);
+  },
+
+  'fishery@2': (pc, cx, cy) => {
+    // Rybársky prístav: druhá loďka a sušiak na ryby.
+    PAINTERS.fishery!(pc, cx, cy);
+    pc.fillRect(cx - 12, cy - 6, 1, 6, P.woodDark);
+    pc.fillRect(cx - 7, cy - 8, 1, 6, P.woodDark);
+    pc.fillRect(cx - 12, cy - 7, 6, 1, P.woodDark);
+    pc.stamp(cx - 11, cy - 6, ['s.s.s', 's.s.s'], { s: P.stoneLight });
+    pc.stamp(cx - 6, cy + 4, ['.WWWW.', 'WwwwwW', '.WWWW.'], { W: P.woodDark, w: P.wood });
+  },
+  'fishery@3': (pc, cx, cy) => {
+    // Rybárska flotila: chladiareň na móle a motorová loď.
+    pc.fillDiamond(cx, cy, HW - 2, (x, y) => ((x + y) % 4 === 0 ? P.stoneDark : P.stone));
+    isoBox(pc, cx - 3, cy - 2, 7, 8, { top: P.white, left: P.white, right: P.stoneLight });
+    hipRoof(pc, cx - 3, cy - 2, 7, 8, 3, P.waterDeep, P.stoneDeep);
+    pc.stamp(...rightWall(cx - 3, cy - 2, 7, 2, 6), ['ddd', 'dDd', 'dDd'], {
+      d: P.stoneDeep,
+      D: P.stoneLight,
+    });
+    pc.stamp(cx + 2, cy, ['...ww...', '..wWww..', 'RRRRRRRR', '.RRRRRR.'], {
+      w: P.white,
+      W: P.window,
+      R: P.roof,
+    });
+    pc.fillRect(cx + 5, cy - 6, 1, 4, P.ink);
+  },
+
+  'mine@2': (pc, cx, cy) => {
+    // Hlbinná baňa: drevená ťažná veža nad šachtou.
+    headframe(pc, cx + 4, cy - 24, cy - 6, P.woodDark);
+    PAINTERS.mine!(pc, cx, cy);
+  },
+  'mine@3': (pc, cx, cy) => {
+    // Strojová baňa: oceľová veža a strojovňa s komínom.
+    headframe(pc, cx + 3, cy - 28, cy - 6, P.stoneDeep, 2);
+    PAINTERS.mine!(pc, cx, cy);
+    isoBox(pc, cx - 10, cy + 1, 4, 5, { top: P.brick, left: P.brick, right: P.brickShade });
+    chimney(pc, cx - 11, cy - 14, 9, P.ink);
+  },
+
+  'pasture@2': (pc, cx, cy) => {
+    // Ovčia farma: stodola a viac oviec.
+    pastureGround(pc, cx, cy);
+    isoBox(pc, cx + 2, cy - 5, 6, 6, { top: P.wood, left: P.wood, right: P.woodShade });
+    hipRoof(pc, cx + 2, cy - 5, 6, 6, 5, P.roof, P.roofShade);
+    for (const [dx, dy] of [
+      [-9, -2],
+      [-4, 1],
+      [2, 3],
+      [8, 1],
+      [-10, 3],
+    ])
+      pc.stamp(cx + dx! - 2, cy + dy! - 2, SHEEP, SHEEP_PAL);
+    pastureFence(pc, cx, cy);
+  },
+  'pasture@3': (pc, cx, cy) => {
+    // Chovná stanica: moderná budova so silom.
+    pastureGround(pc, cx, cy);
+    isoBox(pc, cx + 2, cy - 4, 8, 7, { top: P.white, left: P.white, right: P.stoneLight });
+    hipRoof(pc, cx + 2, cy - 4, 8, 7, 3, P.waterDeep, P.stoneDeep);
+    pc.stamp(...leftWall(cx + 2, cy - 4, 8, 3, 6), ['ww', 'ww'], { w: P.window });
+    isoBox(pc, cx - 8, cy - 4, 3, 13, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    pc.fillDiamond(cx - 8, cy - 18, 3, P.waterDeep);
+    for (const [dx, dy] of [
+      [-4, 2],
+      [3, 4],
+      [9, 2],
+    ])
+      pc.stamp(cx + dx! - 2, cy + dy! - 2, SHEEP, SHEEP_PAL);
+    pastureFence(pc, cx, cy);
+  },
+
+  'coal_mine@2': (pc, cx, cy) => {
+    // Hlboká uhoľná baňa: oceľová veža so svetlom a strojovňa.
+    PAINTERS.coal_mine!(pc, cx, cy);
+    pc.fillRect(cx + 2, cy - 22, 1, 20, P.stoneDeep);
+    pc.fillRect(cx + 8, cy - 22, 1, 20, P.stoneDeep);
+    for (let y = cy - 18; y < cy - 3; y += 5) pc.fillRect(cx + 2, y, 7, 1, P.stoneDeep);
+    pc.set(cx + 5, cy - 21, P.glow);
+    isoBox(pc, cx + 11, cy + 1, 3, 5, { top: P.brick, left: P.brick, right: P.brickShade });
+  },
+  'coal_mine@3': (pc, cx, cy) => {
+    // Automatizovaná baňa: dopravník a rameno nakladača.
+    PAINTERS['coal_mine@2']!(pc, cx, cy);
+    for (let i = 0; i < 10; i++) {
+      pc.set(cx - 14 + i, cy - 6 + Math.floor(i / 2), P.stoneDeep);
+      pc.set(cx - 14 + i, cy - 7 + Math.floor(i / 2), i % 2 ? P.ink : P.stone);
+    }
+    pc.fillRect(cx - 4, cy - 12, 1, 6, P.wheat);
+    pc.fillRect(cx - 4, cy - 12, 5, 1, P.wheat);
+    pc.stamp(cx, cy - 12, ['kk', 'k.'], { k: P.ink });
+  },
+};
+Object.assign(PAINTERS, LEVEL_PAINTERS);
+
 /** Smery napojenia cesty (bity masky): +x, +y, −x, −y v súradniciach mapy. */
 export const ROAD_EAST = 1;
 export const ROAD_SOUTH = 2;
@@ -1549,7 +1781,20 @@ export const CHIMNEYS: Readonly<Record<string, readonly (readonly [number, numbe
   ],
   workshop: [[6, -20]],
   'workshop+': [[6, -20]],
+  'workshop@2': [[6, -20]],
+  'workshop@3': [
+    [4, -27],
+    [9, -26],
+  ],
   brickworks: [[6, -23]],
+  'brickworks@2': [
+    [6, -23],
+    [-2, -25],
+  ],
+  'brickworks@3': [[7, -35]],
+  'lumberjack@3': [[7, -28]],
+  'quarry@3': [[10, -16]],
+  'mine@3': [[-10, -15]],
   smelter: [[-2, -31]],
   steelworks: [
     [-6, -35],

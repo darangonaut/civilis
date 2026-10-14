@@ -15,9 +15,16 @@ async function buildHouse(page: Page) {
   const client = await page.evaluate(() => {
     const hook = window.__civilis!;
     const roads = hook.getState().city.buildings.filter((b) => b.definitionId === 'road');
-    for (const dy of [1, -1]) {
+    // Mapa môže byť náhodná (test obnovenia nemá seed) — skúsi všetkých susedov ciest.
+    const offsets = [
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [-1, 0],
+    ];
+    for (const [dx, dy] of offsets) {
       for (const road of roads) {
-        const tile = { x: road.position.x, y: road.position.y + dy };
+        const tile = { x: road.position.x + dx!, y: road.position.y + dy! };
         if (hook.canPlace('house', tile)) return hook.tileToClient(tile);
       }
     }

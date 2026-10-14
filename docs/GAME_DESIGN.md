@@ -154,3 +154,15 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   v poradí pred ňou.
 - Na dotykovej obrazovke ťuknutie stavia alebo vyberá, ťahanie prstom v režime stavby stavia
   viac naraz a mapa sa vtedy posúva dvoma prstami. Mimo stavby posúva mapu jeden prst.
+
+## Vylepšenie výrobných budov (2026-10-14, na želanie)
+
+- 3 úrovne pre drevorubača, farmu, kameňolom, dielňu, tehelňu, rybársku chatu, baňu, pastvinu
+  a uhoľnú baňu. Úroveň 2: výroba aj spotreba ×1,5, +1 pracovník, údržba ×1,6. Úroveň 3: ×2,2,
+  +2 pracovníci, údržba ×2,4 — výroba na pracovníka aj na políčko rastie, takže vylepšenie šetrí
+  miesto aj ľudí, ale stojí viac údržby a suroviny neskorších ér.
+- Vylepšenia odomykajú technológie neskorších ér (napr. Píla — Cechy, Lesný závod — Parný stroj,
+  Statok — Trojpoľný systém, Mechanizovaná farma — Automobil), výrobné budovy tak rastú s civilizáciou.
+  Nevyžadujú služby v dosahu.
+- Bloky polí a lesov majú veľa políčok, preto inšpektor ponúka „Vylepšiť všetky“ — vylepší všetky
+  rovnaké budovy na rovnakej úrovni, kým stačia suroviny.

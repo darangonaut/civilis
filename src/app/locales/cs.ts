@@ -130,6 +130,8 @@ export const cs: Record<keyof typeof sk, string> = {
   'detail.service.culture': 'kultura v dosahu (chrám, divadlo…)',
   'detail.service.health': 'nemocnice v dosahu',
   'detail.upgraded': 'Budova vylepšena',
+  'detail.upgradeAll': 'Vylepšit všechny ({n})',
+  'detail.upgradedMany': 'Vylepšené budovy: {n}',
   'detail.maxLevel': 'Nejvyšší úroveň',
   'detail.pause': 'Pozastavit',
   'detail.resume': 'Spustit',

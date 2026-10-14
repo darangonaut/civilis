@@ -169,7 +169,34 @@
     "requiresRoad": true,
     "connectsAdjacent": true,
     "allowedTerrain": ["forest"],
-    "toolUsePerWorker": 0.05
+    "toolUsePerWorker": 0.05,
+    "levels": [
+      {
+        "name": "Píla",
+        "upgradeCost": {
+          "wood": 40,
+          "stone": 40,
+          "bricks": 20,
+          "tools": 10
+        },
+        "requiredTechnologyId": "guilds",
+        "workersRequired": 4,
+        "maintenanceCost": 0.8,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Lesný závod",
+        "upgradeCost": {
+          "bricks": 80,
+          "iron": 40,
+          "tools": 30
+        },
+        "requiredTechnologyId": "steam",
+        "workersRequired": 5,
+        "maintenanceCost": 1.2,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "farm",
@@ -197,7 +224,34 @@
     "toolUsePerWorker": 0.05,
     "terrainEfficiency": {
       "grass": 0.5
-    }
+    },
+    "levels": [
+      {
+        "name": "Statok",
+        "upgradeCost": {
+          "wood": 40,
+          "stone": 40,
+          "bricks": 20,
+          "tools": 10
+        },
+        "requiredTechnologyId": "crop_rotation",
+        "workersRequired": 4,
+        "maintenanceCost": 0.8,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Mechanizovaná farma",
+        "upgradeCost": {
+          "bricks": 120,
+          "iron": 80,
+          "tools": 60
+        },
+        "requiredTechnologyId": "automobile",
+        "workersRequired": 5,
+        "maintenanceCost": 1.2,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "quarry",
@@ -222,7 +276,33 @@
     "requiresRoad": true,
     "connectsAdjacent": true,
     "allowedTerrain": ["rock"],
-    "toolUsePerWorker": 0.05
+    "toolUsePerWorker": 0.05,
+    "levels": [
+      {
+        "name": "Veľký lom",
+        "upgradeCost": {
+          "wood": 30,
+          "stone": 20,
+          "bricks": 10
+        },
+        "requiredTechnologyId": "architecture",
+        "workersRequired": 4,
+        "maintenanceCost": 0.8,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Strojový lom",
+        "upgradeCost": {
+          "bricks": 80,
+          "iron": 40,
+          "tools": 30
+        },
+        "requiredTechnologyId": "steam",
+        "workersRequired": 5,
+        "maintenanceCost": 1.2,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "well",
@@ -313,7 +393,34 @@
     "storageCapacity": 0,
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
-    "toolUsePerWorker": 0
+    "toolUsePerWorker": 0,
+    "levels": [
+      {
+        "name": "Remeselnícka dielňa",
+        "upgradeCost": {
+          "wood": 60,
+          "stone": 60,
+          "bricks": 30,
+          "tools": 15
+        },
+        "requiredTechnologyId": "guilds",
+        "workersRequired": 4,
+        "maintenanceCost": 1.6,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Manufaktúra",
+        "upgradeCost": {
+          "bricks": 120,
+          "iron": 60,
+          "tools": 45
+        },
+        "requiredTechnologyId": "industrialization",
+        "workersRequired": 5,
+        "maintenanceCost": 2.4,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "school",
@@ -396,7 +503,34 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0.05,
-    "requiredTechnologyId": "pottery"
+    "requiredTechnologyId": "pottery",
+    "levels": [
+      {
+        "name": "Kruhová pec",
+        "upgradeCost": {
+          "wood": 60,
+          "stone": 60,
+          "bricks": 30,
+          "tools": 15
+        },
+        "requiredTechnologyId": "guilds",
+        "workersRequired": 5,
+        "maintenanceCost": 2.4,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Parná tehelňa",
+        "upgradeCost": {
+          "bricks": 120,
+          "iron": 60,
+          "tools": 45
+        },
+        "requiredTechnologyId": "steam",
+        "workersRequired": 6,
+        "maintenanceCost": 3.6,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "fishery",
@@ -421,7 +555,33 @@
     "requiresRoad": true,
     "allowedTerrain": ["water"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "fishing"
+    "requiredTechnologyId": "fishing",
+    "levels": [
+      {
+        "name": "Rybársky prístav",
+        "upgradeCost": {
+          "bricks": 40,
+          "iron": 20,
+          "tools": 20
+        },
+        "requiredTechnologyId": "navigation",
+        "workersRequired": 3,
+        "maintenanceCost": 0.8,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Rybárska flotila",
+        "upgradeCost": {
+          "bricks": 120,
+          "iron": 80,
+          "tools": 60
+        },
+        "requiredTechnologyId": "refrigeration",
+        "workersRequired": 4,
+        "maintenanceCost": 1.2,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "aqueduct",
@@ -505,7 +665,33 @@
     "connectsAdjacent": true,
     "allowedTerrain": ["hill"],
     "toolUsePerWorker": 0.05,
-    "requiredTechnologyId": "mining"
+    "requiredTechnologyId": "mining",
+    "levels": [
+      {
+        "name": "Hlbinná baňa",
+        "upgradeCost": {
+          "bricks": 120,
+          "iron": 60,
+          "tools": 45
+        },
+        "requiredTechnologyId": "steam",
+        "workersRequired": 5,
+        "maintenanceCost": 1.6,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Strojová baňa",
+        "upgradeCost": {
+          "bricks": 180,
+          "iron": 120,
+          "tools": 90
+        },
+        "requiredTechnologyId": "mass_production",
+        "workersRequired": 6,
+        "maintenanceCost": 2.4,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "smelter",
@@ -622,7 +808,33 @@
     "connectsAdjacent": true,
     "allowedTerrain": ["grass", "hill"],
     "toolUsePerWorker": 0.05,
-    "requiredTechnologyId": "textiles"
+    "requiredTechnologyId": "textiles",
+    "levels": [
+      {
+        "name": "Ovčia farma",
+        "upgradeCost": {
+          "bricks": 80,
+          "iron": 40,
+          "tools": 30
+        },
+        "requiredTechnologyId": "industrialization",
+        "workersRequired": 3,
+        "maintenanceCost": 0.8,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Chovná stanica",
+        "upgradeCost": {
+          "iron": 120,
+          "tools": 100,
+          "electronics": 20
+        },
+        "requiredTechnologyId": "genetics",
+        "workersRequired": 4,
+        "maintenanceCost": 1.2,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "harbor",
@@ -767,7 +979,33 @@
     "connectsAdjacent": true,
     "allowedTerrain": ["hill", "rock"],
     "toolUsePerWorker": 0.05,
-    "requiredTechnologyId": "steam"
+    "requiredTechnologyId": "steam",
+    "levels": [
+      {
+        "name": "Hlboká uhoľná baňa",
+        "upgradeCost": {
+          "bricks": 180,
+          "iron": 120,
+          "tools": 90
+        },
+        "requiredTechnologyId": "electricity",
+        "workersRequired": 6,
+        "maintenanceCost": 3.2,
+        "productionMultiplier": 1.5
+      },
+      {
+        "name": "Automatizovaná baňa",
+        "upgradeCost": {
+          "iron": 180,
+          "tools": 150,
+          "electronics": 30
+        },
+        "requiredTechnologyId": "robotics",
+        "workersRequired": 7,
+        "maintenanceCost": 4.8,
+        "productionMultiplier": 2.2
+      }
+    ]
   },
   {
     "id": "steelworks",

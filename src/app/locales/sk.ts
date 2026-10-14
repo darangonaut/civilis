@@ -131,6 +131,8 @@ export const sk = {
   'detail.service.culture': 'kultúra v dosahu (chrám, divadlo…)',
   'detail.service.health': 'nemocnica v dosahu',
   'detail.upgraded': 'Budova vylepšená',
+  'detail.upgradeAll': 'Vylepšiť všetky ({n})',
+  'detail.upgradedMany': 'Vylepšené budovy: {n}',
   'detail.maxLevel': 'Najvyššia úroveň',
   'detail.pause': 'Pozastaviť',
   'detail.resume': 'Spustiť',

@@ -130,6 +130,8 @@ export const en: Record<keyof typeof sk, string> = {
   'detail.service.culture': 'culture in range (temple, theater…)',
   'detail.service.health': 'hospital in range',
   'detail.upgraded': 'Building upgraded',
+  'detail.upgradeAll': 'Upgrade all ({n})',
+  'detail.upgradedMany': 'Buildings upgraded: {n}',
   'detail.maxLevel': 'Highest level',
   'detail.pause': 'Pause',
   'detail.resume': 'Resume',
