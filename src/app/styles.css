@@ -284,43 +284,49 @@ button.danger:hover:not(:disabled),
   background: var(--blue);
 }
 
-/* --- Horná lišta --- */
+/* --- Horná lišta: tenký pás cez celú šírku --- */
 .top-hud {
   position: absolute;
-  top: 14px;
-  left: 16px;
-  right: 16px;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 12px 14px;
-  pointer-events: none;
+  align-items: center;
+  gap: 12px;
+  padding: 5px 12px;
+  background: var(--panel);
+  box-shadow:
+    0 2px 0 var(--ink),
+    0 4px 0 var(--edge);
 }
 
-.top-hud > * {
-  pointer-events: auto;
+.top-hud .hud-divider {
+  align-self: center;
+  height: 26px;
+  margin: 0;
 }
 
 .hud-brand,
 .hud-people {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 10px 16px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .brand-block,
 .era-block {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .brand {
   font-family: var(--pixel);
-  font-size: 24px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   line-height: 1;
   text-transform: uppercase;
   color: var(--gold);
@@ -328,7 +334,7 @@ button.danger:hover:not(:disabled),
 
 .brand-era {
   font-family: var(--pixel);
-  font-size: 12px;
+  font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
@@ -336,7 +342,7 @@ button.danger:hover:not(:disabled),
 
 .era-name {
   font-family: var(--pixel);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -345,8 +351,8 @@ button.danger:hover:not(:disabled),
 .era-day {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 5px;
+  font-size: 11px;
   color: var(--text-soft);
   white-space: nowrap;
 }
@@ -361,23 +367,46 @@ button.danger:hover:not(:disabled),
   color: #8fb6ff;
 }
 
+/* Suroviny v jednom riadku; keď sa nezmestia, posúvajú sa (nezalamujú sa). */
 .hud-resources {
   display: flex;
-  flex-wrap: wrap;
+  flex: 1 1 auto;
   align-items: center;
-  gap: 4px;
-  padding: 8px 10px;
-  flex: 0 1 auto;
+  gap: 3px;
   min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.hud-resources::-webkit-scrollbar {
+  display: none;
+}
+
+/* Centrovanie cez okraje — pri pretečení sa začiatok neoreže (na rozdiel od justify-content). */
+.hud-resources > :first-child {
+  margin-left: auto;
+}
+
+.hud-resources > :last-child {
+  margin-right: auto;
 }
 
 .res-chip {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 6px;
-  padding: 5px 9px;
-  background: rgb(58 68 102 / 45%);
+  gap: 5px;
+  padding: 2px 6px;
+  background: rgb(58 68 102 / 35%);
   white-space: nowrap;
+}
+
+/* Hodnota a pod ňou trend — čip je úzky. */
+.res-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.05;
 }
 
 .res-chip.money {
@@ -400,9 +429,17 @@ button.danger:hover:not(:disabled),
 .res-value,
 .hud-value {
   font-family: var(--pixel);
-  font-size: 16px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.res-value {
+  font-size: 13px;
+}
+
+.hud-value {
+  font-size: 14px;
 }
 
 .steady {
@@ -410,14 +447,9 @@ button.danger:hover:not(:disabled),
   white-space: nowrap;
 }
 
-.res-value,
-.hud-value {
-  text-align: right;
-}
-
 .res-delta {
-  font-size: 12px;
-  color: var(--text-soft);
+  font-size: 10px;
+  color: var(--muted);
 }
 
 .res-delta.up {
@@ -428,17 +460,17 @@ button.danger:hover:not(:disabled),
   color: #ff8a80;
 }
 
-.hud-people {
-  margin-left: auto;
-  padding: 10px 14px;
-}
-
 .hud-stat {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   color: var(--text-soft);
   white-space: nowrap;
+}
+
+.hud-stat svg {
+  width: 16px;
+  height: 16px;
 }
 
 .hud-stat .hud-value {
@@ -446,7 +478,7 @@ button.danger:hover:not(:disabled),
 }
 
 .hud-sub {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--muted);
 }
 
@@ -474,11 +506,11 @@ button.danger:hover:not(:disabled),
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 30px;
+  width: 28px;
+  height: 24px;
   padding: 0;
   font-family: var(--pixel);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .speed-controls button.active {
@@ -2281,15 +2313,13 @@ button.danger:hover:not(:disabled),
   }
 
   .top-hud {
-    top: var(--safe-top);
-    left: var(--safe-left);
-    right: var(--safe-right);
-    gap: 7px;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    padding: max(4px, env(safe-area-inset-top)) var(--safe-right) 4px var(--safe-left);
   }
 
   .hud-brand {
     gap: 8px;
-    padding: 6px 10px;
   }
 
   .hud-brand .brand-block,
@@ -2308,7 +2338,6 @@ button.danger:hover:not(:disabled),
   .hud-people {
     margin-left: auto;
     gap: 8px;
-    padding: 6px 8px;
   }
 
   .hud-people .hud-divider {
@@ -2326,28 +2355,19 @@ button.danger:hover:not(:disabled),
 
   .speed-controls button {
     width: 27px;
-    height: 30px;
+    height: 26px;
     font-size: 12px;
   }
 
-  /* Suroviny v jednom riadku, posúvajú sa prstom. */
+  /* Suroviny v druhom riadku, posúvajú sa prstom. */
   .hud-resources {
     order: 3;
     flex: 1 1 100%;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 5px 6px;
-    scrollbar-width: none;
-  }
-
-  .hud-resources::-webkit-scrollbar {
-    display: none;
   }
 
   .res-chip {
-    flex-shrink: 0;
     gap: 4px;
-    padding: 4px 7px;
+    padding: 2px 5px;
   }
 
   .hud-left {
@@ -2647,13 +2667,8 @@ button.danger:hover:not(:disabled),
 
 /* Veľmi úzky telefón (iPhone SE): stiesnenejšia horná lišta. */
 @media (max-width: 400px) {
-  .hud-brand {
-    padding: 6px 8px;
-  }
-
   .hud-people {
     gap: 6px;
-    padding: 6px;
   }
 
   .hud-stat {

@@ -41,7 +41,7 @@ export function TopHud() {
 
   return (
     <header ref={ref} className="top-hud" data-testid="top-bar">
-      <div className="hud-panel hud-brand">
+      <div className="hud-brand">
         <div className="brand-block">
           <span className="brand">{t('app.title')}</span>
           <span className="brand-era">
@@ -70,7 +70,13 @@ export function TopHud() {
         </div>
       </div>
 
-      <div className="hud-panel hud-resources">
+      <div
+        className="hud-resources"
+        onWheel={(event) => {
+          // Koliesko myši posúva pretečené suroviny do strán.
+          if (event.deltaY !== 0) event.currentTarget.scrollLeft += event.deltaY;
+        }}
+      >
         {RESOURCE_IDS.filter((id) => resourceVisible(id, eraIndex, economy.resources[id])).map(
           (id) => {
             const capped = id !== 'knowledge';
@@ -109,7 +115,7 @@ export function TopHud() {
         />
       </div>
 
-      <div className="hud-panel hud-people">
+      <div className="hud-people">
         <span className="hud-stat" title={`${t('topbar.population')} / ${t('hud.housing')}`}>
           <Icon name="people" />
           <Steady className="hud-value">{population.total}</Steady>
@@ -205,13 +211,15 @@ function Chip({
       data-testid={testId}
     >
       <ResourceIcon kind={icon} />
-      <Steady className="res-value">{value}</Steady>
-      {delta !== undefined && (
-        <Steady className={`res-delta ${trend}`}>
-          {trend === 'up' ? '▲' : trend === 'down' ? '▼' : ''}
-          {trend === 'flat' ? '±0' : formatDelta(Math.abs(delta)).replace('+', '')}
-        </Steady>
-      )}
+      <span className="res-stack">
+        <Steady className="res-value">{value}</Steady>
+        {delta !== undefined && (
+          <Steady className={`res-delta ${trend}`}>
+            {trend === 'up' ? '▲' : trend === 'down' ? '▼' : ''}
+            {trend === 'flat' ? '±0' : formatDelta(Math.abs(delta)).replace('+', '')}
+          </Steady>
+        )}
+      </span>
     </span>
   );
 }
