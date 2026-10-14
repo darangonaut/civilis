@@ -12,7 +12,11 @@ export interface CivilisTestHook {
   /** Odsimuluje zadaný počet dní naraz. */
   advanceDays(days: number): void;
   /** Pridá technológie a suroviny (príprava scenára v teste). */
-  grantForTest(grant: { technologies?: string[]; resources?: Partial<Resources> }): void;
+  grantForTest(grant: {
+    technologies?: string[];
+    resources?: Partial<Resources>;
+    milestones?: string[];
+  }): void;
 }
 
 declare global {

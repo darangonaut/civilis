@@ -136,7 +136,7 @@ describe('výstavba (test C)', () => {
     const engine = setup();
     expectRejected(
       engine,
-      { type: 'PLACE_BUILDING', buildingId: 'castle', position: { x: 1, y: 1 } },
+      { type: 'PLACE_BUILDING', buildingId: 'dragon_lair', position: { x: 1, y: 1 } },
       'unknown_building',
     );
   });

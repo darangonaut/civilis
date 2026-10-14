@@ -49,3 +49,8 @@ export {
   tradeAvailable,
   validateTrade,
 } from './economy/trade';
+export {
+  achievementProgress,
+  cityScore,
+  type AchievementProgress,
+} from './milestones/achievements';

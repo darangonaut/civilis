@@ -11,6 +11,7 @@ interface DataNames {
   technologies: Record<string, string>;
   milestones: Record<string, string>;
   eras: Record<string, { name: string; description: string }>;
+  achievements: Record<string, { name: string; description: string }>;
 }
 
 const NAMES: Partial<Record<Language, DataNames>> = { cs: csNames, en: enNames };
@@ -35,6 +36,20 @@ export function milestoneTitle(id: string): string {
 
 export function eraName(id: string): string {
   return names()?.eras[id]?.name ?? gameData.eras.find((e) => e.id === id)?.name ?? id;
+}
+
+export function achievementName(id: string): string {
+  return (
+    names()?.achievements[id]?.name ?? gameData.achievements.find((a) => a.id === id)?.name ?? id
+  );
+}
+
+export function achievementDescription(id: string): string {
+  return (
+    names()?.achievements[id]?.description ??
+    gameData.achievements.find((a) => a.id === id)?.description ??
+    ''
+  );
 }
 
 export function eraDescription(id: string): string {

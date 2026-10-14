@@ -184,3 +184,16 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   nad 90 % kapacity skladu na 75 %. Príjem sa započíta do denného príjmu.
 - Ceny sú nízke oproti výrobe (napr. drevo 0,6, nástroje 2, elektronika 8) — obchod má pomôcť
   vyrovnať nerovnováhu a využiť plný sklad, nie nahradiť výrobu.
+
+## Divy sveta, úspechy a skóre (2026-10-14, na želanie)
+
+- Šesť divov (2 × 2 políčka, v meste každý najviac raz, bez pracovníkov a cesty): Pyramída
+  (−10 % údržba), Veľká knižnica (+25 % vedomosti), Hrad (+5 spokojnosť), Kolos (+25 % peniaze),
+  Železná veža (+10 % všetka výroba), Olympijský štadión (+8 spokojnosť). Odomykajú ich technológie
+  a cena je vyššia ako kapacita skladu na začiatku éry — treba ich plánovať.
+- Efekty divov sa sčítavajú s efektmi technológií; bonus spokojnosti sa pripočíta k cieľovej
+  spokojnosti (strop 100).
+- Úspechy sa vyhodnocujú denne a stačí ich splniť raz (populácia, výskum, spokojnosť, peniaze,
+  obchod, divy, parky, mrakodrapy, éra, rýchle dohranie do 2 500. dňa).
+- Skóre = obyvatelia + 20 × technológia + 150 × míľnik + 300 × div + 100 × úspech + zárobok
+  z obchodu / 100. Deň dohrania sa zapíše pri splnení posledného míľnika.

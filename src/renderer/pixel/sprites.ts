@@ -1499,6 +1499,159 @@ const DECORATION_PAINTERS: Record<string, Painter> = {
 };
 Object.assign(PAINTERS, DECORATION_PAINTERS);
 
+// --- Divy sveta (2 × 2 políčka) --------------------------------------------------------
+
+/** Výška plátna nad pôdorysom divu (železná veža je vysoká). */
+const WONDER_TOP = 64;
+/** Polovičná šírka pôdorysu 2 × 2. */
+const WHW = PX_TILE_W;
+
+function wonderCanvas(): { pc: PixelCanvas; cx: number; cy: number } {
+  const pc = new PixelCanvas(2 * PX_TILE_W + 2, 2 * PX_TILE_H + WONDER_TOP + 2);
+  return { pc, cx: WHW + 1, cy: WONDER_TOP + PX_TILE_H + 1 };
+}
+
+const BRONZE = 0x3e8948;
+const BRONZE_DARK = 0x2a6b47;
+
+const WONDER_PAINTERS: Record<string, Painter> = {
+  pyramid: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, WHW - 2, (x, y) => (pixelNoise(x, y, 51) < 0.15 ? P.dirtLight : P.dirt));
+    const left: Point = [cx - 27, cy];
+    const front: Point = [cx, cy + 13];
+    const right: Point = [cx + 27, cy];
+    const apex: Point = [cx, cy - 36];
+    const steps = (light: Rgb) => (_x: number, y: number) =>
+      (y - cy) % 5 === 0 ? P.dirtEdge : light;
+    pc.fillPolygon([left, front, apex], steps(P.dirtLight));
+    pc.fillPolygon([front, right, apex], steps(P.dirtDark));
+    pc.stamp(cx - 2, cy + 5, ['.oo.', 'oooo', 'oooo'], { o: P.ink });
+    pc.fillRect(cx - 1, cy - 37, 2, 2, P.wheatLight);
+  },
+  great_library: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 26, 4, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    const hw = 21;
+    isoBox(pc, cx, cy - 4, hw, 14, { top: P.plaster, left: P.plaster, right: P.plasterShade });
+    // Stĺporadie na oboch viditeľných stenách.
+    for (let dx = 2; dx < hw; dx += 4) {
+      const [lx, ly] = leftWall(cx, cy - 4, hw, dx, 13);
+      pc.fillRect(lx, ly, 1, 12, P.plasterDark);
+      const [rx, ry] = rightWall(cx, cy - 4, hw, dx, 13);
+      pc.fillRect(rx, ry, 1, 12, P.plasterDark);
+    }
+    hipRoof(pc, cx, cy - 4, hw, 14, 9, P.roof, P.roofShade);
+    pc.stamp(...rightWall(cx, cy - 4, hw, 9, 9), DOOR, DETAIL_PAL);
+  },
+  castle: (pc, cx, cy) => {
+    const tower = (x: number, y: number, h: number) => {
+      isoBox(pc, x, y, 5, h, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+      hipRoof(pc, x, y, 5, h, 8, P.roof, P.roofShade);
+    };
+    tower(cx, cy - 13, 22);
+    isoBox(pc, cx, cy, 24, 10, { top: P.stoneDark, left: P.stone, right: P.stoneDark });
+    // Cimburie na korune hradieb.
+    for (let dx = 1; dx < 24; dx += 3) {
+      const [lx, ly] = leftWall(cx, cy, 24, dx, 12);
+      pc.fillRect(lx, ly, 2, 2, P.stone);
+      const [rx, ry] = rightWall(cx, cy, 24, dx, 12);
+      pc.fillRect(rx, ry, 2, 2, P.stoneDark);
+    }
+    isoBox(pc, cx, cy - 3, 9, 24, { top: P.stoneLight, left: P.stoneLight, right: P.stone });
+    hipRoof(pc, cx, cy - 3, 9, 24, 10, P.roof, P.roofShade);
+    pc.fillRect(cx, cy - 46, 1, 8, P.woodDark);
+    pc.fillRect(cx + 1, cy - 46, 5, 3, P.wheat);
+    tower(cx - 24, cy, 18);
+    tower(cx + 24, cy, 18);
+    tower(cx, cy + 12, 16);
+    pc.stamp(...rightWall(cx, cy, 24, 8, 8), ['.dd.', 'dDDd', 'dDDd', 'dDDd'], DETAIL_PAL);
+  },
+  colossus: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, WHW - 2, (x, y) => ((x + y) % 4 === 0 ? P.stoneDark : P.stone));
+    isoBox(pc, cx, cy, 12, 10, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    const pal = { b: BRONZE, d: BRONZE_DARK, y: P.wheatLight, o: P.wheat };
+    // Postava s pochodňou (2 px na „pixel“ návrhu, aby bola mohutná).
+    const figure = [
+      '......yy',
+      '......oo',
+      '.bb...d.',
+      '.bb...d.',
+      'bbbb.dd.',
+      'bbbbbd..',
+      'bbbbd...',
+      '.bbd....',
+      '.bdd....',
+      '.b.d....',
+      '.b.d....',
+      'bb.dd...',
+    ];
+    figure.forEach((row, ry) =>
+      [...row].forEach((ch, rx) => {
+        const color = pal[ch as keyof typeof pal];
+        if (color) pc.fillRect(cx - 6 + rx * 2, cy - 38 + ry * 2, 2, 2, color);
+      }),
+    );
+  },
+  iron_tower: (pc, cx, cy) => {
+    pc.fillDiamond(cx, cy, WHW - 4, (x, y) =>
+      pixelNoise(x, y, 61) < 0.15 ? P.grassLight : P.grass,
+    );
+    const lattice = (x: number, y: number) =>
+      (x + y) % 3 === 0 || (x - y + 300) % 3 === 0 ? P.stoneDeep : null;
+    // Nohy s oblúkom medzi nimi.
+    pc.fillPolygon(
+      [
+        [cx - 24, cy + 4],
+        [cx - 6, cy - 30],
+        [cx + 6, cy - 30],
+        [cx + 24, cy + 4],
+      ],
+      (x, y) => {
+        const dx = (x - cx) / 14;
+        const dy = (y - (cy + 4)) / 18;
+        if (dx * dx + dy * dy < 1) return null;
+        return lattice(x, y);
+      },
+    );
+    pc.fillRect(cx - 9, cy - 16, 18, 2, P.stoneDeep);
+    pc.fillRect(cx - 7, cy - 31, 14, 2, P.stoneDeep);
+    pc.fillPolygon(
+      [
+        [cx - 6, cy - 30],
+        [cx - 2, cy - 58],
+        [cx + 2, cy - 58],
+        [cx + 6, cy - 30],
+      ],
+      lattice,
+    );
+    pc.fillRect(cx, cy - 63, 1, 6, P.stoneDeep);
+    pc.set(cx, cy - 64, P.roof);
+  },
+  stadium: (pc, cx, cy) => {
+    isoBox(pc, cx, cy, 28, 10, { top: P.stoneLight, left: P.white, right: P.stoneLight });
+    pc.fillDiamond(cx, cy - 10, 23, (_x, y) => ((y - cy) % 2 === 0 ? P.stone : P.stoneDark));
+    pc.fillDiamond(cx, cy - 10, 15, (x) => (x === cx ? P.white : P.grass));
+    for (const [dx, dy] of [
+      [-26, -1],
+      [26, -1],
+      [0, -14],
+      [0, 12],
+    ]) {
+      pc.fillRect(cx + dx!, cy + dy! - 22, 1, 12, P.stoneDeep);
+      pc.fillRect(
+        cx + dx! + 1,
+        cy + dy! - 22,
+        4,
+        3,
+        dx! % 2 === 0 && dy! < 0 ? P.roof : P.waterDeep,
+      );
+    }
+    for (let dx = 3; dx < 28; dx += 5) {
+      const [lx, ly] = leftWall(cx, cy, 28, dx, 8);
+      pc.fillRect(lx, ly, 2, 4, P.window);
+    }
+  },
+};
+
 /** Smery napojenia cesty (bity masky): +x, +y, −x, −y v súradniciach mapy. */
 export const ROAD_EAST = 1;
 export const ROAD_SOUTH = 2;
@@ -1595,6 +1748,12 @@ export function buildingSpriteKey(
 }
 
 export function drawBuilding(key: string): PixelSprite {
+  const wonder = WONDER_PAINTERS[key];
+  if (wonder) {
+    const { pc, cx, cy } = wonderCanvas();
+    wonder(pc, cx, cy);
+    return finish(pc, cx, cy);
+  }
   const [base, maskText] = key.split('#');
   const flat = maskText !== undefined ? roadPainter(Number(maskText), base === 'road+') : FLAT[key];
   if (flat) {

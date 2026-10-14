@@ -1,0 +1,149 @@
+[
+  {
+    "id": "first_settlers",
+    "name": "Prví osadníci",
+    "description": "Dosiahni 50 obyvateľov.",
+    "condition": {
+      "type": "population",
+      "minimum": 50
+    }
+  },
+  {
+    "id": "town",
+    "name": "Mestečko",
+    "description": "Dosiahni 500 obyvateľov.",
+    "condition": {
+      "type": "population",
+      "minimum": 500
+    }
+  },
+  {
+    "id": "big_city",
+    "name": "Veľkomesto",
+    "description": "Dosiahni 5 000 obyvateľov.",
+    "condition": {
+      "type": "population",
+      "minimum": 5000
+    }
+  },
+  {
+    "id": "megalopolis",
+    "name": "Megapolis",
+    "description": "Dosiahni 20 000 obyvateľov.",
+    "condition": {
+      "type": "population",
+      "minimum": 20000
+    }
+  },
+  {
+    "id": "scholar",
+    "name": "Učenec",
+    "description": "Preskúmaj 10 technológií.",
+    "condition": {
+      "type": "completed_research",
+      "minimum": 10
+    }
+  },
+  {
+    "id": "omniscient",
+    "name": "Vševed",
+    "description": "Preskúmaj všetky technológie.",
+    "condition": {
+      "type": "completed_research",
+      "minimum": 58
+    }
+  },
+  {
+    "id": "happy_city",
+    "name": "Šťastné mesto",
+    "description": "Spokojnosť aspoň 95.",
+    "condition": {
+      "type": "happiness",
+      "minimum": 95
+    }
+  },
+  {
+    "id": "full_treasury",
+    "name": "Plná pokladnica",
+    "description": "Nazbieraj 10 000 peňazí.",
+    "condition": {
+      "type": "money",
+      "minimum": 10000
+    }
+  },
+  {
+    "id": "merchant",
+    "name": "Obchodník",
+    "description": "Zarob obchodom 1 000 peňazí.",
+    "condition": {
+      "type": "trade_earned",
+      "minimum": 1000
+    }
+  },
+  {
+    "id": "tycoon",
+    "name": "Magnát",
+    "description": "Zarob obchodom 50 000 peňazí.",
+    "condition": {
+      "type": "trade_earned",
+      "minimum": 50000
+    }
+  },
+  {
+    "id": "first_wonder",
+    "name": "Prvý div",
+    "description": "Postav div sveta.",
+    "condition": {
+      "type": "wonder_count",
+      "minimum": 1
+    }
+  },
+  {
+    "id": "wonders_of_the_world",
+    "name": "Divy sveta",
+    "description": "Postav všetkých šesť divov sveta.",
+    "condition": {
+      "type": "wonder_count",
+      "minimum": 6
+    }
+  },
+  {
+    "id": "green_city",
+    "name": "Mesto v zeleni",
+    "description": "Postav 20 parkov.",
+    "condition": {
+      "type": "building_count",
+      "buildingId": "park",
+      "minimum": 20
+    }
+  },
+  {
+    "id": "skyline",
+    "name": "Panoráma",
+    "description": "Maj 10 mrakodrapov alebo lepších domov.",
+    "condition": {
+      "type": "building_level",
+      "buildingId": "house",
+      "level": 8,
+      "minimum": 10
+    }
+  },
+  {
+    "id": "industrial_revolution",
+    "name": "Priemyselná revolúcia",
+    "description": "Dosiahni Priemyselnú éru.",
+    "condition": {
+      "type": "era",
+      "minimum": 4
+    }
+  },
+  {
+    "id": "fast_forward",
+    "name": "Rýchly postup",
+    "description": "Dohraj hru do 2 500. dňa.",
+    "condition": {
+      "type": "finished_before_day",
+      "minimum": 2500
+    }
+  }
+]

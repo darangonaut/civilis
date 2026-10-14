@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { buildingName, techName } from '@/app/names';
 import { formatAmount } from '@/app/format';
-import { commandReasonLabel, problemLabel, t } from '@/app/i18n';
+import { commandReasonLabel, effectLabel, problemLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
@@ -119,6 +119,15 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
           ))
         )}
       </ul>
+
+      {base.wonder && (
+        <ul className="wonder-effects" data-testid="wonder-effects">
+          {base.wonder.effects.map((effect, i) => (
+            <li key={i}>{effectLabel(effect)}</li>
+          ))}
+          {base.wonder.happiness && <li>{t('wonder.happiness', { n: base.wonder.happiness })}</li>}
+        </ul>
+      )}
 
       {definition.housingCapacity > 0 && (
         <Meter

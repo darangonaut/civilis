@@ -110,8 +110,8 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
     });
   }
 
-  const maintenanceFactor = maintenanceMultiplier(state.research, data);
-  const moneyFactor = moneyMultiplier(state.research, data);
+  const maintenanceFactor = maintenanceMultiplier(state, data);
+  const moneyFactor = moneyMultiplier(state, data);
   const maintenanceTotal = maintenanceBase * maintenanceFactor;
   const fundingRatio =
     maintenanceTotal > 0 ? Math.min(1, Math.max(0, economy.money) / maintenanceTotal) : 1;
@@ -224,11 +224,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
     for (const id of RESOURCE_IDS) {
       const output = definition.outputs[id] ?? 0;
       if (output <= 0) continue;
-      add(
-        status.produced,
-        id,
-        output * status.efficiency * productionMultiplier(state.research, data, id),
-      );
+      add(status.produced, id, output * status.efficiency * productionMultiplier(state, data, id));
       if (!UNCAPPED_RESOURCES.has(id) && economy.resources[id] >= storageCapacity) {
         status.problems.push({ code: 'storage_full', resource: id });
       }

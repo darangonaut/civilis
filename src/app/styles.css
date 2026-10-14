@@ -1770,6 +1770,97 @@ button.danger:hover:not(:disabled),
   flex: 1;
 }
 
+/* --- Divy a úspechy --- */
+.wonder-effects {
+  margin: 0;
+  padding: 6px 10px 6px 24px;
+  background: rgb(254 231 97 / 10%);
+  color: var(--gold-light);
+  font-size: 13px;
+}
+
+.dock-built {
+  font-family: var(--pixel);
+  color: var(--green);
+}
+
+.panel-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+}
+
+.panel-tabs .segmented button {
+  flex: 0 1 auto;
+  padding: 6px 12px;
+}
+
+.score {
+  font-family: var(--pixel);
+  font-size: 15px;
+  color: var(--text-soft);
+}
+
+.score strong,
+.victory-score strong {
+  color: var(--gold);
+}
+
+.victory-score {
+  font-family: var(--pixel);
+  font-size: 18px;
+}
+
+.achievement-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+
+.achievement {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--well-dark);
+  box-shadow: inset 0 0 0 2px var(--edge-soft);
+  opacity: 0.75;
+}
+
+.achievement.done {
+  opacity: 1;
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+
+.achievement-badge {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.achievement.done .achievement-badge {
+  color: var(--gold);
+}
+
+.achievement-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.achievement-text strong {
+  font-family: var(--pixel);
+  font-size: 14px;
+}
+
 /* --- Obchod --- */
 .trade-unavailable {
   margin: 0;

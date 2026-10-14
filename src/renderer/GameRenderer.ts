@@ -72,9 +72,20 @@ function applyTexture(sprite: Sprite, anchored: AnchoredTexture): void {
   sprite.anchor.set(anchored.anchorX, anchored.anchorY);
 }
 
-function placeOnTile(sprite: Sprite, position: Position): void {
-  const world = tileToWorld(position.x, position.y);
+/** Umiestni sprite na stred pôdorysu `size` × `size` políčok (ľavý horný roh = `position`). */
+function placeOnTile(sprite: Sprite, position: Position, size = 1): void {
+  const offset = (size - 1) / 2;
+  const world = tileToWorld(position.x + offset, position.y + offset);
   sprite.position.set(world.x, world.y);
+}
+
+/** Poradie kreslenia: podľa predného rohu pôdorysu. */
+const depthOf = (position: Position, size = 1) => position.x + position.y + 2 * (size - 1);
+
+/** Typ budovy pre renderer: ID a veľkosť pôdorysu (divy 2 × 2). */
+export interface RendererBuilding {
+  id: string;
+  size: number;
 }
 
 /**
@@ -138,12 +149,25 @@ export class GameRenderer {
 
   static async create(
     host: HTMLElement,
-    buildingIds: readonly string[],
+    buildings: readonly RendererBuilding[],
     callbacks: RendererCallbacks,
   ) {
     const renderer = new GameRenderer(host, callbacks);
-    await renderer.init(buildingIds);
+    for (const building of buildings) renderer.sizes.set(building.id, building.size);
+    await renderer.init(buildings.map((b) => b.id));
     return renderer;
+  }
+
+  private sizes = new Map<string, number>();
+  private sizeOf(buildingId: string): number {
+    return this.sizes.get(buildingId) ?? 1;
+  }
+
+  /** Políčka stavby z ťahania; veľká budova (div) sa stavia iba raz, na mieste pustenia. */
+  private dragTiles(drag: { start: Position; end: Position }): Position[] {
+    if (!this.buildModeId) return [];
+    if (this.sizeOf(this.buildModeId) > 1) return [drag.end];
+    return dragPositions(dragShapeFor(this.buildModeId), drag.start, drag.end);
   }
 
   private async init(buildingIds: readonly string[]): Promise<void> {
@@ -369,13 +393,14 @@ export class GameRenderer {
         applyTexture(sprite, this.atlas.building(key));
         (building.definitionId === 'road' ? this.roadLayer : this.buildingLayer).addChild(sprite);
         this.buildingSprites.set(building.id, sprite);
-        placeOnTile(sprite, building.position);
+        placeOnTile(sprite, building.position, this.sizeOf(building.definitionId));
         if (this.animateNewBuildings && building.definitionId !== 'road') {
           this.effects.pop(sprite, building.position);
         }
       }
-      placeOnTile(sprite, building.position);
-      sprite.zIndex = building.position.x + building.position.y;
+      const size = this.sizeOf(building.definitionId);
+      placeOnTile(sprite, building.position, size);
+      sprite.zIndex = depthOf(building.position, size);
     }
     for (const [id, sprite] of this.buildingSprites) {
       if (!present.has(id)) {
@@ -406,7 +431,8 @@ export class GameRenderer {
         marker.label = kind;
         applyTexture(marker, this.atlas.marker(kind));
       }
-      const world = tileToWorld(building.position.x, building.position.y);
+      const offset = (this.sizeOf(building.definitionId) - 1) / 2;
+      const world = tileToWorld(building.position.x + offset, building.position.y + offset);
       marker.position.set(world.x, world.y - MARKER_OFFSET);
     }
   }
@@ -415,14 +441,21 @@ export class GameRenderer {
     if (!this.state) return;
     const hovered = this.hoveredTile;
 
+    // Obrys pod kurzorom má v režime stavby veľkosť pôdorysu stavanej budovy.
+    const buildSize = this.buildModeId ? this.sizeOf(this.buildModeId) : 1;
     this.hoverOutline.visible = hovered !== null;
-    if (hovered) placeOnTile(this.hoverOutline, hovered);
+    this.hoverOutline.scale.set(buildSize);
+    if (hovered) placeOnTile(this.hoverOutline, hovered, buildSize);
 
     const selected = this.selectedInstanceId
       ? this.state.city.buildings.find((b) => b.id === this.selectedInstanceId)
       : undefined;
     this.selectionOutline.visible = selected !== undefined;
-    if (selected) placeOnTile(this.selectionOutline, selected.position);
+    if (selected) {
+      const size = this.sizeOf(selected.definitionId);
+      this.selectionOutline.scale.set(size);
+      placeOnTile(this.selectionOutline, selected.position, size);
+    }
 
     this.refreshDragPreview();
     const showPreview = this.buildModeId !== null && hovered !== null && this.dragBuild === null;
@@ -435,8 +468,8 @@ export class GameRenderer {
         this.state.research.completedTechnologyIds,
       );
       applyTexture(this.preview, this.atlas.building(previewKey));
-      placeOnTile(this.preview, hovered);
-      this.preview.zIndex = hovered.x + hovered.y + 0.5;
+      placeOnTile(this.preview, hovered, buildSize);
+      this.preview.zIndex = depthOf(hovered, buildSize) + 0.5;
       this.preview.tint = valid ? PREVIEW_VALID : PREVIEW_INVALID;
       this.hoverOutline.tint = valid ? PREVIEW_VALID : PREVIEW_INVALID;
     } else {
@@ -447,10 +480,8 @@ export class GameRenderer {
   /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */
   private refreshDragPreview(): void {
     const drag = this.dragBuild;
-    const positions =
-      drag && this.buildModeId
-        ? dragPositions(dragShapeFor(this.buildModeId), drag.start, drag.end)
-        : [];
+    const positions = drag ? this.dragTiles(drag) : [];
+    const dragSize = this.buildModeId ? this.sizeOf(this.buildModeId) : 1;
     while (this.dragPreview.length < positions.length) {
       const sprite = new Sprite();
       sprite.alpha = 0.7;
@@ -469,8 +500,8 @@ export class GameRenderer {
       sprite.visible = position !== undefined && key !== null;
       if (!position || !key) return;
       applyTexture(sprite, this.atlas.building(key));
-      placeOnTile(sprite, position);
-      sprite.zIndex = position.x + position.y + 0.5;
+      placeOnTile(sprite, position, dragSize);
+      sprite.zIndex = depthOf(position, dragSize) + 0.5;
       sprite.tint = this.callbacks.canPlace(this.buildModeId!, position)
         ? PREVIEW_VALID
         : PREVIEW_INVALID;
@@ -678,10 +709,7 @@ export class GameRenderer {
         const drag = this.dragBuild;
         this.dragBuild = null;
         if (drag && this.buildModeId) {
-          this.callbacks.onPlaceMany(
-            this.buildModeId,
-            dragPositions(dragShapeFor(this.buildModeId), drag.start, drag.end),
-          );
+          this.callbacks.onPlaceMany(this.buildModeId, this.dragTiles(drag));
         }
         this.refreshOverlay();
       } else if (!p.dragging && e.button === 0) {

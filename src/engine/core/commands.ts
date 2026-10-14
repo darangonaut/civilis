@@ -49,6 +49,9 @@ export function validatePlacement(
   if (!Number.isInteger(level) || level < 1 || level > maxLevel(definition))
     return fail('max_level');
 
+  if (definition.wonder && state.city.buildings.some((b) => b.definitionId === buildingId))
+    return fail('wonder_built');
+
   const tiles = footprint(definition, position);
   if (!tiles.every((p) => isInBounds(state.world, p.x, p.y))) return fail('out_of_bounds');
   if (tiles.some((p) => getTile(state.world, p.x, p.y)!.buildingId !== undefined)) {

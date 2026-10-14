@@ -3,6 +3,7 @@ import type { GameEvent } from '../core/events';
 import type { GameData } from '../core/definitions';
 import { currentEraIndex } from '../milestones/eras';
 import { evaluateMilestones } from '../milestones/milestones';
+import { evaluateAchievements } from '../milestones/achievements';
 import { simulatePopulation } from '../population/population';
 import { advanceResearch } from '../research/research';
 import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
@@ -76,10 +77,17 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const eraBefore = currentEraIndex(state, data);
   const milestoneId = evaluateMilestones(state, data);
   if (milestoneId) events.push({ type: 'milestone_completed', milestoneId });
+  if (milestoneId && milestoneId === data.milestones.at(-1)?.id) {
+    state.achievements.finishedDay = state.simulation.day + 1;
+  }
   const eraAfter = currentEraIndex(state, data);
   if (eraAfter > eraBefore) events.push({ type: 'era_reached', eraId: data.eras[eraAfter]!.id });
 
   state.simulation.day += 1;
   refreshDerivedState(state, data);
+
+  // 11. Úspechy (rozšírenie) — po prepočte, aby videli aktuálny stav.
+  for (const achievementId of evaluateAchievements(state, data))
+    events.push({ type: 'achievement_unlocked', achievementId });
   return events;
 }

@@ -3,6 +3,8 @@ import { controller } from '@/app/game';
 import { t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { useUiStore } from '@/stores/uiStore';
+import { gameData } from '@/data';
+import { cityScore } from '@/engine';
 
 /** Obrazovka úspechu po splnení posledného míľnika. Hra potom pokračuje ako sandbox. */
 export function VictoryDialog() {
@@ -10,6 +12,8 @@ export function VictoryDialog() {
   const setOpen = useUiStore((s) => s.setVictoryOpen);
   const day = useGameState((s) => s.simulation.day);
   const population = useGameState((s) => s.city.population.total);
+  const finishedDay = useGameState((s) => s.achievements.finishedDay);
+  const score = useGameState((s) => cityScore(s, gameData));
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -36,8 +40,14 @@ export function VictoryDialog() {
       </div>
       <h2>{t('victory.title')}</h2>
       <p>{t('victory.text')}</p>
+      <p className="victory-score" data-testid="victory-score">
+        {t('score.title')}: <strong>{score}</strong>
+      </p>
       <p className="muted">
-        {t('topbar.day')} {day} · {t('topbar.population')} {population}
+        {finishedDay !== null
+          ? t('score.finished', { days: finishedDay })
+          : `${t('topbar.day')} ${day}`}{' '}
+        · {t('topbar.population')} {population}
       </p>
       <button className="primary" onClick={continuePlaying}>
         {t('victory.continue')}

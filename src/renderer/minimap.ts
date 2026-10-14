@@ -18,6 +18,7 @@ const BUILDINGS: Record<BuildingCategory, string> = {
   service: '#b55088',
   infrastructure: '#c0a080',
   decoration: '#63c74d',
+  wonder: '#fee761',
 };
 
 /** Mierka minimapy: políčko = `scale` px na šírku diagonály. */

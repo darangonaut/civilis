@@ -9,6 +9,7 @@ import { effectiveDefinition } from '../core/levels';
 import type { GameData } from '../core/definitions';
 import type { CityAnalysis } from '../economy/analysis';
 import { footprint, tileIndex } from '../world/grid';
+import { wonderHappiness } from '../economy/modifiers';
 
 /**
  * Mriežka políčok v dosahu aktívnej služby daného typu. Dosah je štvorec (Chebyševova
@@ -127,7 +128,7 @@ export function simulatePopulation(
   const factors = computeHappinessFactors(state, data, analysis, foodSatisfaction);
   population.happinessFactors = factors;
 
-  const target = targetHappiness(factors, data);
+  const target = targetHappiness(factors, data) + wonderHappiness(state, data);
   const step = Math.max(
     -balance.happinessChangePerDay,
     Math.min(balance.happinessChangePerDay, target - population.happiness),

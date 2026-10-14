@@ -1,6 +1,6 @@
 import { formatAmount } from '@/app/format';
 import { buildingName, techName } from '@/app/names';
-import { categoryLabel, t } from '@/app/i18n';
+import { categoryLabel, effectLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
 import {
@@ -27,22 +27,36 @@ interface DockTile {
   definition: BuildingDefinition;
   level: number;
   locked: boolean;
+  /** Div sveta, ktorý už v meste stojí. */
+  built: boolean;
   cost: Partial<Resources>;
 }
 
 /** Dlaždice kategórie: budovy dostupných ér + vyššie úrovne, ktoré už má hráč odomknuté. */
-function dockTiles(category: string, eraIndex: number, completed: readonly string[]): DockTile[] {
+function dockTiles(
+  category: string,
+  eraIndex: number,
+  completed: readonly string[],
+  builtWonders: ReadonlySet<string>,
+): DockTile[] {
   const tiles: DockTile[] = [];
   for (const definition of gameData.buildings) {
     if (definition.category !== category || buildingEraIndex(gameData, definition.id) > eraIndex)
       continue;
     const locked =
       !!definition.requiredTechnologyId && !completed.includes(definition.requiredTechnologyId);
-    tiles.push({ definition, level: 1, locked, cost: definition.constructionCost });
+    const built = builtWonders.has(definition.id);
+    tiles.push({ definition, level: 1, locked, built, cost: definition.constructionCost });
     if (locked) continue;
     for (let level = 2; level <= maxLevel(definition); level++) {
       if (!technologiesForLevel(definition, level).every((id) => completed.includes(id))) break;
-      tiles.push({ definition, level, locked: false, cost: buildCostAtLevel(definition, level) });
+      tiles.push({
+        definition,
+        level,
+        locked: false,
+        built: false,
+        cost: buildCostAtLevel(definition, level),
+      });
     }
   }
   return tiles;
@@ -73,7 +87,13 @@ export function BuildDock() {
   const resources = useGameState((s) => s.city.economy.resources);
   const completed = useGameState((s) => s.research.completedTechnologyIds);
   const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
-  const tiles = dockTiles(category, eraIndex, completed);
+  const builtKey = useGameState((s) =>
+    s.city.buildings
+      .filter((b) => gameData.buildingsById.get(b.definitionId)?.wonder)
+      .map((b) => b.definitionId)
+      .join(','),
+  );
+  const tiles = dockTiles(category, eraIndex, completed, new Set(builtKey.split(',')));
   const tooltipTile =
     tiles.find((tile) => tile.definition.id === hovered?.id && tile.level === hovered.level) ??
     tiles.find((tile) => tile.definition.id === buildModeId && tile.level === buildLevel);
@@ -110,20 +130,20 @@ export function BuildDock() {
         <div className="dock-tiles" onMouseLeave={() => setHovered(null)}>
           {tiles.length === 0 && <p className="muted">{t('catalog.empty')}</p>}
           {tiles.map((tile) => {
-            const { definition, level, locked, cost } = tile;
+            const { definition, level, locked, built, cost } = tile;
             const selected = buildModeId === definition.id && buildLevel === level;
             const canAfford = affordable(cost, resources);
             const name = buildingName(definition.id, level);
             return (
               <button
                 key={`${definition.id}@${level}`}
-                className={`dock-tile${selected ? ' selected' : ''}${locked ? ' locked' : ''}${!locked && !canAfford ? ' unaffordable' : ''}`}
+                className={`dock-tile${selected ? ' selected' : ''}${locked || built ? ' locked' : ''}${!locked && !canAfford ? ' unaffordable' : ''}`}
                 aria-pressed={selected}
                 aria-label={name}
-                disabled={locked}
+                disabled={locked || built}
                 data-building-id={level === 1 ? definition.id : undefined}
                 data-building-level={`${definition.id}@${level}`}
-                data-available={!locked && canAfford}
+                data-available={!locked && !built && canAfford}
                 onMouseEnter={() => setHovered({ id: definition.id, level })}
                 onFocus={() => setHovered({ id: definition.id, level })}
                 onClick={() => {
@@ -138,7 +158,9 @@ export function BuildDock() {
                 </span>
                 {level > 1 && <span className="dock-tile-level">{level}</span>}
                 <span className="dock-tile-cost">
-                  {locked ? (
+                  {built ? (
+                    <span className="dock-built">✓</span>
+                  ) : locked ? (
                     <Icon name="lock" size={14} />
                   ) : (
                     <Cost cost={cost} stock={resources} limit={2} />
@@ -178,6 +200,19 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
         </span>
       )}
       {level > 1 && <span className="tooltip-note">{t('hud.directBuild')}</span>}
+      {base.wonder && (
+        <>
+          <span className="tooltip-note">{t('wonder.unique')}</span>
+          <ul className="wonder-effects">
+            {base.wonder.effects.map((effect, i) => (
+              <li key={i}>{effectLabel(effect)}</li>
+            ))}
+            {base.wonder.happiness && (
+              <li>{t('wonder.happiness', { n: base.wonder.happiness })}</li>
+            )}
+          </ul>
+        </>
+      )}
       {base.connectsAdjacent && <span className="tooltip-note">{t('hud.connectsAdjacent')}</span>}
       <dl className="tooltip-grid">
         <dt>{t('detail.cost')}</dt>

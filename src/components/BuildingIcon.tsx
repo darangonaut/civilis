@@ -19,7 +19,7 @@ function icon(spriteKey: string): Icon {
   return entry;
 }
 
-/** Ikona v presnom 2× zväčšení (rovnomerné pixely), zarovnaná na spodok rámčeka. */
+/** Ikona v presnom celočíselnom zväčšení (rovnomerné pixely), zarovnaná na spodok rámčeka. */
 export function BuildingIcon({
   definitionId,
   spriteKey,
@@ -28,9 +28,11 @@ export function BuildingIcon({
   spriteKey?: string;
 }) {
   const { url, width, height } = icon(spriteKey ?? definitionId ?? 'house');
+  // Divy (2 × 2) majú dvakrát širšie plátno — ikona v 1× mierke, aby sa zmestila.
+  const scale = width > 40 ? 1 : 2;
   return (
     <span className="building-icon" aria-hidden>
-      <img src={url} alt="" width={width * 2} height={height * 2} draggable={false} />
+      <img src={url} alt="" width={width * scale} height={height * scale} draggable={false} />
     </span>
   );
 }

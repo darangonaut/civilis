@@ -64,6 +64,28 @@ export interface MilestoneDefinition {
   };
 }
 
+/** Podmienka úspechu — vyhodnocuje sa denne, stačí raz splniť. */
+export type AchievementCondition =
+  | { type: 'population'; minimum: number }
+  | { type: 'completed_research'; minimum: number }
+  | { type: 'happiness'; minimum: number }
+  | { type: 'money'; minimum: number }
+  | { type: 'trade_earned'; minimum: number }
+  | { type: 'wonder_count'; minimum: number }
+  | { type: 'building_count'; buildingId: string; minimum: number }
+  | { type: 'building_level'; buildingId: string; level: number; minimum: number }
+  /** Dosiahnutá éra (index od 0). */
+  | { type: 'era'; minimum: number }
+  /** Hra dohraná (posledný míľnik) najneskôr v daný deň. */
+  | { type: 'finished_before_day'; minimum: number };
+
+export interface AchievementDefinition {
+  id: string;
+  name: string;
+  description: string;
+  condition: AchievementCondition;
+}
+
 export interface MilestoneState {
   completedIds: string[];
   progressDays: Record<string, number>;

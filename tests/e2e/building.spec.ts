@@ -210,3 +210,41 @@ test('vylepšenie všetkých rovnakých budov naraz (blok fariem)', async ({ pag
   );
   expect(levels).toEqual([2, 2, 2]);
 });
+
+test('div sveta: pyramída na 2 × 2 políčka, druhá sa už postaviť nedá', async ({ page }) => {
+  await openGame(page);
+  const spot = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    hook.grantForTest({
+      technologies: ['architecture'],
+      // Splnená Osada → Starovek, kde sa pyramída objaví v doku.
+      milestones: [
+        'settlement_founded',
+        'self_sufficient_village',
+        'educated_society',
+        'prosperous_town',
+        'birth_of_civilization',
+      ],
+      // Pyramída stojí viac, než sa zmestí do skladu na začiatku hry — test hook zásoby nezastropuje.
+      resources: { wood: 300, stone: 700, bricks: 400, tools: 100 },
+    });
+    const state = hook.getState();
+    const w = state.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let d = 2; d < 12; d++)
+      for (let y = w.y - d; y <= w.y + d; y++)
+        for (let x = w.x - d; x <= w.x + d; x++) {
+          const tile = { x, y };
+          if (hook.canPlace('pyramid', tile)) return { tile, client: hook.tileToClient(tile) };
+        }
+    throw new Error('Žiadne miesto pre pyramídu');
+  });
+  await pickBuilding(page, 'pyramid');
+  await page.mouse.click(spot.client.x, spot.client.y);
+  const pyramid = await page.evaluate(() =>
+    window.__civilis!.getState().city.buildings.find((b) => b.definitionId === 'pyramid'),
+  );
+  expect(pyramid?.position).toEqual(spot.tile);
+  await expect(
+    page.getByTestId('building-catalog').locator('[data-building-id="pyramid"]'),
+  ).toBeDisabled();
+});

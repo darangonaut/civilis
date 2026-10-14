@@ -32,6 +32,10 @@ describe('preklady', () => {
     }
     for (const tech of gameData.technologies) expect(names.technologies).toHaveProperty([tech.id]);
     for (const m of gameData.milestones) expect(names.milestones).toHaveProperty([m.id]);
+    for (const a of gameData.achievements) {
+      expect(names.achievements).toHaveProperty([a.id, 'name']);
+      expect(names.achievements).toHaveProperty([a.id, 'description']);
+    }
     for (const era of gameData.eras) {
       expect(names.eras).toHaveProperty([era.id, 'name']);
       expect(names.eras).toHaveProperty([era.id, 'description']);

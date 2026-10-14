@@ -1,9 +1,16 @@
 import { formatAmount } from '@/app/format';
-import { eraName, milestoneTitle } from '@/app/names';
+import { achievementDescription, achievementName, eraName, milestoneTitle } from '@/app/names';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { conditionProgress, currentMilestone, type ConditionProgress } from '@/engine';
+import {
+  achievementProgress,
+  cityScore,
+  conditionProgress,
+  currentMilestone,
+  type ConditionProgress,
+} from '@/engine';
+import { useState } from 'react';
 import { RESOURCE_IDS, type MilestoneCondition, type MilestoneDefinition } from '@/types';
 import { conditionLabel } from '@/app/conditions';
 import { PanelFrame } from './PanelFrame';
@@ -20,11 +27,86 @@ function rewardLabel(milestone: MilestoneDefinition): string {
 }
 
 export function MilestonesPanel() {
+  const [tab, setTab] = useState<'milestones' | 'achievements'>('milestones');
+  const score = useGameState((s) => cityScore(s, gameData));
+  const achievementsDone = useGameState((s) => s.achievements.completedIds.length);
+
+  return (
+    <PanelFrame title={t('milestones.title')} testId="milestones-panel">
+      <div className="panel-tabs">
+        <div className="segmented" role="tablist">
+          <button
+            role="tab"
+            aria-selected={tab === 'milestones'}
+            className={tab === 'milestones' ? 'active' : ''}
+            onClick={() => setTab('milestones')}
+          >
+            {t('milestones.tab')}
+          </button>
+          <button
+            role="tab"
+            aria-selected={tab === 'achievements'}
+            className={tab === 'achievements' ? 'active' : ''}
+            onClick={() => setTab('achievements')}
+            data-testid="tab-achievements"
+          >
+            {t('achievements.count', {
+              done: achievementsDone,
+              total: gameData.achievements.length,
+            })}
+          </button>
+        </div>
+        <span className="score" data-testid="city-score">
+          {t('score.title')}: <strong>{score}</strong>
+        </span>
+      </div>
+      {tab === 'milestones' ? <MilestoneList /> : <AchievementList />}
+    </PanelFrame>
+  );
+}
+
+function AchievementList() {
+  const completed = useGameState((s) => s.achievements.completedIds);
+  const progress = useGameState((s) =>
+    gameData.achievements.map((a) => achievementProgress(s, gameData, a.condition)),
+  );
+  return (
+    <ul className="achievement-list" data-testid="achievement-list">
+      {gameData.achievements.map((achievement, i) => {
+        const done = completed.includes(achievement.id);
+        const p = progress[i]!;
+        const showBar = !done && achievement.condition.type !== 'finished_before_day';
+        return (
+          <li
+            key={achievement.id}
+            className={`achievement ${done ? 'done' : ''}`}
+            data-achievement-id={achievement.id}
+          >
+            <span className="achievement-badge" aria-hidden>
+              {done ? '★' : '☆'}
+            </span>
+            <div className="achievement-text">
+              <strong>{achievementName(achievement.id)}</strong>
+              <span className="muted">{achievementDescription(achievement.id)}</span>
+              {showBar && (
+                <span className="bar">
+                  <span style={{ width: `${Math.min(1, p.current / p.target) * 100}%` }} />
+                </span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function MilestoneList() {
   const completedIds = useGameState((s) => s.milestones.completedIds);
   const current = useGameState((s) => currentMilestone(s, gameData));
 
   return (
-    <PanelFrame title={t('milestones.title')} testId="milestones-panel">
+    <>
       {!current && <p className="all-done">{t('milestones.allDone')}</p>}
       {gameData.eras.map((era) => (
         <section key={era.id} className="era-group" data-era-id={era.id}>
@@ -61,7 +143,7 @@ export function MilestonesPanel() {
           </ol>
         </section>
       ))}
-    </PanelFrame>
+    </>
   );
 }
 

@@ -77,7 +77,13 @@
     "fountain": "Fountain",
     "plaza": "Town Square",
     "statue": "Statue",
-    "botanical_garden": "Botanical Garden"
+    "botanical_garden": "Botanical Garden",
+    "pyramid": "Pyramid",
+    "great_library": "Great Library",
+    "castle": "Castle",
+    "colossus": "Colossus",
+    "iron_tower": "Iron Tower",
+    "stadium": "Olympic Stadium"
   },
   "technologies": {
     "woodworking": "Woodworking",
@@ -199,6 +205,72 @@
     "future": {
       "name": "Near Future",
       "description": "Fusion, artificial intelligence and arcologies. The last step of civilization will be a spaceport."
+    }
+  },
+  "achievements": {
+    "first_settlers": {
+      "name": "First Settlers",
+      "description": "Reach 50 residents."
+    },
+    "town": {
+      "name": "Small Town",
+      "description": "Reach 500 residents."
+    },
+    "big_city": {
+      "name": "Big City",
+      "description": "Reach 5,000 residents."
+    },
+    "megalopolis": {
+      "name": "Megalopolis",
+      "description": "Reach 20,000 residents."
+    },
+    "scholar": {
+      "name": "Scholar",
+      "description": "Research 10 technologies."
+    },
+    "omniscient": {
+      "name": "Omniscient",
+      "description": "Research all technologies."
+    },
+    "happy_city": {
+      "name": "Happy City",
+      "description": "Reach happiness of at least 95."
+    },
+    "full_treasury": {
+      "name": "Full Treasury",
+      "description": "Save up 10,000 money."
+    },
+    "merchant": {
+      "name": "Merchant",
+      "description": "Earn 1,000 money by trade."
+    },
+    "tycoon": {
+      "name": "Tycoon",
+      "description": "Earn 50,000 money by trade."
+    },
+    "first_wonder": {
+      "name": "First Wonder",
+      "description": "Build a wonder of the world."
+    },
+    "wonders_of_the_world": {
+      "name": "Wonders of the World",
+      "description": "Build all six wonders of the world."
+    },
+    "green_city": {
+      "name": "Green City",
+      "description": "Build 20 parks."
+    },
+    "skyline": {
+      "name": "Skyline",
+      "description": "Have 10 skyscrapers or better houses."
+    },
+    "industrial_revolution": {
+      "name": "Industrial Revolution",
+      "description": "Reach the Industrial Era."
+    },
+    "fast_forward": {
+      "name": "Fast Forward",
+      "description": "Finish the game by day 2,500."
     }
   }
 }

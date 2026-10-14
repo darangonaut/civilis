@@ -1,3 +1,4 @@
+import type { TechnologyEffect } from './research';
 import type { Resources } from './resources';
 import type { Position, TerrainType } from './world';
 
@@ -8,6 +9,8 @@ export const BUILDING_CATEGORIES = [
   'infrastructure',
   /** Parky a dekorácie (rozšírenie). */
   'decoration',
+  /** Divy sveta — unikátne veľké stavby s trvalým bonusom (rozšírenie). */
+  'wonder',
 ] as const;
 export type BuildingCategory = (typeof BUILDING_CATEGORIES)[number];
 
@@ -71,6 +74,12 @@ export interface BuildingDefinition {
 
   /** Úrovne 2, 3, … (rozšírenie oproti špecifikácii). */
   levels?: BuildingLevelDefinition[];
+
+  /** Div sveta: v meste najviac raz, trvalé efekty ako technológie a bonus k spokojnosti. */
+  wonder?: {
+    effects: TechnologyEffect[];
+    happiness?: number;
+  };
 }
 
 export interface BuildingInstance {

@@ -1,5 +1,5 @@
 import { gameData } from '@/data';
-import { eraName, milestoneTitle, techName } from './names';
+import { achievementName, eraName, milestoneTitle, techName } from './names';
 import type { GameEvent } from '@/engine';
 import { RESOURCE_IDS } from '@/types';
 import { useUiStore } from '@/stores/uiStore';
@@ -40,6 +40,10 @@ export function installGameEventNotifications(): () => void {
         const name = techName(event.technologyId);
         ui.showNotice(`${t('events.researchCompleted')}: ${name}`, 'success');
         log(t('events.researchCompleted'), name, 'success');
+      } else if (event.type === 'achievement_unlocked') {
+        const name = achievementName(event.achievementId);
+        ui.showNotice(`${t('achievements.unlocked')}: ${name}`, 'success');
+        log(t('achievements.unlocked'), name, 'success');
       } else if (event.type === 'era_reached') {
         controller.setSpeed(0);
         ui.setNewEra(event.eraId);

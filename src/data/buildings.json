@@ -1763,5 +1763,202 @@
       "radius": 12
     },
     "requiredTechnologyId": "ecology"
+  },
+  {
+    "id": "pyramid",
+    "name": "Pyramída",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "wood": 200,
+      "stone": 600,
+      "bricks": 300,
+      "tools": 50
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "architecture",
+    "wonder": {
+      "effects": [
+        {
+          "type": "maintenance_multiplier",
+          "target": "all",
+          "multiplier": 0.9
+        }
+      ]
+    }
+  },
+  {
+    "id": "great_library",
+    "name": "Veľká knižnica",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "wood": 200,
+      "stone": 300,
+      "bricks": 400
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "philosophy",
+    "wonder": {
+      "effects": [
+        {
+          "type": "production_multiplier",
+          "target": "knowledge",
+          "multiplier": 1.25
+        }
+      ]
+    }
+  },
+  {
+    "id": "castle",
+    "name": "Hrad",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "stone": 1000,
+      "bricks": 600,
+      "iron": 100,
+      "tools": 100
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "theology",
+    "wonder": {
+      "effects": [],
+      "happiness": 5
+    }
+  },
+  {
+    "id": "colossus",
+    "name": "Kolos",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "stone": 600,
+      "bricks": 800,
+      "iron": 400
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 4,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "navigation",
+    "wonder": {
+      "effects": [
+        {
+          "type": "money_multiplier",
+          "target": "all",
+          "multiplier": 1.25
+        }
+      ]
+    }
+  },
+  {
+    "id": "iron_tower",
+    "name": "Železná veža",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "bricks": 800,
+      "iron": 1500,
+      "tools": 300
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 6,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "steel",
+    "wonder": {
+      "effects": [
+        {
+          "type": "production_multiplier",
+          "target": "all",
+          "multiplier": 1.1
+        }
+      ]
+    }
+  },
+  {
+    "id": "stadium",
+    "name": "Olympijský štadión",
+    "category": "wonder",
+    "size": {
+      "width": 2,
+      "height": 2
+    },
+    "constructionCost": {
+      "bricks": 2000,
+      "iron": 1200,
+      "tools": 600,
+      "electricity": 200
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 10,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "requiredTechnologyId": "consumerism",
+    "wonder": {
+      "effects": [],
+      "happiness": 8
+    }
   }
 ]

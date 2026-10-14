@@ -7,6 +7,8 @@ import {
   TERRAIN_TYPES,
   type BuildingDefinition,
   type EraDefinition,
+  type AchievementCondition,
+  type AchievementDefinition,
   type MilestoneCondition,
   type MilestoneDefinition,
   type Resources,
@@ -34,6 +36,12 @@ export const resourcesSchema = z.strictObject({
 }) satisfies z.ZodType<Resources>;
 
 export const partialResourcesSchema = resourcesSchema.partial();
+
+const technologyEffectSchema = z.strictObject({
+  type: z.enum(TECHNOLOGY_EFFECT_TYPES),
+  target: z.union([resourceId, z.literal('all')]),
+  multiplier: z.number().positive(),
+});
 
 const buildingLevelSchema = z.strictObject({
   name: z.string().min(1),
@@ -68,6 +76,12 @@ export const buildingDefinitionSchema = z.strictObject({
   service: z.strictObject({ type: z.enum(SERVICE_TYPES), radius: positiveInt }).optional(),
   requiredTechnologyId: id.optional(),
   levels: z.array(buildingLevelSchema).optional(),
+  wonder: z
+    .strictObject({
+      effects: z.array(technologyEffectSchema),
+      happiness: nonNegative.optional(),
+    })
+    .optional(),
 }) satisfies z.ZodType<BuildingDefinition>;
 
 export const eraDefinitionSchema = z.strictObject({
@@ -82,15 +96,7 @@ export const technologyDefinitionSchema = z.strictObject({
   era: id,
   cost: z.number().positive(),
   prerequisites: z.array(id),
-  effects: z
-    .array(
-      z.strictObject({
-        type: z.enum(TECHNOLOGY_EFFECT_TYPES),
-        target: z.union([resourceId, z.literal('all')]),
-        multiplier: z.number().positive(),
-      }),
-    )
-    .min(1),
+  effects: z.array(technologyEffectSchema).min(1),
 }) satisfies z.ZodType<TechnologyDefinition>;
 
 const milestoneConditionSchema = z.discriminatedUnion('type', [
@@ -133,6 +139,31 @@ export const milestoneDefinitionSchema = z.strictObject({
     badgeId: id.optional(),
   }),
 }) satisfies z.ZodType<MilestoneDefinition>;
+
+const achievementConditionSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('population'), minimum: positiveInt }),
+  z.strictObject({ type: z.literal('completed_research'), minimum: positiveInt }),
+  z.strictObject({ type: z.literal('happiness'), minimum: z.number().min(0).max(100) }),
+  z.strictObject({ type: z.literal('money'), minimum: positiveInt }),
+  z.strictObject({ type: z.literal('trade_earned'), minimum: positiveInt }),
+  z.strictObject({ type: z.literal('wonder_count'), minimum: positiveInt }),
+  z.strictObject({ type: z.literal('building_count'), buildingId: id, minimum: positiveInt }),
+  z.strictObject({
+    type: z.literal('building_level'),
+    buildingId: id,
+    level: z.number().int().min(2),
+    minimum: positiveInt,
+  }),
+  z.strictObject({ type: z.literal('era'), minimum: z.number().int().nonnegative() }),
+  z.strictObject({ type: z.literal('finished_before_day'), minimum: positiveInt }),
+]) satisfies z.ZodType<AchievementCondition>;
+
+export const achievementDefinitionSchema = z.strictObject({
+  id,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  condition: achievementConditionSchema,
+}) satisfies z.ZodType<AchievementDefinition>;
 
 export const balanceSchema = z.strictObject({
   startingState: z.strictObject({
@@ -192,6 +223,7 @@ export interface GameData {
   buildings: readonly BuildingDefinition[];
   technologies: readonly TechnologyDefinition[];
   milestones: readonly MilestoneDefinition[];
+  achievements: readonly AchievementDefinition[];
   balance: BalanceConfig;
   buildingsById: ReadonlyMap<string, BuildingDefinition>;
   technologiesById: ReadonlyMap<string, TechnologyDefinition>;
@@ -202,6 +234,8 @@ export interface RawGameData {
   buildings: unknown;
   technologies: unknown;
   milestones: unknown;
+  /** Úspechy (nepovinné — testovacie dáta ich nemusia mať). */
+  achievements?: unknown;
   balance: unknown;
 }
 
@@ -265,6 +299,7 @@ export function loadGameData(raw: RawGameData): GameData {
   const technologies = z.array(technologyDefinitionSchema).safeParse(raw.technologies);
   const milestones = z.array(milestoneDefinitionSchema).safeParse(raw.milestones);
   const balance = balanceSchema.safeParse(raw.balance);
+  const achievements = z.array(achievementDefinitionSchema).safeParse(raw.achievements ?? []);
 
   const schemaIssues = [
     ...(eras.success ? [] : formatZodIssues('eras', eras.error)),
@@ -272,13 +307,15 @@ export function loadGameData(raw: RawGameData): GameData {
     ...(technologies.success ? [] : formatZodIssues('technologies', technologies.error)),
     ...(milestones.success ? [] : formatZodIssues('milestones', milestones.error)),
     ...(balance.success ? [] : formatZodIssues('balance', balance.error)),
+    ...(achievements.success ? [] : formatZodIssues('achievements', achievements.error)),
   ];
   if (
     !eras.success ||
     !buildings.success ||
     !technologies.success ||
     !milestones.success ||
-    !balance.success
+    !balance.success ||
+    !achievements.success
   ) {
     throw new GameDataError(schemaIssues);
   }
@@ -400,6 +437,16 @@ export function loadGameData(raw: RawGameData): GameData {
     issues.push('balance.trade: autoSellTo musí byť nižšie ako autoSellAbove');
   }
 
+  for (const duplicate of findDuplicates(achievements.data.map((a) => a.id))) {
+    issues.push(`achievements: duplicitné ID "${duplicate}"`);
+  }
+  for (const achievement of achievements.data) {
+    const condition = achievement.condition;
+    if ('buildingId' in condition && !buildingIds.has(condition.buildingId)) {
+      issues.push(`achievements[${achievement.id}]: neznáma budova "${condition.buildingId}"`);
+    }
+  }
+
   if (issues.length > 0) throw new GameDataError(issues);
 
   return {
@@ -407,6 +454,7 @@ export function loadGameData(raw: RawGameData): GameData {
     buildings: buildings.data,
     technologies: technologies.data,
     milestones: milestones.data,
+    achievements: achievements.data,
     balance: balance.data,
     buildingsById: new Map(buildings.data.map((b) => [b.id, b])),
     technologiesById: new Map(technologies.data.map((t) => [t.id, t])),

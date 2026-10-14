@@ -59,7 +59,7 @@ export function MapView() {
       .then(({ GameRenderer }) =>
         GameRenderer.create(
           host,
-          gameData.buildings.map((b) => b.id),
+          gameData.buildings.map((b) => ({ id: b.id, size: b.size.width })),
           {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),
             onTileClick: handleTileClick,

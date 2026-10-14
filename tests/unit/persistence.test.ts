@@ -132,7 +132,7 @@ describe('export a import JSON', () => {
 
   it('odmietne stav s neznámou budovou', () => {
     const state = playedEngine().serialize();
-    state.city.buildings[0]!.definitionId = 'castle';
+    state.city.buildings[0]!.definitionId = 'dragon_lair';
     expectSaveError(() => service.importJson(JSON.stringify(state)), 'invalid_state');
   });
 });

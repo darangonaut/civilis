@@ -77,7 +77,13 @@
     "fountain": "Fontána",
     "plaza": "Náměstí",
     "statue": "Socha",
-    "botanical_garden": "Botanická zahrada"
+    "botanical_garden": "Botanická zahrada",
+    "pyramid": "Pyramida",
+    "great_library": "Velká knihovna",
+    "castle": "Hrad",
+    "colossus": "Kolos",
+    "iron_tower": "Železná věž",
+    "stadium": "Olympijský stadion"
   },
   "technologies": {
     "woodworking": "Zpracování dřeva",
@@ -199,6 +205,72 @@
     "future": {
       "name": "Blízká budoucnost",
       "description": "Fúze, umělá inteligence a arkologie. Posledním krokem civilizace bude vesmírný přístav."
+    }
+  },
+  "achievements": {
+    "first_settlers": {
+      "name": "První osadníci",
+      "description": "Dosáhni 50 obyvatel."
+    },
+    "town": {
+      "name": "Městečko",
+      "description": "Dosáhni 500 obyvatel."
+    },
+    "big_city": {
+      "name": "Velkoměsto",
+      "description": "Dosáhni 5 000 obyvatel."
+    },
+    "megalopolis": {
+      "name": "Megapole",
+      "description": "Dosáhni 20 000 obyvatel."
+    },
+    "scholar": {
+      "name": "Učenec",
+      "description": "Prozkoumej 10 technologií."
+    },
+    "omniscient": {
+      "name": "Vševěd",
+      "description": "Prozkoumej všechny technologie."
+    },
+    "happy_city": {
+      "name": "Šťastné město",
+      "description": "Spokojenost alespoň 95."
+    },
+    "full_treasury": {
+      "name": "Plná pokladna",
+      "description": "Nashromáždi 10 000 peněz."
+    },
+    "merchant": {
+      "name": "Obchodník",
+      "description": "Vydělej obchodem 1 000 peněz."
+    },
+    "tycoon": {
+      "name": "Magnát",
+      "description": "Vydělej obchodem 50 000 peněz."
+    },
+    "first_wonder": {
+      "name": "První div",
+      "description": "Postav div světa."
+    },
+    "wonders_of_the_world": {
+      "name": "Divy světa",
+      "description": "Postav všech šest divů světa."
+    },
+    "green_city": {
+      "name": "Město v zeleni",
+      "description": "Postav 20 parků."
+    },
+    "skyline": {
+      "name": "Panorama",
+      "description": "Měj 10 mrakodrapů nebo lepších domů."
+    },
+    "industrial_revolution": {
+      "name": "Průmyslová revoluce",
+      "description": "Dosáhni průmyslové éry."
+    },
+    "fast_forward": {
+      "name": "Rychlý postup",
+      "description": "Dohraj hru do 2 500. dne."
     }
   }
 }

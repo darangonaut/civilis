@@ -70,9 +70,16 @@ describe('herné dáta', () => {
     expect(b('road').requiresRoad).toBe(false);
     expect(b('well').requiresRoad).toBe(false);
     for (const building of data.buildings) {
-      expect(building.size).toEqual({ width: 1, height: 1 });
+      // Divy sveta sú rozšírenie 2 × 2, ostatné budovy majú jedno políčko.
+      expect(building.size).toEqual(
+        building.wonder ? { width: 2, height: 2 } : { width: 1, height: 1 },
+      );
       // Výnimky: cesty, studne, akvadukt a dekorácie (fungujú bez napojenia).
-      if (!['road', 'well', 'aqueduct'].includes(building.id) && building.category !== 'decoration')
+      if (
+        !['road', 'well', 'aqueduct'].includes(building.id) &&
+        building.category !== 'decoration' &&
+        !building.wonder
+      )
         expect(building.requiresRoad).toBe(true);
     }
   });
@@ -122,8 +129,8 @@ describe('herné dáta', () => {
   it('odmietne míľnik s neznámou budovou', () => {
     const raw = validRaw();
     const list = raw.milestones as { conditions: { buildingId?: string }[] }[];
-    list[0]!.conditions[1]!.buildingId = 'castle';
-    expectIssue(raw, /neznáma budova "castle"/);
+    list[0]!.conditions[1]!.buildingId = 'dragon_lair';
+    expectIssue(raw, /neznáma budova "dragon_lair"/);
   });
 
   it('odmietne neznámy typ podmienky míľnika', () => {
