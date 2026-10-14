@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import type { CameraView } from '@/renderer/GameRenderer';
 import type { DayPhase } from '@/renderer/dayNight';
-import type { BuildingCategory, Position } from '@/types';
+import type { BuildingCategory, Position, ServiceType } from '@/types';
 
-export type PanelId = 'research' | 'milestones' | 'trade' | 'statistics' | 'saves' | 'settings';
+export type PanelId =
+  'research' | 'milestones' | 'trade' | 'problems' | 'statistics' | 'saves' | 'settings';
 
 export type NoticeKind = 'info' | 'success' | 'warning';
 
@@ -37,6 +38,8 @@ interface UiState {
   log: LogEntry[];
   dayPhase: DayPhase | null;
   cameraView: CameraView | null;
+  /** Zapnutá mapová vrstva pokrytia službou. */
+  mapLayer: ServiceType | null;
   /** Budova vybraná na mape. */
   selectedInstanceId: string | null;
   hoveredTile: Position | null;
@@ -57,6 +60,7 @@ interface UiState {
   clearLog: () => void;
   setDayPhase: (phase: DayPhase | null) => void;
   setCameraView: (view: CameraView) => void;
+  setMapLayer: (layer: ServiceType | null) => void;
   selectInstance: (id: string | null) => void;
   setHoveredTile: (position: Position | null) => void;
   showNotice: (text: string, kind?: NoticeKind) => void;
@@ -79,6 +83,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   log: [],
   dayPhase: null,
   cameraView: null,
+  mapLayer: null,
   selectedInstanceId: null,
   hoveredTile: null,
   notices: [],
@@ -96,6 +101,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   clearLog: () => set({ log: [] }),
   setDayPhase: (dayPhase) => set({ dayPhase }),
   setCameraView: (cameraView) => set({ cameraView }),
+  setMapLayer: (mapLayer) => set({ mapLayer }),
   selectInstance: (selectedInstanceId) => set({ selectedInstanceId, buildModeId: null }),
   setHoveredTile: (hoveredTile) => set({ hoveredTile }),
   showNotice: (text, kind = 'info') =>

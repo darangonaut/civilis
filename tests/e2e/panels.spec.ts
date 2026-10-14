@@ -195,3 +195,46 @@ test('obchod: bez trhoviska zamknutý, s trhoviskom predaj a automatický predaj
   await panel.getByTestId('auto-sell-stone').check();
   expect(await page.evaluate(() => window.__civilis!.getState().trade.autoSell)).toEqual(['stone']);
 });
+
+test('prehľad problémov: počet na tlačidle a klik vyberie budovu', async ({ page }) => {
+  await openGame(page);
+  // Dom bez cesty = problém „Chýba cesta“.
+  const spot = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const state = hook.getState();
+    const w = state.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let d = 4; d < 12; d++)
+      for (let x = w.x - d; x <= w.x + d; x++) {
+        const tile = { x, y: w.y - d };
+        if (hook.canPlace('house', tile)) return hook.tileToClient(tile);
+      }
+    throw new Error('Žiadne miesto');
+  });
+  await pickBuilding(page, 'house');
+  await page.mouse.click(spot.x, spot.y);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('problem-count')).toHaveText('1');
+
+  await page.getByTestId('open-problems').click();
+  const panel = page.getByTestId('problems-panel');
+  await expect(panel.locator('[data-problem="no_road"]')).toContainText('Chýba cesta');
+  await panel.locator('[data-problem="no_road"] .link-row').click();
+  await expect(page.getByTestId('problems-panel')).toBeHidden();
+  await expect(page.getByTestId('detail-panel')).toContainText('Chýba cesta');
+});
+
+test('mapové vrstvy: výber vrstvy ukáže legendu, pri stavbe služby sa zapne sama', async ({
+  page,
+}) => {
+  await openGame(page);
+  await page.getByTestId('open-layers').click();
+  await page.getByTestId('layer-water').click();
+  await expect(page.getByTestId('layer-legend')).toContainText(/voda/i);
+  await page.getByTestId('layer-legend').getByRole('button').click();
+  await expect(page.getByTestId('layer-legend')).toBeHidden();
+
+  await pickBuilding(page, 'school');
+  await expect(page.getByTestId('layer-legend')).toContainText(/vzdelanie/i);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('layer-legend')).toBeHidden();
+});

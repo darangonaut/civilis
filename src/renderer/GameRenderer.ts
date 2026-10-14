@@ -1,6 +1,6 @@
-import { Application, Container, CullerPlugin, Sprite, extensions } from 'pixi.js';
+import { Application, Container, CullerPlugin, Graphics, Sprite, extensions } from 'pixi.js';
 import type { GameState, Position } from '@/types';
-import { tileToWorld, worldBounds, worldToTile } from './iso';
+import { TILE_HEIGHT, TILE_WIDTH, tileToWorld, worldBounds, worldToTile } from './iso';
 import type { DayPhase } from './dayNight';
 import { dragPositions, dragShapeFor } from './dragPath';
 import { CityEffects, type BuildingVisual, type CityActivity } from './effects';
@@ -86,7 +86,20 @@ const depthOf = (position: Position, size = 1) => position.x + position.y + 2 * 
 export interface RendererBuilding {
   id: string;
   size: number;
+  /** Dosah služby (Chebyševova vzdialenosť) — náhľad pri stavbe. */
+  serviceRadius?: number;
 }
+
+/** Mapová vrstva pokrytia službou: políčka v dosahu a domy bez služby. */
+export interface CoverageOverlay {
+  covered: Uint8Array;
+  missing: readonly number[];
+  /** Budovy (domy) bez služby — zafarbia sa na červeno, aby boli vidno aj cez strechy. */
+  missingBuildings: ReadonlySet<string>;
+  color: number;
+}
+
+const MISSING_TINT = 0xff6b6b;
 
 /**
  * Izometrický PixiJS renderer. Číta iba dátový stav (`GameState`), nič v ňom nemení;
@@ -153,12 +166,20 @@ export class GameRenderer {
     callbacks: RendererCallbacks,
   ) {
     const renderer = new GameRenderer(host, callbacks);
-    for (const building of buildings) renderer.sizes.set(building.id, building.size);
+    for (const building of buildings) {
+      renderer.sizes.set(building.id, building.size);
+      if (building.serviceRadius) renderer.radii.set(building.id, building.serviceRadius);
+    }
     await renderer.init(buildings.map((b) => b.id));
     return renderer;
   }
 
   private sizes = new Map<string, number>();
+  private radii = new Map<string, number>();
+  /** Vrstva pokrytia službou (pod budovami) a náhľad dosahu stavanej služby. */
+  private coverageLayer = new Graphics();
+  private rangeLayer = new Graphics();
+  private missingBuildings: ReadonlySet<string> = new Set();
   private sizeOf(buildingId: string): number {
     return this.sizes.get(buildingId) ?? 1;
   }
@@ -218,7 +239,12 @@ export class GameRenderer {
     this.hoverOutline.visible = false;
     this.selectionOutline.visible = false;
     this.selectionOutline.tint = SELECTION_COLOR;
-    this.groundOverlay.addChild(this.hoverOutline, this.selectionOutline);
+    this.groundOverlay.addChild(
+      this.coverageLayer,
+      this.rangeLayer,
+      this.hoverOutline,
+      this.selectionOutline,
+    );
     this.preview.visible = false;
     this.preview.alpha = 0.7;
     this.buildingLayer.addChild(this.preview);
@@ -285,6 +311,39 @@ export class GameRenderer {
     this.buildModeId = buildingId;
     this.buildLevel = level;
     this.refreshOverlay();
+  }
+
+  /** Zafarbí políčka v dosahu služby a domy bez nej (null = vrstva vypnutá). */
+  setCoverage(overlay: CoverageOverlay | null): void {
+    const g = this.coverageLayer;
+    g.clear();
+    this.missingBuildings = overlay?.missingBuildings ?? new Set();
+    for (const [id, sprite] of this.buildingSprites) {
+      sprite.tint = this.missingBuildings.has(id) ? MISSING_TINT : 0xffffff;
+    }
+    if (!overlay || !this.state) return;
+    const width = this.state.world.width;
+    const diamond = (index: number) => {
+      const center = tileToWorld(index % width, Math.floor(index / width));
+      const hw = TILE_WIDTH / 2;
+      const hh = TILE_HEIGHT / 2;
+      return [
+        center.x,
+        center.y - hh,
+        center.x + hw,
+        center.y,
+        center.x,
+        center.y + hh,
+        center.x - hw,
+        center.y,
+      ];
+    };
+    for (let i = 0; i < overlay.covered.length; i++) {
+      if (overlay.covered[i]) g.poly(diamond(i));
+    }
+    g.fill({ color: overlay.color, alpha: 0.3 });
+    for (const index of overlay.missing) g.poly(diamond(index));
+    g.fill({ color: 0xe43b44, alpha: 0.55 });
   }
 
   setSelectedInstance(instanceId: string | null): void {
@@ -401,6 +460,7 @@ export class GameRenderer {
       const size = this.sizeOf(building.definitionId);
       placeOnTile(sprite, building.position, size);
       sprite.zIndex = depthOf(building.position, size);
+      sprite.tint = this.missingBuildings.has(building.id) ? MISSING_TINT : 0xffffff;
     }
     for (const [id, sprite] of this.buildingSprites) {
       if (!present.has(id)) {
@@ -458,6 +518,7 @@ export class GameRenderer {
     }
 
     this.refreshDragPreview();
+    this.refreshRange(hovered);
     const showPreview = this.buildModeId !== null && hovered !== null && this.dragBuild === null;
     this.preview.visible = showPreview;
     if (showPreview) {
@@ -475,6 +536,21 @@ export class GameRenderer {
     } else {
       this.hoverOutline.tint = 0xffffff;
     }
+  }
+
+  /** Štvorec dosahu stavanej služby okolo políčka pod kurzorom. */
+  private refreshRange(hovered: Position | null): void {
+    const g = this.rangeLayer;
+    g.clear();
+    const radius = this.buildModeId ? this.radii.get(this.buildModeId) : undefined;
+    if (!radius || !hovered) return;
+    const corner = (dx: number, dy: number) =>
+      tileToWorld(hovered.x + dx * (radius + 0.5), hovered.y + dy * (radius + 0.5));
+    const points = [corner(-1, -1), corner(1, -1), corner(1, 1), corner(-1, 1)].flatMap((p) => [
+      p.x,
+      p.y,
+    ]);
+    g.poly(points).fill({ color: 0xfee761, alpha: 0.12 }).stroke({ color: 0xfee761, width: 2 });
   }
 
   /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */

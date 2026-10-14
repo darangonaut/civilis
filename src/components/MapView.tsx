@@ -4,6 +4,7 @@ import { controller } from '@/app/game';
 import { currentMarkers } from '@/app/markers';
 import { installTestHook } from '@/app/testHook';
 import { registerCameraTarget } from '@/app/camera';
+import { coverageOverlay, effectiveLayer } from '@/app/coverage';
 import { gameData } from '@/data';
 import type { GameRenderer } from '@/renderer/GameRenderer';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -59,7 +60,11 @@ export function MapView() {
       .then(({ GameRenderer }) =>
         GameRenderer.create(
           host,
-          gameData.buildings.map((b) => ({ id: b.id, size: b.size.width })),
+          gameData.buildings.map((b) => ({
+            id: b.id,
+            size: b.size.width,
+            ...(b.service ? { serviceRadius: b.service.radius } : {}),
+          })),
           {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),
             onTileClick: handleTileClick,
@@ -89,13 +94,31 @@ export function MapView() {
         });
         renderer.setSelectedInstance(ui.selectedInstanceId);
 
+        // Vrstva pokrytia sa prepočíta najviac raz za snímku (pri 4× rýchlosti mení stav často).
+        let coverageFrame: number | null = null;
+        const refreshCoverage = () => {
+          coverageFrame ??= requestAnimationFrame(() => {
+            coverageFrame = null;
+            const ui = useUiStore.getState();
+            const layer = effectiveLayer(ui.buildModeId, ui.mapLayer);
+            created.setCoverage(layer ? coverageOverlay(layer) : null);
+          });
+        };
+        refreshCoverage();
         unsubscribers.push(
-          controller.subscribe(() =>
-            created.sync(controller.state, currentMarkers(), controller.activity),
-          ),
+          () => {
+            if (coverageFrame !== null) cancelAnimationFrame(coverageFrame);
+          },
+          controller.subscribe(() => {
+            created.sync(controller.state, currentMarkers(), controller.activity);
+            if (effectiveLayer(useUiStore.getState().buildModeId, useUiStore.getState().mapLayer))
+              refreshCoverage();
+          }),
           useUiStore.subscribe((s, prev) => {
             if (s.buildModeId !== prev.buildModeId || s.buildLevel !== prev.buildLevel)
               created.setBuildMode(s.buildModeId, s.buildLevel);
+            if (s.mapLayer !== prev.mapLayer || s.buildModeId !== prev.buildModeId)
+              refreshCoverage();
             if (s.selectedInstanceId !== prev.selectedInstanceId)
               created.setSelectedInstance(s.selectedInstanceId);
           }),
