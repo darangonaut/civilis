@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { eraName } from '@/app/names';
 import { formatCompact, formatDelta } from '@/app/format';
 import { controller } from '@/app/game';
@@ -59,7 +59,10 @@ export function TopHud() {
                 <Icon name={phase === 'night' || phase === 'dusk' ? 'moon' : 'sun'} size={14} />
               </span>
             )}
-            {t('topbar.day')} <span data-testid="day">{day}</span>
+            {t('topbar.day')}{' '}
+            <Steady className="day-number">
+              <span data-testid="day">{day}</span>
+            </Steady>
             {phase && (
               <span className="phase-text"> · {t(`phase.${phase}` as TranslationKey)}</span>
             )}
@@ -109,14 +112,14 @@ export function TopHud() {
       <div className="hud-panel hud-people">
         <span className="hud-stat" title={`${t('topbar.population')} / ${t('hud.housing')}`}>
           <Icon name="people" />
-          <span className="hud-value">{population.total}</span>
-          <span className="hud-sub">/ {population.housingCapacity}</span>
+          <Steady className="hud-value">{population.total}</Steady>
+          <Steady className="hud-sub">/ {population.housingCapacity}</Steady>
           <span className="sr-only">{`${population.total} / ${population.housingCapacity}`}</span>
         </span>
         <span className="hud-stat workers" title={`${t('hud.employed')} / ${t('topbar.workers')}`}>
           <Icon name="workers" />
-          <span className="hud-value">{population.employedWorkers}</span>
-          <span className="hud-sub">/ {population.availableWorkers}</span>
+          <Steady className="hud-value">{population.employedWorkers}</Steady>
+          <Steady className="hud-sub">/ {population.availableWorkers}</Steady>
         </span>
         <span
           className={`hud-stat happiness ${happy < 40 ? 'bad' : happy < 70 ? 'mid' : 'good'}`}
@@ -126,7 +129,7 @@ export function TopHud() {
           data-testid="happiness"
         >
           <Icon name="smile" />
-          <span className="hud-value">{happy}</span>
+          <Steady className="hud-value">{happy}</Steady>
         </span>
         <div className="hud-divider" />
         <div
@@ -150,6 +153,26 @@ export function TopHud() {
         </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * Text, ktorého šírka sa nikdy nezmenší (pamätá si maximum). Čísla v pixelovom písme majú rôznu
+ * šírku číslic — bez toho by sa lišta pri každej zmene posúvala a zalamovala (blikanie).
+ */
+function Steady({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const max = useRef(0);
+  useLayoutEffect(() => {
+    const element = ref.current!;
+    element.style.minWidth = '';
+    max.current = Math.max(max.current, element.getBoundingClientRect().width);
+    element.style.minWidth = `${max.current}px`;
+  });
+  return (
+    <span ref={ref} className={`steady ${className}`}>
+      {children}
+    </span>
   );
 }
 
@@ -180,12 +203,12 @@ function Chip({
       data-testid={testId}
     >
       <ResourceIcon kind={icon} />
-      <span className="res-value">{value}</span>
+      <Steady className="res-value">{value}</Steady>
       {delta !== undefined && (
-        <span className={`res-delta ${trend}`}>
+        <Steady className={`res-delta ${trend}`}>
           {trend === 'up' ? '▲' : trend === 'down' ? '▼' : ''}
           {trend === 'flat' ? '±0' : formatDelta(Math.abs(delta)).replace('+', '')}
-        </span>
+        </Steady>
       )}
     </span>
   );

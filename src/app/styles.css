@@ -405,6 +405,16 @@ button.danger:hover:not(:disabled),
   font-variant-numeric: tabular-nums;
 }
 
+.steady {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.res-value,
+.hud-value {
+  text-align: right;
+}
+
 .res-delta {
   font-size: 12px;
   color: var(--text-soft);
