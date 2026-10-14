@@ -1,5 +1,6 @@
 import type { BuildingInstance } from './buildings';
 import type { ResourceId } from './resources';
+import type { EventsState } from './events';
 import type { Resources } from './resources';
 import type { MilestoneState, ResearchState } from './research';
 import type { Position, World } from './world';
@@ -69,6 +70,8 @@ export interface GameState {
   trade: TradeState;
   /** Úspechy a deň dohrania (schéma v6). */
   achievements: AchievementState;
+  /** Náhodné udalosti (schéma v7). */
+  events: EventsState;
 }
 
 export interface TradeState {
@@ -111,6 +114,10 @@ export type GameCommand =
   | { type: 'TRADE'; resource: ResourceId; amount: number }
   /** Rozšírenie: automatický predaj prebytkov suroviny. */
   | { type: 'SET_AUTO_SELL'; resource: ResourceId; enabled: boolean }
+  /** Rozšírenie: rozhodnutie o čakajúcej udalosti. */
+  | { type: 'RESOLVE_EVENT'; choiceId: string }
+  /** Rozšírenie: zapnutie / vypnutie náhodných udalostí. */
+  | { type: 'SET_EVENTS_ENABLED'; enabled: boolean }
   /** Rozšírenie oproti špecifikácii: aj rýchlosť je súčasť herného stavu. */
   | { type: 'SET_SPEED'; speed: SimulationSpeed };
 

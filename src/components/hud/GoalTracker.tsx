@@ -9,6 +9,7 @@ import { conditionProgress, currentEraIndex, currentMilestone } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import { conditionLabel } from '@/app/conditions';
 import { LayerLegend } from './LayerLegend';
+import { ActiveEvents } from './ActiveEvents';
 
 /** Vľavo hore: aktuálny míľnik s priebehom podmienok a krátky záznam udalostí. */
 export function GoalTracker() {
@@ -126,6 +127,7 @@ export function GoalTracker() {
           </button>
         )}
       </section>
+      <ActiveEvents />
       <LayerLegend />
       {!compact && <EventLog />}
     </div>

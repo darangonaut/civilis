@@ -5,6 +5,7 @@ import { problemLabel } from './i18n';
 
 /** Poradie skupín v prehľade — najvážnejšie problémy hore. */
 const SEVERITY: BuildingProblem['code'][] = [
+  'damaged',
   'no_road',
   'no_workers',
   'no_funds',

@@ -1782,7 +1782,7 @@ export function drawTileOutline(): PixelSprite {
 }
 
 export type MarkerKind =
-  'road' | 'workers' | 'understaffed' | 'goods' | 'money' | 'storage' | 'upgrade';
+  'road' | 'workers' | 'understaffed' | 'goods' | 'money' | 'storage' | 'upgrade' | 'damaged';
 
 const MARKER_GLYPHS: Record<MarkerKind, { bubble: Rgb; glyph: string[] }> = {
   // Cesta s prerušovanou stredovou čiarou.
@@ -1798,6 +1798,8 @@ const MARKER_GLYPHS: Record<MarkerKind, { bubble: Rgb; glyph: string[] }> = {
   storage: { bubble: P.wheat, glyph: ['ooooo', 'o.o.o', 'ooooo', 'o.o.o', 'ooooo'] },
   // Šípka hore — budova sa dá vylepšiť.
   upgrade: { bubble: 0x3e8948, glyph: ['..w..', '.www.', 'wwwww', '..w..', '..w..'] },
+  // Plameň — budova poškodená požiarom.
+  damaged: { bubble: 0xf77622, glyph: ['..y..', '.yy..', '.yyy.', 'yywyy', '.www.'] },
 };
 
 /** Bublina so symbolom nad budovou; kotva v dolnom hrote. */

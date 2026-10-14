@@ -1,3 +1,4 @@
+import { resolveEvent, setEventsEnabled } from '../events/randomEvents';
 import { executeTrade, setAutoSell } from '../economy/trade';
 import {
   RESOURCE_IDS,
@@ -219,5 +220,12 @@ export function executeCommand(
       return executeTrade(state, data, command.resource, command.amount);
     case 'SET_AUTO_SELL':
       return setAutoSell(state, data, command.resource, command.enabled);
+    case 'RESOLVE_EVENT': {
+      const result = resolveEvent(state, data, command.choiceId);
+      if (result.success) refreshDerivedState(state, data);
+      return result;
+    }
+    case 'SET_EVENTS_ENABLED':
+      return setEventsEnabled(state, command.enabled);
   }
 }

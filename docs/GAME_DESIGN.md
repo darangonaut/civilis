@@ -158,8 +158,8 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
 ## Vylepšenie výrobných budov (2026-10-14, na želanie)
 
 - 3 úrovne pre drevorubača, farmu, kameňolom, dielňu, tehelňu, rybársku chatu, baňu, pastvinu
-  a uhoľnú baňu. Úroveň 2: výroba aj spotreba ×1,5, +1 pracovník, údržba ×1,6. Úroveň 3: ×2,2,
-  +2 pracovníci, údržba ×2,4 — výroba na pracovníka aj na políčko rastie, takže vylepšenie šetrí
+  a uhoľnú baňu. Úroveň 2: výroba aj spotreba ×1,5, +1 pracovník, údržba ×1,3. Úroveň 3: ×2,2,
+  +2 pracovníci, údržba ×1,8 — výroba na pracovníka aj na políčko rastie, takže vylepšenie šetrí
   miesto aj ľudí, ale stojí viac údržby a suroviny neskorších ér.
 - Vylepšenia odomykajú technológie neskorších ér (napr. Píla — Cechy, Lesný závod — Parný stroj,
   Statok — Trojpoľný systém, Mechanizovaná farma — Automobil), výrobné budovy tak rastú s civilizáciou.
@@ -197,3 +197,18 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   obchod, divy, parky, mrakodrapy, éra, rýchle dohranie do 2 500. dňa).
 - Skóre = obyvatelia + 20 × technológia + 150 × míľnik + 300 × div + 100 × úspech + zárobok
   z obchodu / 100. Deň dohrania sa zapíše pri splnení posledného míľnika.
+
+## Náhodné udalosti (2026-10-14, na želanie)
+
+- Prvá udalosť najskôr v 40. deň, potom každých 60–120 dní; výber váhovaný podľa `weight`
+  spomedzi udalostí, ktoré dávajú zmysel (éra, potrebné budovy, voľné bývanie, cieľ požiaru…).
+  Deterministické podľa seedu mapy a dňa — uložená hra sa správa rovnako.
+- Zlé: sucho (−40 % potravín 20 dní; zavlažovanie alebo akvadukt polovica), epidémia (−4 %
+  obyvateľov, −15 spokojnosť 20 dní; nemocnice pre 60 % bývania zmiernia na 40 %), výpadok prúdu
+  (−50 % elektriny 6 dní; solárny park, jadrová alebo fúzna elektráreň polovica).
+- Dobré: bohatá úroda (+50 % potravín 15 dní), nové ložisko (20 % skladu kameňa, 10 % železa),
+  staroveké ruiny (vedomosti za 20 dní), mecenáš (príjem za 15 dní).
+- S voľbou (hra sa pozastaví): požiar (oprava za peniaze, inak budova 12 dní nefunguje),
+  karavána (15 % kapacity skladu suroviny za polovičnú cenu), prisťahovalci (+5 % obyvateľov
+  do voľného bývania, −5 spokojnosť 15 dní), slávnosť (+10 spokojnosť 30 dní za peniaze).
+- Udalosti sa dajú vypnúť v Nastaveniach.

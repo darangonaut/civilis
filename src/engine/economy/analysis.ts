@@ -13,6 +13,8 @@ import { maintenanceMultiplier, moneyMultiplier, productionMultiplier } from './
 
 export type BuildingProblem =
   | { code: 'disabled' }
+  /** Budova zasiahnutá udalosťou (požiar) — dočasne nefunguje. */
+  | { code: 'damaged' }
   | { code: 'no_road' }
   | { code: 'no_workers' }
   | { code: 'understaffed' }
@@ -111,19 +113,36 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
   }
 
   const maintenanceFactor = maintenanceMultiplier(state, data);
+  // Násobiče výroby raz za analýzu (technológie, divy, udalosti) — nie pre každú budovu.
+  const productionFactors = new Map(
+    RESOURCE_IDS.map((id) => [id, productionMultiplier(state, data, id)] as const),
+  );
   const moneyFactor = moneyMultiplier(state, data);
   const maintenanceTotal = maintenanceBase * maintenanceFactor;
   const fundingRatio =
     maintenanceTotal > 0 ? Math.min(1, Math.max(0, economy.money) / maintenanceTotal) : 1;
 
   const ordered = [...state.city.buildings].sort(byPriority);
+  // Budovy dočasne mimo prevádzky po udalosti (požiar).
+  const damaged = new Set(
+    (state.events?.active ?? []).flatMap((e) =>
+      e.effect.type === 'disable_building' ? [e.effect.buildingId] : [],
+    ),
+  );
 
   // 2. Pridelenie pracovníkov podľa priority.
   const workforce = Math.floor(state.city.population.total * balance.workforceShare);
   let freeWorkers = workforce;
   for (const building of ordered) {
     const status = statuses.get(building.id);
-    if (!status || !building.enabled || !status.connected || status.workersRequired === 0) continue;
+    if (
+      !status ||
+      !building.enabled ||
+      damaged.has(building.id) ||
+      !status.connected ||
+      status.workersRequired === 0
+    )
+      continue;
     status.workersAssigned = Math.min(status.workersRequired, freeWorkers);
     freeWorkers -= status.workersAssigned;
   }
@@ -140,6 +159,10 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
 
     if (!building.enabled) {
       status.problems.push({ code: 'disabled' });
+      continue;
+    }
+    if (damaged.has(building.id)) {
+      status.problems.push({ code: 'damaged' });
       continue;
     }
     if (!status.connected) {
@@ -224,7 +247,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
     for (const id of RESOURCE_IDS) {
       const output = definition.outputs[id] ?? 0;
       if (output <= 0) continue;
-      add(status.produced, id, output * status.efficiency * productionMultiplier(state, data, id));
+      add(status.produced, id, output * status.efficiency * productionFactors.get(id)!);
       if (!UNCAPPED_RESOURCES.has(id) && economy.resources[id] >= storageCapacity) {
         status.problems.push({ code: 'storage_full', resource: id });
       }

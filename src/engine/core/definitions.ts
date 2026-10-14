@@ -9,6 +9,8 @@ import {
   type EraDefinition,
   type AchievementCondition,
   type AchievementDefinition,
+  type EventDefinition,
+  type EventEffect,
   type MilestoneCondition,
   type MilestoneDefinition,
   type Resources,
@@ -165,6 +167,71 @@ export const achievementDefinitionSchema = z.strictObject({
   condition: achievementConditionSchema,
 }) satisfies z.ZodType<AchievementDefinition>;
 
+const eventEffectSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('production'),
+    resource: z.union([resourceId, z.literal('all')]),
+    multiplier: z.number().nonnegative(),
+    days: positiveInt,
+  }),
+  z.strictObject({ type: z.literal('happiness'), amount: z.number().finite(), days: positiveInt }),
+  z.strictObject({ type: z.literal('population_loss'), share: z.number().min(0).max(1) }),
+  z.strictObject({
+    type: z.literal('immigrants'),
+    share: z.number().min(0).max(1),
+    minimum: z.number().int().nonnegative(),
+  }),
+  z.strictObject({ type: z.literal('resources_share'), resources: partialResourcesSchema }),
+  z.strictObject({ type: z.literal('knowledge_days'), days: positiveInt, minimum: nonNegative }),
+  z.strictObject({ type: z.literal('money_days'), days: positiveInt, minimum: nonNegative }),
+  z.strictObject({ type: z.literal('disable_building'), days: positiveInt }),
+  z.strictObject({
+    type: z.literal('caravan'),
+    storageShare: z.number().positive().max(1),
+    priceFactor: z.number().positive(),
+  }),
+]) satisfies z.ZodType<EventEffect>;
+
+export const eventDefinitionSchema = z
+  .strictObject({
+    id,
+    name: z.string().min(1),
+    description: z.string().min(1),
+    kind: z.enum(['bad', 'good', 'choice']),
+    era: id,
+    weight: z.number().positive(),
+    requiresBuildings: z.array(id).optional(),
+    effects: z.array(eventEffectSchema).optional(),
+    choices: z
+      .array(
+        z.strictObject({
+          id,
+          cost: z
+            .strictObject({
+              money: nonNegative.optional(),
+              moneyPerCapita: nonNegative.optional(),
+              minimum: nonNegative.optional(),
+            })
+            .optional(),
+          effects: z.array(eventEffectSchema),
+        }),
+      )
+      .min(2)
+      .optional(),
+    mitigation: z
+      .strictObject({
+        technologies: z.array(id).optional(),
+        buildings: z.array(id).optional(),
+        services: z.array(z.enum(SERVICE_TYPES)).optional(),
+        minShare: z.number().min(0).max(1).optional(),
+        factor: z.number().min(0).max(1),
+      })
+      .optional(),
+  })
+  .refine((e) => (e.kind === 'choice') === (e.choices !== undefined), {
+    message: 'udalosť s voľbou musí mať `choices`, ostatné `effects`',
+  }) satisfies z.ZodType<EventDefinition>;
+
 export const balanceSchema = z.strictObject({
   startingState: z.strictObject({
     population: positiveInt,
@@ -205,6 +272,14 @@ export const balanceSchema = z.strictObject({
   happinessDeclineThreshold: z.number().min(0).max(100),
   /** Bonus k spokojnosti pri plnom pokrytí bývania parkami a dekoráciami. */
   leisureBonus: nonNegative,
+  /** Náhodné udalosti: prvá najskôr v deň `firstDay`, potom každých min–max dní. */
+  events: z.strictObject({
+    firstDay: z.number().int().nonnegative(),
+    minInterval: positiveInt,
+    maxInterval: positiveInt,
+    /** Po koľkých dňoch sa nerozhodnutá udalosť vyrieši poslednou voľbou. */
+    pendingDays: positiveInt,
+  }),
   /** Obchod: ceny (nákup), podiel pri predaji, budovy zlepšujúce výkup, automatický predaj. */
   trade: z.strictObject({
     requiredBuilding: id,
@@ -224,6 +299,7 @@ export interface GameData {
   technologies: readonly TechnologyDefinition[];
   milestones: readonly MilestoneDefinition[];
   achievements: readonly AchievementDefinition[];
+  events: readonly EventDefinition[];
   balance: BalanceConfig;
   buildingsById: ReadonlyMap<string, BuildingDefinition>;
   technologiesById: ReadonlyMap<string, TechnologyDefinition>;
@@ -236,6 +312,8 @@ export interface RawGameData {
   milestones: unknown;
   /** Úspechy (nepovinné — testovacie dáta ich nemusia mať). */
   achievements?: unknown;
+  /** Náhodné udalosti (nepovinné). */
+  events?: unknown;
   balance: unknown;
 }
 
@@ -300,6 +378,7 @@ export function loadGameData(raw: RawGameData): GameData {
   const milestones = z.array(milestoneDefinitionSchema).safeParse(raw.milestones);
   const balance = balanceSchema.safeParse(raw.balance);
   const achievements = z.array(achievementDefinitionSchema).safeParse(raw.achievements ?? []);
+  const events = z.array(eventDefinitionSchema).safeParse(raw.events ?? []);
 
   const schemaIssues = [
     ...(eras.success ? [] : formatZodIssues('eras', eras.error)),
@@ -308,6 +387,7 @@ export function loadGameData(raw: RawGameData): GameData {
     ...(milestones.success ? [] : formatZodIssues('milestones', milestones.error)),
     ...(balance.success ? [] : formatZodIssues('balance', balance.error)),
     ...(achievements.success ? [] : formatZodIssues('achievements', achievements.error)),
+    ...(events.success ? [] : formatZodIssues('events', events.error)),
   ];
   if (
     !eras.success ||
@@ -315,7 +395,8 @@ export function loadGameData(raw: RawGameData): GameData {
     !technologies.success ||
     !milestones.success ||
     !balance.success ||
-    !achievements.success
+    !achievements.success ||
+    !events.success
   ) {
     throw new GameDataError(schemaIssues);
   }
@@ -447,6 +528,22 @@ export function loadGameData(raw: RawGameData): GameData {
     }
   }
 
+  for (const event of events.data) {
+    if (!eraIndex.has(event.era)) issues.push(`events[${event.id}]: neznáma éra "${event.era}"`);
+    const referenced = [...(event.requiresBuildings ?? []), ...(event.mitigation?.buildings ?? [])];
+    for (const buildingId of referenced) {
+      if (!buildingIds.has(buildingId))
+        issues.push(`events[${event.id}]: neznáma budova "${buildingId}"`);
+    }
+    for (const techId of event.mitigation?.technologies ?? []) {
+      if (!technologies.data.some((t) => t.id === techId))
+        issues.push(`events[${event.id}]: neznáma technológia "${techId}"`);
+    }
+  }
+  if (balance.data.events.minInterval > balance.data.events.maxInterval) {
+    issues.push('balance.events: minInterval nesmie byť väčší ako maxInterval');
+  }
+
   if (issues.length > 0) throw new GameDataError(issues);
 
   return {
@@ -455,6 +552,7 @@ export function loadGameData(raw: RawGameData): GameData {
     technologies: technologies.data,
     milestones: milestones.data,
     achievements: achievements.data,
+    events: events.data,
     balance: balance.data,
     buildingsById: new Map(buildings.data.map((b) => [b.id, b])),
     technologiesById: new Map(technologies.data.map((t) => [t.id, t])),

@@ -12,7 +12,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
     advanceDays: (days) => {
       for (let i = 0; i < days; i++) controller.tick();
     },
-    grantForTest: ({ technologies = [], resources = {}, milestones = [] }) => {
+    grantForTest: ({ technologies = [], resources = {}, milestones = [], pendingEvent }) => {
       const state = controller.serialize();
       state.research.completedTechnologyIds.push(
         ...technologies.filter((id) => !state.research.completedTechnologyIds.includes(id)),
@@ -23,6 +23,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
       state.milestones.completedIds.push(
         ...milestones.filter((id) => !state.milestones.completedIds.includes(id)),
       );
+      if (pendingEvent) state.events.pending = pendingEvent;
       controller.load(state);
     },
   };

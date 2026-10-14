@@ -1,5 +1,6 @@
 import type { GameState } from './game';
 import type { Resources } from './resources';
+import type { PendingEvent } from './events';
 import type { Position } from './world';
 
 /** Rozhranie pre E2E testy. Aktivuje sa len s parametrom `?e2e` v URL. */
@@ -16,6 +17,8 @@ export interface CivilisTestHook {
     technologies?: string[];
     resources?: Partial<Resources>;
     milestones?: string[];
+    /** Udalosť čakajúca na rozhodnutie (test karty udalosti). */
+    pendingEvent?: PendingEvent;
   }): void;
 }
 

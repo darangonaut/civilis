@@ -1,5 +1,13 @@
 import { gameData } from '@/data';
-import { achievementName, eraName, milestoneTitle, techName } from './names';
+import {
+  achievementName,
+  eraName,
+  eventDescription,
+  eventName,
+  milestoneTitle,
+  techName,
+} from './names';
+import { isMitigated } from '@/engine';
 import type { GameEvent } from '@/engine';
 import { RESOURCE_IDS } from '@/types';
 import { useUiStore } from '@/stores/uiStore';
@@ -40,6 +48,24 @@ export function installGameEventNotifications(): () => void {
         const name = techName(event.technologyId);
         ui.showNotice(`${t('events.researchCompleted')}: ${name}`, 'success');
         log(t('events.researchCompleted'), name, 'success');
+      } else if (event.type === 'event_started') {
+        const definition = gameData.events.find((e) => e.id === event.eventId);
+        const name = eventName(event.eventId);
+        if (event.pending) {
+          // Udalosť s voľbou: hra počká na rozhodnutie (karta EventDialog).
+          controller.setSpeed(0);
+          log(t('event.title'), name, 'info');
+        } else {
+          const kind = definition?.kind === 'good' ? 'success' : 'warning';
+          const mitigated =
+            definition && isMitigated(controller.state, gameData, definition)
+              ? ` ${t('event.mitigated')}`
+              : '';
+          ui.showNotice(`${name}: ${eventDescription(event.eventId)}${mitigated}`, kind);
+          log(t('event.title'), name, kind);
+        }
+      } else if (event.type === 'event_ended') {
+        log(t('event.ended'), eventName(event.eventId), 'info');
       } else if (event.type === 'achievement_unlocked') {
         const name = achievementName(event.achievementId);
         ui.showNotice(`${t('achievements.unlocked')}: ${name}`, 'success');

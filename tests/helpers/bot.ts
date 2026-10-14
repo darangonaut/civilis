@@ -1,6 +1,7 @@
 import { analyzeCity } from '@/engine/economy/analysis';
 import { validatePlacement } from '@/engine/core/commands';
 import { upgradableBuildings } from '@/engine/core/upgrade';
+import { nextLevel } from '@/engine/core/levels';
 import { currentMilestone } from '@/engine/milestones/milestones';
 import { computeRoadNetwork } from '@/engine/world/connectivity';
 import { serviceCoverage, serviceCoverageGrid } from '@/engine/population/population';
@@ -362,9 +363,17 @@ export class Bot {
     const upgradable = saving
       ? new Set<string>()
       : upgradableBuildings(this.state, this.data, analysis);
+    // Domy a sklady prednostne; výrobné budovy len pri veľkom prebytku surovín
+    // (inak by vylepšovanie polí minulo tehly a železo potrebné na míľniky).
+    const plentiful = (b: (typeof city.buildings)[number]) => {
+      const next = nextLevel(this.data.buildingsById.get(b.definitionId)!, b.level);
+      return (
+        next !== undefined && RESOURCE_IDS.every((id) => (next.upgradeCost[id] ?? 0) * 5 <= r[id])
+      );
+    };
     const toUpgrade =
       city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'house') ??
-      city.buildings.find((b) => upgradable.has(b.id));
+      city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'warehouse');
     if (toUpgrade && r.stone > 10) {
       if (this.engine.execute({ type: 'UPGRADE_BUILDING', instanceId: toUpgrade.id }).success) {
         this.log.push(`deň ${this.state.simulation.day}: vylepšenie ${toUpgrade.definitionId}`);
@@ -515,6 +524,16 @@ export class Bot {
         ? this.buildServiceNear(id) || this.build(id)
         : this.build(id);
       if (built) return true;
+    }
+
+    // Nakoniec (nič dôležitejšie) vylepšenie výrobnej budovy pri veľkom prebytku surovín.
+    if (!saving) {
+      const production = city.buildings.find((b) => upgradable.has(b.id) && plentiful(b));
+      if (
+        production &&
+        this.engine.execute({ type: 'UPGRADE_BUILDING', instanceId: production.id }).success
+      )
+        return true;
     }
     return false;
   }

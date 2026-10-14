@@ -5,6 +5,7 @@ import type { TranslationKey } from './i18n';
 
 /** Poradie dôležitosti problémov — značka ukazuje ten najvážnejší. */
 const PROBLEM_MARKERS: [BuildingProblem['code'], MarkerKind][] = [
+  ['damaged', 'damaged'],
   ['no_road', 'road'],
   ['no_workers', 'workers'],
   ['no_funds', 'money'],
@@ -46,5 +47,6 @@ export const MARKER_LEGEND: [MarkerKind, TranslationKey][] = [
   ['goods', 'marker.goods'],
   ['money', 'marker.money'],
   ['storage', 'marker.storage'],
+  ['damaged', 'marker.damaged'],
   ['upgrade', 'marker.upgrade'],
 ];

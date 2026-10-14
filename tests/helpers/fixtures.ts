@@ -67,6 +67,8 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
     milestones: { completedIds: [], progressDays: {} },
     trade: { autoSell: [], earned: 0 },
     achievements: { completedIds: [], finishedDay: null },
+    // Testové mestá bez náhodných udalostí (ekonomické testy musia byť presné).
+    events: { enabled: false, nextDay: 0, active: [], pending: null },
   };
 
   const engine = createGameEngine(testData, state);

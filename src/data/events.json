@@ -1,0 +1,243 @@
+[
+  {
+    "id": "drought",
+    "name": "Sucho",
+    "description": "Dlho nepršalo — farmy vyrábajú menej potravín.",
+    "kind": "bad",
+    "era": "settlement",
+    "weight": 3,
+    "requiresBuildings": ["farm"],
+    "effects": [
+      {
+        "type": "production",
+        "resource": "food",
+        "multiplier": 0.6,
+        "days": 20
+      }
+    ],
+    "mitigation": {
+      "technologies": ["irrigation"],
+      "buildings": ["aqueduct"],
+      "factor": 0.5
+    }
+  },
+  {
+    "id": "epidemic",
+    "name": "Epidémia",
+    "description": "Mestom sa šíri choroba. Časť obyvateľov odišla a nálada klesla.",
+    "kind": "bad",
+    "era": "antiquity",
+    "weight": 2,
+    "effects": [
+      {
+        "type": "population_loss",
+        "share": 0.04
+      },
+      {
+        "type": "happiness",
+        "amount": -15,
+        "days": 20
+      }
+    ],
+    "mitigation": {
+      "services": ["health"],
+      "minShare": 0.6,
+      "factor": 0.4
+    }
+  },
+  {
+    "id": "fire",
+    "name": "Požiar",
+    "description": "V budove {building} vypukol požiar. Opravíš ju hneď, alebo počkáš, kým ju obyvatelia opravia sami?",
+    "kind": "choice",
+    "era": "settlement",
+    "weight": 2,
+    "choices": [
+      {
+        "id": "repair",
+        "cost": {
+          "moneyPerCapita": 0.5,
+          "minimum": 50
+        },
+        "effects": []
+      },
+      {
+        "id": "wait",
+        "effects": [
+          {
+            "type": "disable_building",
+            "days": 12
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blackout",
+    "name": "Výpadok prúdu",
+    "description": "Porucha v elektrárni — výroba elektriny na pár dní klesla.",
+    "kind": "bad",
+    "era": "modern",
+    "weight": 2,
+    "requiresBuildings": ["power_plant"],
+    "effects": [
+      {
+        "type": "production",
+        "resource": "electricity",
+        "multiplier": 0.5,
+        "days": 6
+      }
+    ],
+    "mitigation": {
+      "buildings": ["solar_park", "nuclear_plant", "fusion_reactor"],
+      "factor": 0.5
+    }
+  },
+  {
+    "id": "bumper_harvest",
+    "name": "Bohatá úroda",
+    "description": "Výborné počasie — farmy vyrábajú viac potravín.",
+    "kind": "good",
+    "era": "settlement",
+    "weight": 3,
+    "requiresBuildings": ["farm"],
+    "effects": [
+      {
+        "type": "production",
+        "resource": "food",
+        "multiplier": 1.5,
+        "days": 15
+      }
+    ]
+  },
+  {
+    "id": "ore_find",
+    "name": "Nové ložisko",
+    "description": "Baníci narazili na bohatú žilu.",
+    "kind": "good",
+    "era": "settlement",
+    "weight": 2,
+    "requiresBuildings": ["quarry", "mine"],
+    "effects": [
+      {
+        "type": "resources_share",
+        "resources": {
+          "stone": 0.2,
+          "iron": 0.1
+        }
+      }
+    ]
+  },
+  {
+    "id": "ancient_ruins",
+    "name": "Staroveké ruiny",
+    "description": "Pri stavbe sa našli ruiny s cennými záznamami.",
+    "kind": "good",
+    "era": "antiquity",
+    "weight": 2,
+    "effects": [
+      {
+        "type": "knowledge_days",
+        "days": 20,
+        "minimum": 50
+      }
+    ]
+  },
+  {
+    "id": "patron",
+    "name": "Mecenáš",
+    "description": "Bohatý obyvateľ daroval mestu peniaze.",
+    "kind": "good",
+    "era": "antiquity",
+    "weight": 2,
+    "effects": [
+      {
+        "type": "money_days",
+        "days": 15,
+        "minimum": 100
+      }
+    ]
+  },
+  {
+    "id": "caravan",
+    "name": "Karavána obchodníkov",
+    "description": "Obchodníci ponúkajú {amount} × {resource} za {cost} — polovičnú cenu.",
+    "kind": "choice",
+    "era": "settlement",
+    "weight": 3,
+    "requiresBuildings": ["market"],
+    "choices": [
+      {
+        "id": "accept",
+        "effects": [
+          {
+            "type": "caravan",
+            "storageShare": 0.15,
+            "priceFactor": 0.5
+          }
+        ]
+      },
+      {
+        "id": "decline",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "immigrants",
+    "name": "Prisťahovalci",
+    "description": "Skupina {amount} ľudí sa chce usadiť v meste. Prijmeš ich? Chvíľu potrvá, kým si zvyknú.",
+    "kind": "choice",
+    "era": "settlement",
+    "weight": 2,
+    "choices": [
+      {
+        "id": "accept",
+        "effects": [
+          {
+            "type": "immigrants",
+            "share": 0.05,
+            "minimum": 10
+          },
+          {
+            "type": "happiness",
+            "amount": -5,
+            "days": 15
+          }
+        ]
+      },
+      {
+        "id": "decline",
+        "effects": []
+      }
+    ]
+  },
+  {
+    "id": "festival",
+    "name": "Slávnosť",
+    "description": "Obyvatelia by radi usporiadali slávnosť. Stojí {cost}, ale mesiac zlepší náladu.",
+    "kind": "choice",
+    "era": "antiquity",
+    "weight": 2,
+    "choices": [
+      {
+        "id": "celebrate",
+        "cost": {
+          "moneyPerCapita": 0.3,
+          "minimum": 100
+        },
+        "effects": [
+          {
+            "type": "happiness",
+            "amount": 10,
+            "days": 30
+          }
+        ]
+      },
+      {
+        "id": "decline",
+        "effects": []
+      }
+    ]
+  }
+]

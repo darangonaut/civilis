@@ -8,6 +8,7 @@ import { simulatePopulation } from '../population/population';
 import { advanceResearch } from '../research/research';
 import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
 import { autoSell } from './trade';
+import { advanceEvents } from '../events/randomEvents';
 
 function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
   for (const id of RESOURCE_IDS) {
@@ -86,7 +87,11 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   state.simulation.day += 1;
   refreshDerivedState(state, data);
 
-  // 11. Úspechy (rozšírenie) — po prepočte, aby videli aktuálny stav.
+  // 11. Náhodné udalosti (rozšírenie).
+  events.push(...advanceEvents(state, data));
+  refreshDerivedState(state, data);
+
+  // 12. Úspechy (rozšírenie) — po prepočte, aby videli aktuálny stav.
   for (const achievementId of evaluateAchievements(state, data))
     events.push({ type: 'achievement_unlocked', achievementId });
   return events;

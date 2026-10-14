@@ -36,6 +36,14 @@ describe('preklady', () => {
       expect(names.achievements).toHaveProperty([a.id, 'name']);
       expect(names.achievements).toHaveProperty([a.id, 'description']);
     }
+    for (const event of gameData.events) {
+      expect(names.events).toHaveProperty([event.id, 'name']);
+      expect(names.events).toHaveProperty([event.id, 'description']);
+      // Parametre v preklade musia sedieť so slovenským popisom.
+      expect(
+        placeholders(names.events[event.id as keyof typeof names.events]!.description),
+      ).toEqual(placeholders(event.description));
+    }
     for (const era of gameData.eras) {
       expect(names.eras).toHaveProperty([era.id, 'name']);
       expect(names.eras).toHaveProperty([era.id, 'description']);

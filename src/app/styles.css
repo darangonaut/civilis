@@ -1955,6 +1955,65 @@ button.danger:hover:not(:disabled),
   flex: 1;
 }
 
+/* --- Udalosti --- */
+.event-dialog {
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.event-dialog[open] {
+  display: flex;
+}
+
+.event-dialog h2 {
+  margin: 0;
+}
+
+.event-dialog p {
+  margin: 0;
+}
+
+.event-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.event-choices .btn {
+  flex: 1 1 140px;
+}
+
+.active-events {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.active-events ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.active-events li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 8px;
+  box-shadow: inset 3px 0 0 #ff8a80;
+}
+
+.active-events li.good {
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
 /* --- Divy a úspechy --- */
 .wonder-effects {
   margin: 0;

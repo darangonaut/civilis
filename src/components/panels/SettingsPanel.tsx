@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LANGUAGE_NAMES, t, type TranslationKey } from '@/app/i18n';
 import { LANGUAGES, useLanguageStore } from '@/stores/languageStore';
 import { startNewGame } from '@/app/saving';
+import { controller } from '@/app/game';
 import { useGameState } from '@/app/useGameState';
 import { MARKER_LEGEND } from '@/app/markers';
 import { MarkerIcon } from '../MarkerIcon';
@@ -22,6 +23,7 @@ export function SettingsPanel() {
   const seed = useGameState((s) => s.simulation.seed);
   const [seedInput, setSeedInput] = useState('');
   const display = useSettingsStore();
+  const eventsEnabled = useGameState((s) => s.events.enabled);
   const language = useLanguageStore((s) => s.language);
   const setLanguage = useLanguageStore((s) => s.setLanguage);
 
@@ -93,6 +95,17 @@ export function SettingsPanel() {
           data-testid="toggle-daynight"
         />
         {t('settings.dayNight')}
+      </label>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={eventsEnabled}
+          onChange={(e) =>
+            controller.execute({ type: 'SET_EVENTS_ENABLED', enabled: e.target.checked })
+          }
+          data-testid="toggle-events"
+        />
+        {t('settings.events')}
       </label>
 
       <h3>{t('settings.markers')}</h3>

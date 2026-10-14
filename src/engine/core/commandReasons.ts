@@ -26,6 +26,8 @@ export const COMMAND_FAILURE_REASONS = [
   'insufficient_funds',
   'storage_full',
   'wonder_built',
+  'no_pending_event',
+  'unknown_choice',
 ] as const;
 
 export type CommandFailureReason = (typeof COMMAND_FAILURE_REASONS)[number];

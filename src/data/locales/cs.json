@@ -272,5 +272,51 @@
       "name": "Rychlý postup",
       "description": "Dohraj hru do 2 500. dne."
     }
+  },
+  "events": {
+    "drought": {
+      "name": "Sucho",
+      "description": "Dlouho nepršelo — farmy vyrábějí méně potravin."
+    },
+    "epidemic": {
+      "name": "Epidemie",
+      "description": "Městem se šíří nemoc. Část obyvatel odešla a nálada klesla."
+    },
+    "fire": {
+      "name": "Požár",
+      "description": "V budově {building} vypukl požár. Opravíš ji hned, nebo počkáš, až ji obyvatelé opraví sami?"
+    },
+    "blackout": {
+      "name": "Výpadek proudu",
+      "description": "Porucha v elektrárně — výroba elektřiny na pár dní klesla."
+    },
+    "bumper_harvest": {
+      "name": "Bohatá úroda",
+      "description": "Výborné počasí — farmy vyrábějí víc potravin."
+    },
+    "ore_find": {
+      "name": "Nové ložisko",
+      "description": "Horníci narazili na bohatou žílu."
+    },
+    "ancient_ruins": {
+      "name": "Starověké ruiny",
+      "description": "Při stavbě se našly ruiny s cennými záznamy."
+    },
+    "patron": {
+      "name": "Mecenáš",
+      "description": "Bohatý obyvatel daroval městu peníze."
+    },
+    "caravan": {
+      "name": "Karavana obchodníků",
+      "description": "Obchodníci nabízejí {amount} × {resource} za {cost} — poloviční cenu."
+    },
+    "immigrants": {
+      "name": "Přistěhovalci",
+      "description": "Skupina {amount} lidí se chce usadit ve městě. Přijmeš je? Chvíli potrvá, než si zvyknou."
+    },
+    "festival": {
+      "name": "Slavnost",
+      "description": "Obyvatelé by rádi uspořádali slavnost. Stojí {cost}, ale měsíc zlepší náladu."
+    }
   }
 }

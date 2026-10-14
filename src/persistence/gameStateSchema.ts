@@ -86,6 +86,35 @@ export const gameStateSchema = z
       completedIds: z.array(z.string()),
       finishedDay: nonNegativeInt.nullable(),
     }),
+    events: z.strictObject({
+      enabled: z.boolean(),
+      nextDay: nonNegativeInt,
+      active: z.array(
+        z.strictObject({
+          eventId: z.string(),
+          daysLeft: nonNegativeInt,
+          effect: z.discriminatedUnion('type', [
+            z.strictObject({
+              type: z.literal('production'),
+              resource: z.union([z.enum(RESOURCE_IDS), z.literal('all')]),
+              multiplier: z.number().nonnegative(),
+            }),
+            z.strictObject({ type: z.literal('happiness'), amount: z.number().finite() }),
+            z.strictObject({ type: z.literal('disable_building'), buildingId: z.string() }),
+          ]),
+        }),
+      ),
+      pending: z
+        .strictObject({
+          eventId: z.string(),
+          day: nonNegativeInt,
+          buildingId: z.string().optional(),
+          resource: z.enum(RESOURCE_IDS).optional(),
+          amount: nonNegative.optional(),
+          cost: nonNegative.optional(),
+        })
+        .nullable(),
+    }),
   })
   .superRefine((state, ctx) => {
     if (state.world.tiles.length !== state.world.width * state.world.height) {

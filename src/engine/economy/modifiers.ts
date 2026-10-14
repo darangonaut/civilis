@@ -1,5 +1,6 @@
 import type { GameState, ResourceId, TechnologyEffect } from '@/types';
 import type { GameData } from '../core/definitions';
+import { eventProductionBonus } from '../events/randomEvents';
 
 /** Efekty dokončených technológií a postavených divov sveta. */
 function activeEffects(state: Readonly<GameState>, data: GameData): TechnologyEffect[] {
@@ -31,7 +32,7 @@ export function productionMultiplier(
       bonus += effect.multiplier - 1;
     }
   }
-  return Math.max(0, 1 + bonus);
+  return Math.max(0, 1 + bonus + eventProductionBonus(state, resource));
 }
 
 /** Násobič nákladov na údržbu (aditívne). */

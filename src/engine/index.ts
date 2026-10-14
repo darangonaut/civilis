@@ -54,3 +54,4 @@ export {
   cityScore,
   type AchievementProgress,
 } from './milestones/achievements';
+export { eventEligible, isMitigated } from './events/randomEvents';

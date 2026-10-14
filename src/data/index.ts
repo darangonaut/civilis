@@ -1,6 +1,7 @@
 import { loadGameData, type GameData } from '@/engine/core/definitions';
 import achievements from './achievements.json';
 import balance from './balance.json';
+import events from './events.json';
 import buildings from './buildings.json';
 import eras from './eras.json';
 import milestones from './milestones.json';
@@ -13,5 +14,6 @@ export const gameData: GameData = loadGameData({
   technologies,
   milestones,
   achievements,
+  events,
   balance,
 });

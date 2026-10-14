@@ -29,6 +29,14 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v6 → v7: náhodné udalosti (prvá najskôr o 40 dní od načítania). */
+  6: (raw) => {
+    const simulation = raw.simulation as { day?: number } | undefined;
+    return {
+      events: { enabled: true, nextDay: (simulation?.day ?? 0) + 40, active: [], pending: null },
+      ...raw,
+    };
+  },
   /** v5 → v6: zložka spokojnosti „oddych“, obchod a úspechy. */
   5: (raw) => {
     const city = raw.city as RawCity | undefined;

@@ -92,6 +92,12 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
     milestones: { completedIds: [], progressDays: {} },
     trade: { autoSell: [], earned: 0 },
     achievements: { completedIds: [], finishedDay: null },
+    events: {
+      enabled: true,
+      nextDay: data.balance.events.firstDay,
+      active: [],
+      pending: null,
+    },
   };
   const analysis = refreshDerivedState(state, data);
   state.city.population.happinessFactors = computeHappinessFactors(state, data, analysis, 1);

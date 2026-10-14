@@ -12,6 +12,7 @@ interface DataNames {
   milestones: Record<string, string>;
   eras: Record<string, { name: string; description: string }>;
   achievements: Record<string, { name: string; description: string }>;
+  events: Record<string, { name: string; description: string }>;
 }
 
 const NAMES: Partial<Record<Language, DataNames>> = { cs: csNames, en: enNames };
@@ -50,6 +51,17 @@ export function achievementDescription(id: string): string {
     gameData.achievements.find((a) => a.id === id)?.description ??
     ''
   );
+}
+
+export function eventName(id: string): string {
+  return names()?.events[id]?.name ?? gameData.events.find((e) => e.id === id)?.name ?? id;
+}
+
+/** Popis udalosti s doplnenými parametrami (`{building}`, `{resource}`, `{amount}`, `{cost}`). */
+export function eventDescription(id: string, params: Record<string, string | number> = {}): string {
+  const text =
+    names()?.events[id]?.description ?? gameData.events.find((e) => e.id === id)?.description ?? '';
+  return text.replace(/\{(\w+)\}/g, (_, key: string) => String(params[key] ?? `{${key}}`));
 }
 
 export function eraDescription(id: string): string {

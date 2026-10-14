@@ -6,6 +6,7 @@ import { TopHud } from '@/components/hud/TopHud';
 import { MapInfo } from '@/components/MapInfo';
 import { MapView } from '@/components/MapView';
 import { NewEraDialog } from '@/components/NewEraDialog';
+import { EventDialog } from '@/components/EventDialog';
 import { Notice } from '@/components/Notice';
 import { PanelHost } from '@/components/panels/PanelHost';
 import { VictoryDialog } from '@/components/VictoryDialog';
@@ -50,6 +51,7 @@ export function App() {
         <Notice />
         <PanelHost />
         <NewEraDialog />
+        <EventDialog />
         <VictoryDialog />
       </Fragment>
     </div>

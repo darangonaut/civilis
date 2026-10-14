@@ -98,7 +98,7 @@ test('nastavenia obsahujú legendu značiek', async ({ page }) => {
   await openGame(page);
   await page.getByTestId('open-settings').click();
   const legend = page.getByTestId('marker-legend');
-  await expect(legend.locator('li')).toHaveCount(7);
+  await expect(legend.locator('li')).toHaveCount(8);
   await expect(legend).toContainText('Chýba cesta');
   await expect(legend).toContainText('vylepšiť');
 });
@@ -237,4 +237,35 @@ test('mapové vrstvy: výber vrstvy ukáže legendu, pri stavbe služby sa zapne
   await expect(page.getByTestId('layer-legend')).toContainText(/vzdelanie/i);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('layer-legend')).toBeHidden();
+});
+
+test('udalosť s voľbou: karta, prijatie prisťahovalcov pridá obyvateľov', async ({ page }) => {
+  await openGame(page);
+  // Voľné bývanie pre prisťahovalcov: dom pri ceste.
+  const spot = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    for (const road of hook.getState().city.buildings.filter((b) => b.definitionId === 'road')) {
+      const tile = { x: road.position.x, y: road.position.y + 1 };
+      if (hook.canPlace('house', tile)) return hook.tileToClient(tile);
+    }
+    throw new Error('Žiadne miesto');
+  });
+  await pickBuilding(page, 'house');
+  await page.mouse.click(spot.x, spot.y);
+  await page.keyboard.press('Escape');
+  const before = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    hook.grantForTest({ pendingEvent: { eventId: 'immigrants', day: 0, amount: 5 } });
+    return hook.getState().city.population.total;
+  });
+  const dialog = page.getByTestId('event-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Prisťahovalci');
+  await expect(dialog).toContainText('5');
+  await dialog.getByTestId('event-choice-accept').click();
+  await expect(dialog).toBeHidden();
+  const state = await page.evaluate(() => window.__civilis!.getState());
+  expect(state.events.pending).toBeNull();
+  expect(state.city.population.total).toBeGreaterThan(before);
+  await expect(page.getByTestId('active-events')).toContainText('Prisťahovalci');
 });

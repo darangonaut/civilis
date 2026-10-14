@@ -272,5 +272,51 @@
       "name": "Fast Forward",
       "description": "Finish the game by day 2,500."
     }
+  },
+  "events": {
+    "drought": {
+      "name": "Drought",
+      "description": "It has not rained for a long time — farms produce less food."
+    },
+    "epidemic": {
+      "name": "Epidemic",
+      "description": "A disease is spreading through the city. Some residents left and the mood dropped."
+    },
+    "fire": {
+      "name": "Fire",
+      "description": "A fire broke out in {building}. Repair it right away, or wait for the residents to fix it themselves?"
+    },
+    "blackout": {
+      "name": "Blackout",
+      "description": "A power plant failure — electricity production dropped for a few days."
+    },
+    "bumper_harvest": {
+      "name": "Bumper Harvest",
+      "description": "Excellent weather — farms produce more food."
+    },
+    "ore_find": {
+      "name": "New Deposit",
+      "description": "Miners struck a rich vein."
+    },
+    "ancient_ruins": {
+      "name": "Ancient Ruins",
+      "description": "Construction uncovered ruins with valuable records."
+    },
+    "patron": {
+      "name": "Patron",
+      "description": "A wealthy resident donated money to the city."
+    },
+    "caravan": {
+      "name": "Merchant Caravan",
+      "description": "Merchants offer {amount} × {resource} for {cost} — half the price."
+    },
+    "immigrants": {
+      "name": "Immigrants",
+      "description": "A group of {amount} people wants to settle in the city. Accept them? It will take them a while to settle in."
+    },
+    "festival": {
+      "name": "Festival",
+      "description": "The residents would like to hold a festival. It costs {cost}, but it lifts the mood for a month."
+    }
   }
 }
