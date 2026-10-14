@@ -8,7 +8,7 @@ import { RESOURCE_IDS } from '@/types';
 import { PanelFrame } from './PanelFrame';
 import { Progress } from './Progress';
 
-const FACTORS = ['food', 'housing', 'water', 'education'] as const;
+const FACTORS = ['food', 'housing', 'water', 'education', 'leisure'] as const;
 
 export function StatisticsPanel() {
   const population = useGameState((s) => s.city.population);
@@ -52,7 +52,11 @@ export function StatisticsPanel() {
               <li key={key}>
                 <span>
                   {t(`happiness.${key}`)}{' '}
-                  <span className="muted">({Math.round(weights[key] * 100)} %)</span>
+                  <span className="muted">
+                    {key === 'leisure'
+                      ? `(+${gameData.balance.leisureBonus})`
+                      : `(${Math.round(weights[key] * 100)} %)`}
+                  </span>
                 </span>
                 <Progress value={population.happinessFactors[key] / 100} />
                 <span className="factor-value">{population.happinessFactors[key]}</span>

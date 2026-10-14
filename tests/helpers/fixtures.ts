@@ -44,7 +44,7 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
         availableWorkers: 0,
         employedWorkers: 0,
         happiness: 70,
-        happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
+        happinessFactors: { food: 100, housing: 0, water: 0, education: 0, leisure: 0 },
         growthProgress: 0,
       },
       economy: {
@@ -65,6 +65,8 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
       queue: [],
     },
     milestones: { completedIds: [], progressDays: {} },
+    trade: { autoSell: [], earned: 0 },
+    achievements: { completedIds: [], finishedDay: null },
   };
 
   const engine = createGameEngine(testData, state);

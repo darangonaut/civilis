@@ -48,7 +48,7 @@ describe('herné dáta', () => {
       6,
     );
     expect(data.milestones.filter((m) => m.era === 'settlement')).toHaveLength(5);
-    expect(data.buildings.filter((b) => !b.requiredTechnologyId)).toHaveLength(10);
+    expect(data.buildings.filter((b) => !b.requiredTechnologyId)).toHaveLength(11);
   });
 
   it('zodpovedajú katalógu budov zo špecifikácie', () => {
@@ -71,7 +71,8 @@ describe('herné dáta', () => {
     expect(b('well').requiresRoad).toBe(false);
     for (const building of data.buildings) {
       expect(building.size).toEqual({ width: 1, height: 1 });
-      if (!['road', 'well', 'aqueduct'].includes(building.id))
+      // Výnimky: cesty, studne, akvadukt a dekorácie (fungujú bez napojenia).
+      if (!['road', 'well', 'aqueduct'].includes(building.id) && building.category !== 'decoration')
         expect(building.requiresRoad).toBe(true);
     }
   });

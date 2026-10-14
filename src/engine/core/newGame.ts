@@ -69,7 +69,7 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
         availableWorkers: Math.floor(start.population * data.balance.workforceShare),
         employedWorkers: 0,
         happiness: start.happiness,
-        happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
+        happinessFactors: { food: 100, housing: 0, water: 0, education: 0, leisure: 0 },
         growthProgress: 0,
       },
       economy: {
@@ -90,6 +90,8 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
       queue: [],
     },
     milestones: { completedIds: [], progressDays: {} },
+    trade: { autoSell: [], earned: 0 },
+    achievements: { completedIds: [], finishedDay: null },
   };
   const analysis = refreshDerivedState(state, data);
   state.city.population.happinessFactors = computeHappinessFactors(state, data, analysis, 1);

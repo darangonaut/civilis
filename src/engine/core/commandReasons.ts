@@ -20,6 +20,11 @@ export const COMMAND_FAILURE_REASONS = [
   'prerequisites_missing',
   'era_locked',
   'invalid_queue',
+  'invalid_amount',
+  'not_tradable',
+  'trade_unavailable',
+  'insufficient_funds',
+  'storage_full',
 ] as const;
 
 export type CommandFailureReason = (typeof COMMAND_FAILURE_REASONS)[number];

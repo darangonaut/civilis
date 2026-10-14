@@ -29,6 +29,25 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v5 → v6: zložka spokojnosti „oddych“, obchod a úspechy. */
+  5: (raw) => {
+    const city = raw.city as RawCity | undefined;
+    const population = city?.population as Record<string, unknown> | undefined;
+    const factors = population?.happinessFactors as Record<string, unknown> | undefined;
+    return {
+      trade: { autoSell: [], earned: 0 },
+      achievements: { completedIds: [], finishedDay: null },
+      ...raw,
+      ...(city && population && factors
+        ? {
+            city: {
+              ...city,
+              population: { ...population, happinessFactors: { leisure: 0, ...factors } },
+            },
+          }
+        : {}),
+    };
+  },
   /** v4 → v5: poradie výskumu. */
   4: (raw) => {
     const research = raw.research as Record<string, unknown> | undefined;

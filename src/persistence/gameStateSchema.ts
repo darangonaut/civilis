@@ -53,6 +53,7 @@ export const gameStateSchema = z
           housing: nonNegative,
           water: nonNegative,
           education: nonNegative,
+          leisure: nonNegative,
         }),
         growthProgress: z.number().min(0).max(1),
       }),
@@ -76,6 +77,14 @@ export const gameStateSchema = z
     milestones: z.strictObject({
       completedIds: z.array(z.string()),
       progressDays: z.record(z.string(), nonNegativeInt),
+    }),
+    trade: z.strictObject({
+      autoSell: z.array(z.enum(RESOURCE_IDS)),
+      earned: nonNegative,
+    }),
+    achievements: z.strictObject({
+      completedIds: z.array(z.string()),
+      finishedDay: nonNegativeInt.nullable(),
     }),
   })
   .superRefine((state, ctx) => {

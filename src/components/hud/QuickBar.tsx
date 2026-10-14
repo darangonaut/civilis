@@ -11,6 +11,7 @@ import { MiniMap } from './MiniMap';
 const PANELS: { id: PanelId; label: TranslationKey; icon: IconName }[] = [
   { id: 'research', label: 'bottom.research', icon: 'research' },
   { id: 'milestones', label: 'bottom.milestones', icon: 'milestones' },
+  { id: 'trade', label: 'bottom.trade', icon: 'trade' },
   { id: 'statistics', label: 'bottom.statistics', icon: 'statistics' },
   { id: 'saves', label: 'bottom.save', icon: 'saves' },
   { id: 'settings', label: 'bottom.settings', icon: 'settings' },

@@ -3,7 +3,7 @@ import type { CameraView } from '@/renderer/GameRenderer';
 import type { DayPhase } from '@/renderer/dayNight';
 import type { BuildingCategory, Position } from '@/types';
 
-export type PanelId = 'research' | 'milestones' | 'statistics' | 'saves' | 'settings';
+export type PanelId = 'research' | 'milestones' | 'trade' | 'statistics' | 'saves' | 'settings';
 
 export type NoticeKind = 'info' | 'success' | 'warning';
 

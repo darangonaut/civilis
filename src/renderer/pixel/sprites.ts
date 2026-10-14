@@ -1407,6 +1407,98 @@ const LEVEL_PAINTERS: Record<string, Painter> = {
 };
 Object.assign(PAINTERS, LEVEL_PAINTERS);
 
+// --- Parky a dekorácie -----------------------------------------------------------------
+
+const FLOWERS: Painter = (pc, cx, cy) => {
+  for (const [dx, dy, c] of [
+    [-6, 2, P.roof],
+    [-4, 3, P.wheatLight],
+    [5, 3, P.purple],
+    [7, 1, P.roof],
+    [1, 5, P.wheatLight],
+  ] as const)
+    pc.set(cx + dx, cy + dy, c);
+};
+
+const DECORATION_PAINTERS: Record<string, Painter> = {
+  park: (pc, cx, cy) => {
+    // Trávnik s chodníkom, dva stromy a lavička.
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) =>
+      pixelNoise(x, y, 23) < 0.12 ? P.grassLight : P.grass,
+    );
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) =>
+      Math.abs(x - cx - (y - cy) * 2) <= 1 ? P.dirt : null,
+    );
+    FLOWERS(pc, cx, cy);
+    pc.stamp(cx - 11, cy - 10, TREE, TREE_PAL);
+    pc.stamp(cx + 3, cy - 12, TREE, TREE_PAL);
+    pc.stamp(cx + 3, cy + 1, ['wwww', 'd..d'], { w: P.wood, d: P.woodDark });
+  },
+  fountain: (pc, cx, cy) => {
+    // Kamenná fontána s vodou a prúdom.
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) => (pixelNoise(x, y, 29) < 0.1 ? P.grassLight : P.grass));
+    isoBox(pc, cx, cy, 9, 3, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    pc.fillDiamond(cx, cy - 3, 7, P.water);
+    pc.fillRect(cx - 1, cy - 9, 2, 6, P.stone);
+    pc.fillRect(cx - 1, cy - 12, 2, 3, P.waterLight);
+    for (const [dx, dy] of [
+      [-3, -10],
+      [3, -10],
+      [-4, -7],
+      [4, -7],
+    ])
+      pc.set(cx + dx!, cy + dy!, P.waterLight);
+  },
+  plaza: (pc, cx, cy) => {
+    // Dláždené námestie so stĺpom.
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) => {
+      const joint = (x + 2 * y) % 6 === 0 || (x - 2 * y + 600) % 6 === 0;
+      return joint ? P.stoneDark : pixelNoise(x, y, 37) < 0.1 ? P.stoneLight : P.stone;
+    });
+    isoBox(pc, cx, cy, 4, 2, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    pc.fillRect(cx - 1, cy - 20, 3, 18, P.stoneLight);
+    pc.fillRect(cx + 1, cy - 20, 1, 18, P.stone);
+    pc.stamp(cx - 2, cy - 24, ['.y.', 'yyy', '.y.'], { y: P.wheat });
+    FLOWERS(pc, cx, cy);
+  },
+  statue: (pc, cx, cy) => {
+    // Socha na podstavci v záhone.
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) =>
+      pixelNoise(x, y, 31) < 0.12 ? P.grassLight : P.grass,
+    );
+    FLOWERS(pc, cx, cy);
+    isoBox(pc, cx, cy, 5, 6, { top: P.stoneLight, left: P.stone, right: P.stoneDark });
+    pc.stamp(
+      cx - 3,
+      cy - 13,
+      ['..cc..', '..cc..', 'cCCCCc', '.CCCC.', '.CccC.', '.C..C.', '.C..C.'],
+      {
+        c: 0x3e8948,
+        C: 0x2a6b47,
+      },
+    );
+  },
+  botanical_garden: (pc, cx, cy) => {
+    // Skleník s kupolou a záhony.
+    pc.fillDiamond(cx, cy, HW - 1, (x, y) => ((((x >> 1) + y) & 3) === 0 ? P.soilDark : P.grass));
+    FLOWERS(pc, cx, cy);
+    isoBox(pc, cx + 1, cy - 1, 9, 7, { top: 0x9fe5f5, left: 0x9fe5f5, right: 0x5bb8d9 });
+    pc.fillPolygon(
+      [
+        [cx - 8, cy - 8],
+        [cx - 4, cy - 15],
+        [cx + 1, cy - 17],
+        [cx + 6, cy - 15],
+        [cx + 10, cy - 8],
+      ],
+      (x) => (x < cx + 1 ? 0xc5f0fa : 0x7fd0e8),
+    );
+    for (let dx = -6; dx <= 8; dx += 4) pc.fillRect(cx + dx, cy - 14, 1, 12, P.white);
+    pc.stamp(cx - 2, cy - 8, ['.g.', 'ggg', '.T.'], { g: P.leaf, T: P.trunk });
+  },
+};
+Object.assign(PAINTERS, DECORATION_PAINTERS);
+
 /** Smery napojenia cesty (bity masky): +x, +y, −x, −y v súradniciach mapy. */
 export const ROAD_EAST = 1;
 export const ROAD_SOUTH = 2;

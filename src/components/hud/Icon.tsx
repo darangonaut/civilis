@@ -9,6 +9,7 @@ const PATHS = {
   moon: 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z',
   research: 'M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7.5 14h9',
   milestones: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  trade: 'M12 3v18M5 7h14M5 7l-3 7h6zM19 7l-3 7h6zM8 21h8',
   statistics: 'M4 20h16M7 16v-5M12 16V7M17 16v-8',
   saves: 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6',
   settings:

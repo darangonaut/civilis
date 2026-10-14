@@ -176,7 +176,7 @@ describe('migrácie', () => {
             ...c,
             population: {
               ...c.population,
-              happinessFactors: { food: 100, housing: 0, water: 0, education: 0 },
+              happinessFactors: { food: 100, housing: 0, water: 0, education: 0, leisure: 0 },
             },
           },
         };

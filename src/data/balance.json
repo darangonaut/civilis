@@ -46,5 +46,29 @@
   "populationGrowthRate": 0.005,
   "populationMaxGrowth": 5,
   "populationMaxGrowthShare": 0.001,
-  "populationDeclineRate": 0.03
+  "populationDeclineRate": 0.03,
+  "leisureBonus": 10,
+  "trade": {
+    "requiredBuilding": "market",
+    "prices": {
+      "food": 0.5,
+      "wood": 0.6,
+      "stone": 0.8,
+      "tools": 2,
+      "bricks": 1.5,
+      "iron": 2.5,
+      "cloth": 3,
+      "coal": 2,
+      "electricity": 1.5,
+      "electronics": 8
+    },
+    "sellFactor": 0.5,
+    "bonusBuildings": {
+      "harbor": 0.1,
+      "railway_station": 0.1,
+      "department_store": 0.1
+    },
+    "autoSellAbove": 0.9,
+    "autoSellTo": 0.75
+  }
 }

@@ -6,6 +6,7 @@ import { evaluateMilestones } from '../milestones/milestones';
 import { simulatePopulation } from '../population/population';
 import { advanceResearch } from '../research/research';
 import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
+import { autoSell } from './trade';
 
 function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
   for (const id of RESOURCE_IDS) {
@@ -53,6 +54,9 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   economy.dailyProduction = production;
   economy.dailyConsumption = consumption;
 
+  // 6b. Automatický predaj prebytkov (rozšírenie: obchod).
+  const tradeIncome = autoSell(state, data);
+
   // 7. Spokojnosť a rast populácie.
   const populationBefore = state.city.population.total;
   simulatePopulation(state, data, analysis, foodSatisfaction);
@@ -61,7 +65,7 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
 
   // 8. Peniaze: príjem z trhovísk, údržba (pokladnica neklesne pod nulu).
   economy.money = Math.max(0, economy.money + analysis.moneyIncome - analysis.maintenanceTotal);
-  economy.dailyIncome = analysis.moneyIncome;
+  economy.dailyIncome = analysis.moneyIncome + tradeIncome;
   economy.dailyExpenses = analysis.maintenanceTotal;
 
   // 9. Výskum.

@@ -72,7 +72,12 @@
     "pasture@2": "Ovčí farma",
     "pasture@3": "Chovná stanice",
     "coal_mine@2": "Hlubinný uhelný důl",
-    "coal_mine@3": "Automatizovaný důl"
+    "coal_mine@3": "Automatizovaný důl",
+    "park": "Park",
+    "fountain": "Fontána",
+    "plaza": "Náměstí",
+    "statue": "Socha",
+    "botanical_garden": "Botanická zahrada"
   },
   "technologies": {
     "woodworking": "Zpracování dřeva",

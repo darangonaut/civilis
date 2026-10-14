@@ -1,3 +1,4 @@
+import { executeTrade, setAutoSell } from '../economy/trade';
 import {
   RESOURCE_IDS,
   SIMULATION_SPEEDS,
@@ -211,5 +212,9 @@ export function executeCommand(
       return setResearchQueue(state, data, command.technologyIds);
     case 'UPGRADE_BUILDING':
       return upgradeBuilding(state, data, command.instanceId);
+    case 'TRADE':
+      return executeTrade(state, data, command.resource, command.amount);
+    case 'SET_AUTO_SELL':
+      return setAutoSell(state, data, command.resource, command.enabled);
   }
 }

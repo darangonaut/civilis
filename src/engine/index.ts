@@ -41,3 +41,11 @@ export {
 export { buildingEraIndex, currentEra, currentEraIndex, isEraUnlocked } from './milestones/eras';
 export { houseOccupancy } from './population/occupancy';
 export { serviceCoverageGrid } from './population/population';
+export {
+  buyPrice,
+  isTradable,
+  sellFactor,
+  sellPrice,
+  tradeAvailable,
+  validateTrade,
+} from './economy/trade';

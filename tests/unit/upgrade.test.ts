@@ -114,6 +114,11 @@ describe('migrácia uložených hier', () => {
     for (const id of ['bricks', 'iron', 'cloth', 'coal', 'electricity', 'electronics']) {
       delete city.economy.resources[id];
     }
+    // Neskoršie rozšírenia stavu (v5 poradie výskumu, v6 oddych, obchod, úspechy).
+    delete (v1.research as Record<string, unknown>).queue;
+    delete (city.population.happinessFactors as Record<string, unknown>).leisure;
+    delete v1.trade;
+    delete v1.achievements;
 
     const migrated = migrateGameState(v1);
     expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
@@ -121,6 +126,10 @@ describe('migrácia uložených hier', () => {
     expect(migrated.city.population.growthProgress).toBe(0);
     expect(migrated.city.economy.resources.bricks).toBe(0);
     expect(migrated.city.economy.resources.iron).toBe(0);
+    expect(migrated.research.queue).toEqual([]);
+    expect(migrated.city.population.happinessFactors.leisure).toBe(0);
+    expect(migrated.trade).toEqual({ autoSell: [], earned: 0 });
+    expect(migrated.achievements).toEqual({ completedIds: [], finishedDay: null });
   });
 });
 

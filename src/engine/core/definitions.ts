@@ -172,6 +172,17 @@ export const balanceSchema = z.strictObject({
   populationMaxGrowthShare: z.number().min(0).max(1),
   populationDeclineRate: z.number().min(0).max(1),
   happinessDeclineThreshold: z.number().min(0).max(100),
+  /** Bonus k spokojnosti pri plnom pokrytí bývania parkami a dekoráciami. */
+  leisureBonus: nonNegative,
+  /** Obchod: ceny (nákup), podiel pri predaji, budovy zlepšujúce výkup, automatický predaj. */
+  trade: z.strictObject({
+    requiredBuilding: id,
+    prices: partialResourcesSchema,
+    sellFactor: z.number().min(0).max(1),
+    bonusBuildings: z.record(id, z.number().min(0).max(1)),
+    autoSellAbove: z.number().min(0).max(1),
+    autoSellTo: z.number().min(0).max(1),
+  }),
 });
 
 export type BalanceConfig = z.infer<typeof balanceSchema>;
@@ -377,6 +388,16 @@ export function loadGameData(raw: RawGameData): GameData {
   }
   if (balance.data.happinessDeclineThreshold > balance.data.happinessGrowthThreshold) {
     issues.push('balance: prah poklesu spokojnosti nesmie byť vyšší ako prah rastu');
+  }
+  const trade = balance.data.trade;
+  for (const buildingId of [trade.requiredBuilding, ...Object.keys(trade.bonusBuildings)]) {
+    if (!buildingIds.has(buildingId)) issues.push(`balance.trade: neznáma budova "${buildingId}"`);
+  }
+  if (trade.prices.knowledge !== undefined) {
+    issues.push('balance.trade: vedomosti sa nedajú obchodovať');
+  }
+  if (trade.autoSellTo > trade.autoSellAbove) {
+    issues.push('balance.trade: autoSellTo musí byť nižšie ako autoSellAbove');
   }
 
   if (issues.length > 0) throw new GameDataError(issues);

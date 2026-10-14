@@ -166,3 +166,21 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   Nevyžadujú služby v dosahu.
 - Bloky polí a lesov majú veľa políčok, preto inšpektor ponúka „Vylepšiť všetky“ — vylepší všetky
   rovnaké budovy na rovnakej úrovni, kým stačia suroviny.
+
+## Parky a dekorácie (2026-10-14, na želanie)
+
+- Kategória Dekorácie: park (Osada), fontána (Akvadukty), námestie (Cechy), socha (Umenie),
+  botanická záhrada (Ekológia). Bez pracovníkov a cesty, malá údržba, služba „oddych“ s dosahom 3–12.
+- Spokojnosť: k váženému priemeru (potraviny, bývanie, voda, vzdelanie) sa pripočíta bonus
+  `podiel bývania v dosahu × leisureBonus` (10 bodov). Pôvodné vyváženie sa nemení, parky sú
+  nástroj na doťahovanie spokojnosti, napr. keď chýba škola.
+
+## Obchod (2026-10-14, na želanie)
+
+- Panel Obchod sa odomkne trhoviskom. Nákup za cenu z `balance.trade.prices`, predaj za 50 % ceny;
+  prístav, železničná stanica a obchodný dom pridávajú po +10 % (max. 100 %). Vedomosti sa
+  neobchodujú, nákup neprekročí kapacitu skladu.
+- Automatický predaj: pre zvolené suroviny sa každý deň (po výrobe a spotrebe) predá prebytok
+  nad 90 % kapacity skladu na 75 %. Príjem sa započíta do denného príjmu.
+- Ceny sú nízke oproti výrobe (napr. drevo 0,6, nástroje 2, elektronika 8) — obchod má pomôcť
+  vyrovnať nerovnováhu a využiť plný sklad, nie nahradiť výrobu.

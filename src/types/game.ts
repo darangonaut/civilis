@@ -1,4 +1,5 @@
 import type { BuildingInstance } from './buildings';
+import type { ResourceId } from './resources';
 import type { Resources } from './resources';
 import type { MilestoneState, ResearchState } from './research';
 import type { Position, World } from './world';
@@ -8,6 +9,8 @@ export interface HappinessFactors {
   housing: number;
   water: number;
   education: number;
+  /** Podiel bývania v dosahu parkov a dekorácií (bonus navyše, schéma v6). */
+  leisure: number;
 }
 
 export interface PopulationState {
@@ -62,6 +65,22 @@ export interface GameState {
   city: CityState;
   research: ResearchState;
   milestones: MilestoneState;
+  /** Obchod: automatický predaj prebytkov a súčet zarobených peňazí (schéma v6). */
+  trade: TradeState;
+  /** Úspechy a deň dohrania (schéma v6). */
+  achievements: AchievementState;
+}
+
+export interface TradeState {
+  autoSell: ResourceId[];
+  /** Peniaze zarobené predajom za celú hru. */
+  earned: number;
+}
+
+export interface AchievementState {
+  completedIds: string[];
+  /** Deň splnenia posledného míľnika (null = ešte nedohrané). */
+  finishedDay: number | null;
 }
 
 export interface SaveSlot {
@@ -88,6 +107,10 @@ export type GameCommand =
   /** Rozšírenie oproti špecifikácii: vylepšenie budovy na ďalšiu úroveň. */
   | { type: 'UPGRADE_BUILDING'; instanceId: string }
   | { type: 'START_RESEARCH'; technologyId: string }
+  /** Rozšírenie: obchod — kladné množstvo = nákup, záporné = predaj. */
+  | { type: 'TRADE'; resource: ResourceId; amount: number }
+  /** Rozšírenie: automatický predaj prebytkov suroviny. */
+  | { type: 'SET_AUTO_SELL'; resource: ResourceId; enabled: boolean }
   /** Rozšírenie oproti špecifikácii: aj rýchlosť je súčasť herného stavu. */
   | { type: 'SET_SPEED'; speed: SimulationSpeed };
 

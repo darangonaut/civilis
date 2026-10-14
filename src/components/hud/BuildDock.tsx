@@ -95,7 +95,7 @@ export function BuildDock() {
               {categoryLabel(c)}
             </button>
           ))}
-          <span className="dock-hint">{t('hud.dockHint')}</span>
+          {!buildModeId && <span className="dock-hint">{t('hud.dockHint')}</span>}
           {buildModeId && (
             <button
               className="dock-cancel"

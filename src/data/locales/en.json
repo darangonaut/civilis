@@ -72,7 +72,12 @@
     "pasture@2": "Sheep Farm",
     "pasture@3": "Breeding Station",
     "coal_mine@2": "Deep Coal Mine",
-    "coal_mine@3": "Automated Mine"
+    "coal_mine@3": "Automated Mine",
+    "park": "Park",
+    "fountain": "Fountain",
+    "plaza": "Town Square",
+    "statue": "Statue",
+    "botanical_garden": "Botanical Garden"
   },
   "technologies": {
     "woodworking": "Woodworking",

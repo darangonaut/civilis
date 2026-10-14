@@ -22,6 +22,7 @@ describe('spokojnosť', () => {
       housing: 100,
       water: 0,
       education: 0,
+      leisure: 0,
     });
   });
 

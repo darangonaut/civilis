@@ -96,6 +96,7 @@ export function computeHappinessFactors(
     housing: Math.round(housing * 100),
     water: Math.round(serviceCoverage(state, data, analysis, 'water') * 100),
     education: Math.round(serviceCoverage(state, data, analysis, 'education') * 100),
+    leisure: Math.round(serviceCoverage(state, data, analysis, 'leisure') * 100),
   };
 }
 
@@ -105,7 +106,9 @@ export function targetHappiness(factors: HappinessFactors, data: GameData): numb
     factors.food * w.food +
     factors.housing * w.housing +
     factors.water * w.water +
-    factors.education * w.education
+    factors.education * w.education +
+    // Parky a dekorácie: bonus navyše nad vážený priemer (strop 100 drží simulácia).
+    (factors.leisure / 100) * data.balance.leisureBonus
   );
 }
 

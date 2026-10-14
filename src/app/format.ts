@@ -14,6 +14,14 @@ const oneDecimal = {
   },
 };
 
+/** Cena s dvoma desatinnými miestami (napr. 0,25). */
+export function formatPrice(value: number): string {
+  return new Intl.NumberFormat(LOCALES[currentLanguage()], {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export function formatAmount(value: number): string {
   return oneDecimal.format(value);
 }

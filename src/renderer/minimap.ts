@@ -17,6 +17,7 @@ const BUILDINGS: Record<BuildingCategory, string> = {
   production: '#feae34',
   service: '#b55088',
   infrastructure: '#c0a080',
+  decoration: '#63c74d',
 };
 
 /** Mierka minimapy: políčko = `scale` px na šírku diagonály. */

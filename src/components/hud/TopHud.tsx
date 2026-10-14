@@ -123,7 +123,9 @@ export function TopHud() {
         </span>
         <span
           className={`hud-stat happiness ${happy < 40 ? 'bad' : happy < 70 ? 'mid' : 'good'}`}
-          title={`${t('topbar.happiness')} — ${(['food', 'housing', 'water', 'education'] as const)
+          title={`${t('topbar.happiness')} — ${(
+            ['food', 'housing', 'water', 'education', 'leisure'] as const
+          )
             .map((key) => `${t(`happiness.${key}`)} ${population.happinessFactors[key]}`)
             .join(', ')}`}
           data-testid="happiness"

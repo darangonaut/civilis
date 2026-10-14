@@ -1623,5 +1623,145 @@
       "radius": 30
     },
     "requiredTechnologyId": "spaceflight"
+  },
+  {
+    "id": "park",
+    "name": "Park",
+    "category": "decoration",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 15
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 0.2,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "leisure",
+      "radius": 3
+    }
+  },
+  {
+    "id": "fountain",
+    "name": "Fontána",
+    "category": "decoration",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 40,
+      "bricks": 20
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 0.5,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "leisure",
+      "radius": 5
+    },
+    "requiredTechnologyId": "aqueducts"
+  },
+  {
+    "id": "plaza",
+    "name": "Námestie",
+    "category": "decoration",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 80,
+      "bricks": 40
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "leisure",
+      "radius": 7
+    },
+    "requiredTechnologyId": "guilds"
+  },
+  {
+    "id": "statue",
+    "name": "Socha",
+    "category": "decoration",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "stone": 100,
+      "bricks": 60,
+      "iron": 20
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "leisure",
+      "radius": 8
+    },
+    "requiredTechnologyId": "arts"
+  },
+  {
+    "id": "botanical_garden",
+    "name": "Botanická záhrada",
+    "category": "decoration",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "bricks": 100,
+      "iron": 60,
+      "electronics": 10
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 3,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "allowedTerrain": ["grass", "fertile"],
+    "toolUsePerWorker": 0,
+    "service": {
+      "type": "leisure",
+      "radius": 12
+    },
+    "requiredTechnologyId": "ecology"
   }
 ]

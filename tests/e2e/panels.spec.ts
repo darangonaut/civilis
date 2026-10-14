@@ -162,3 +162,36 @@ test('jazyk: prepnutie na češtinu a angličtinu, voľba sa pamätá', async ({
   await expect(page.getByTestId('era-name')).toHaveText('Osada');
   await expect(page.getByTestId('building-catalog')).toContainText('Bydlení');
 });
+
+test('obchod: bez trhoviska zamknutý, s trhoviskom predaj a automatický predaj', async ({
+  page,
+}) => {
+  await openGame(page);
+  await page.getByTestId('open-trade').click();
+  await expect(page.getByTestId('trade-unavailable')).toBeVisible();
+
+  const spot = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    for (const road of hook.getState().city.buildings.filter((b) => b.definitionId === 'road')) {
+      const tile = { x: road.position.x, y: road.position.y + 1 };
+      if (hook.canPlace('market', tile)) return hook.tileToClient(tile);
+    }
+    throw new Error('Žiadne miesto pre trhovisko');
+  });
+  await page.keyboard.press('Escape');
+  await pickBuilding(page, 'market');
+  await page.mouse.click(spot.x, spot.y);
+  await page.keyboard.press('Escape');
+
+  await page.getByTestId('open-trade').click();
+  const panel = page.getByTestId('trade-panel');
+  const moneyBefore = await page.evaluate(() => window.__civilis!.getState().city.economy.money);
+  await panel.getByTestId('sell-all-wood').click();
+  await expect(page.getByTestId('notice').filter({ hasText: 'Predané' })).toBeVisible();
+  const after = await page.evaluate(() => window.__civilis!.getState());
+  expect(after.city.economy.resources.wood).toBeLessThan(1);
+  expect(after.city.economy.money).toBeGreaterThan(moneyBefore);
+
+  await panel.getByTestId('auto-sell-stone').check();
+  expect(await page.evaluate(() => window.__civilis!.getState().trade.autoSell)).toEqual(['stone']);
+});
