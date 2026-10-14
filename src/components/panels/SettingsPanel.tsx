@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { t, type TranslationKey } from '@/app/i18n';
+import { LANGUAGE_NAMES, t, type TranslationKey } from '@/app/i18n';
+import { LANGUAGES, useLanguageStore } from '@/stores/languageStore';
 import { startNewGame } from '@/app/saving';
 import { useGameState } from '@/app/useGameState';
 import { MARKER_LEGEND } from '@/app/markers';
@@ -12,7 +13,7 @@ const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
   ['shortcut.zoom', 'shortcut.zoomKey'],
   ['shortcut.select', 'shortcut.selectKey'],
   ['shortcut.cancel', 'Escape'],
-  ['shortcut.pause', 'Medzerník'],
+  ['shortcut.pause', 'key.space'],
   ['shortcut.speed', '1 / 2 / 3'],
   ['shortcut.save', 'Ctrl/Cmd + S'],
 ];
@@ -21,6 +22,8 @@ export function SettingsPanel() {
   const seed = useGameState((s) => s.simulation.seed);
   const [seedInput, setSeedInput] = useState('');
   const display = useSettingsStore();
+  const language = useLanguageStore((s) => s.language);
+  const setLanguage = useLanguageStore((s) => s.setLanguage);
 
   const parsedSeed = seedInput.trim() === '' ? undefined : Number(seedInput);
   const seedValid = parsedSeed === undefined || Number.isInteger(parsedSeed);
@@ -35,6 +38,22 @@ export function SettingsPanel() {
 
   return (
     <PanelFrame title={t('settings.title')} testId="settings-panel">
+      <h3>{t('settings.language')}</h3>
+      <div className="segmented language-switch" role="group" aria-label={t('settings.language')}>
+        {LANGUAGES.map((code) => (
+          <button
+            key={code}
+            lang={code}
+            className={language === code ? 'active' : ''}
+            aria-pressed={language === code}
+            onClick={() => setLanguage(code)}
+            data-testid={`language-${code}`}
+          >
+            {LANGUAGE_NAMES[code]}
+          </button>
+        ))}
+      </div>
+
       <h3>{t('settings.newGame')}</h3>
       <form className="new-game-form" onSubmit={newGame}>
         <label>
@@ -91,7 +110,11 @@ export function SettingsPanel() {
         {SHORTCUTS.map(([action, key]) => (
           <div key={action} className="detail-row">
             <dt>{t(action)}</dt>
-            <dd>{key.startsWith('shortcut.') ? t(key as TranslationKey) : key}</dd>
+            <dd>
+              {key.startsWith('shortcut.') || key.startsWith('key.')
+                ? t(key as TranslationKey)
+                : key}
+            </dd>
           </div>
         ))}
       </dl>

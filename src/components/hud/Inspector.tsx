@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { buildingName, techName } from '@/app/names';
 import { formatAmount } from '@/app/format';
 import { commandReasonLabel, problemLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
@@ -41,9 +42,7 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
   const refund = demolishRefund(base, instance.level, gameData.balance.demolishRefund);
   const lookTechId = TECH_LOOKS[instance.definitionId];
   const lookTech =
-    lookTechId && completedTech.includes(lookTechId)
-      ? gameData.technologiesById.get(lookTechId)?.name
-      : undefined;
+    lookTechId && completedTech.includes(lookTechId) ? techName(lookTechId) : undefined;
 
   const run = (command: Parameters<typeof controller.execute>[0]) => {
     const result = controller.execute(command);
@@ -62,7 +61,11 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
   const producing = status && (hasAny(status.produced) || status.moneyIncome > 0);
 
   return (
-    <aside className="hud-panel inspector" data-testid="detail-panel" aria-label={definition.name}>
+    <aside
+      className="hud-panel inspector"
+      data-testid="detail-panel"
+      aria-label={buildingName(instance.definitionId, instance.level)}
+    >
       <div className="inspector-head">
         <div className="inspector-icon">
           <BuildingIcon
@@ -71,7 +74,7 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
         </div>
         <div className="inspector-title">
           <div className="inspector-title-row">
-            <h2>{definition.name}</h2>
+            <h2>{buildingName(instance.definitionId, instance.level)}</h2>
             <button
               className="icon-button"
               onClick={() => selectInstance(null)}
@@ -236,14 +239,18 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
 
   const upgrade = () => {
     const result = controller.execute({ type: 'UPGRADE_BUILDING', instanceId: instance.id });
-    if (result.success) showNotice(`${t('detail.upgraded')}: ${next.name}`, 'success');
+    if (result.success)
+      showNotice(
+        `${t('detail.upgraded')}: ${buildingName(instance.definitionId, instance.level + 1)}`,
+        'success',
+      );
     else showNotice(commandReasonLabel(result.reason));
   };
 
   return (
     <div className="upgrade-box" data-testid="upgrade-section">
       <h3>
-        {t('detail.upgradeTo')}: {next.name}
+        {t('detail.upgradeTo')}: {buildingName(instance.definitionId, instance.level + 1)}
         {nextDefinition.housingCapacity > 0 && (
           <span className="muted">
             {' '}
@@ -252,7 +259,7 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
         )}
       </h3>
       <ul className="requirement-list">
-        {tech && <Requirement met={technologyMet}>{tech.name}</Requirement>}
+        {tech && <Requirement met={technologyMet}>{techName(tech.id)}</Requirement>}
         {services.map((service) => (
           <Requirement key={service.type} met={service.met}>
             {t(`detail.service.${service.type}`)}

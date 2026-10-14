@@ -7,6 +7,8 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
   use: {
+    // Testy overujú slovenské texty; jazyk sa inak volí podľa prehliadača.
+    locale: 'sk-SK',
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
   },

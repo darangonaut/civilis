@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { buildingName, eraDescription, eraName, techName } from '@/app/names';
 import { controller } from '@/app/game';
 import { t } from '@/app/i18n';
 import { gameData } from '@/data';
@@ -43,19 +44,19 @@ export function NewEraDialog() {
           <div className="badge" aria-hidden>
             ⚑
           </div>
-          <h2>{t('era.reached', { era: era.name })}</h2>
-          <p>{era.description}</p>
+          <h2>{t('era.reached', { era: eraName(era.id) })}</h2>
+          <p>{eraDescription(era.id)}</p>
           <h3>{t('era.newBuildings')}</h3>
           <ul className="era-buildings">
             {buildings.map((b) => (
               <li key={b.id}>
                 <BuildingIcon definitionId={b.id} />
-                <span>{b.name}</span>
+                <span>{buildingName(b.id)}</span>
               </li>
             ))}
           </ul>
           <h3>{t('era.newTechnologies')}</h3>
-          <p className="muted">{technologies.map((tech) => tech.name).join(', ')}</p>
+          <p className="muted">{technologies.map((tech) => techName(tech.id)).join(', ')}</p>
           <button className="primary" onClick={close}>
             {t('era.continue')}
           </button>

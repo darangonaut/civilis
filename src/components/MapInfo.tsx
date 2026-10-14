@@ -1,8 +1,8 @@
 import { controller } from '@/app/game';
+import { buildingName } from '@/app/names';
 import { problemLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { levelName } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 
 /** Informácia o políčku a budove pod kurzorom — vrátane dôvodu výstražnej značky. */
@@ -24,12 +24,14 @@ export function MapInfo() {
       : [];
     return {
       tile,
-      buildingName: building && definition ? levelName(definition, building.level) : null,
+      buildingName:
+        building && definition ? buildingName(building.definitionId, building.level) : null,
       problems,
       canUpgrade: building ? controller.upgradable.has(building.id) : false,
     };
   });
-  const buildName = buildModeId ? gameData.buildingsById.get(buildModeId)?.name : undefined;
+  const buildLevel = useUiStore((s) => s.buildLevel);
+  const buildName = buildModeId ? buildingName(buildModeId, buildLevel) : undefined;
 
   if (!info && !buildName) return null;
   return (

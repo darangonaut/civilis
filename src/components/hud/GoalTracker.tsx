@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { milestoneTitle } from '@/app/names';
 import { formatAmount } from '@/app/format';
 import { useCompact } from '@/app/useCompact';
 import { t } from '@/app/i18n';
@@ -70,14 +71,14 @@ export function GoalTracker() {
         </button>
         {milestone && isCollapsed ? (
           <span className="goal-title small">
-            {milestone.title}{' '}
+            {milestoneTitle(milestone.id)}{' '}
             <span className="muted">
               {metCount}/{milestone.conditions.length}
             </span>
           </span>
         ) : milestone ? (
           <>
-            <span className="goal-title">{milestone.title}</span>
+            <span className="goal-title">{milestoneTitle(milestone.id)}</span>
             <ul className="goal-conditions">
               {milestone.conditions.map((condition, index) => {
                 const p = progress[index]!;

@@ -1,4 +1,5 @@
 import { gameData } from '@/data';
+import { eraName, milestoneTitle, techName } from './names';
 import type { GameEvent } from '@/engine';
 import { RESOURCE_IDS } from '@/types';
 import { useUiStore } from '@/stores/uiStore';
@@ -36,20 +37,15 @@ export function installGameEventNotifications(): () => void {
 
     for (const event of events) {
       if (event.type === 'research_completed') {
-        const name = gameData.technologiesById.get(event.technologyId)?.name ?? event.technologyId;
+        const name = techName(event.technologyId);
         ui.showNotice(`${t('events.researchCompleted')}: ${name}`, 'success');
         log(t('events.researchCompleted'), name, 'success');
       } else if (event.type === 'era_reached') {
         controller.setSpeed(0);
         ui.setNewEra(event.eraId);
-        log(
-          t('events.newEra'),
-          gameData.eras.find((e) => e.id === event.eraId)?.name ?? '',
-          'info',
-        );
+        log(t('events.newEra'), eraName(event.eraId), 'info');
       } else if (event.type === 'milestone_completed') {
-        const title =
-          gameData.milestones.find((m) => m.id === event.milestoneId)?.title ?? event.milestoneId;
+        const title = milestoneTitle(event.milestoneId);
         const reward = rewardText(event.milestoneId);
         ui.showNotice(
           `${t('events.milestoneCompleted')}: ${title}${reward ? ` (${reward})` : ''}`,

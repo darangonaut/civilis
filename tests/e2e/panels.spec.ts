@@ -145,3 +145,20 @@ test('nastavenia zobrazenia: animácie a deň/noc sa dajú vypnúť a pamätajú
   expect(stats.walkers).toBe(0);
   expect(stats.night).toBe(0);
 });
+
+test('jazyk: prepnutie na češtinu a angličtinu, voľba sa pamätá', async ({ page }) => {
+  await openGame(page);
+  await expect(page.getByTestId('era-name')).toHaveText('Osada');
+  await page.getByTestId('open-settings').click();
+  await page.getByTestId('language-en').click();
+  await expect(page.getByTestId('era-name')).toHaveText('Settlement');
+  await expect(page.getByTestId('goal-tracker')).toContainText('Settlement Founded');
+  await expect(page.getByTestId('settings-panel')).toContainText('Language');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+
+  await page.getByTestId('language-cs').click();
+  await expect(page.getByTestId('building-catalog')).toContainText('Bydlení');
+  await page.reload();
+  await expect(page.getByTestId('era-name')).toHaveText('Osada');
+  await expect(page.getByTestId('building-catalog')).toContainText('Bydlení');
+});

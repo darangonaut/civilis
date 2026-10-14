@@ -39,7 +39,7 @@ Izolácia enginu je vynútená ESLint pravidlom `no-restricted-imports` v `eslin
 - **Herné dáta sa validujú pri štarte** (`src/data/index.ts` → `loadGameData`): Zod schémy
   a krížové kontroly (duplicitné ID, neznáme referencie, cykly v technologickom strome, súčet
   váh spokojnosti). Neplatné dáta = okamžitá chyba so zoznamom všetkých problémov.
-- **Lokalizácia:** všetky UI texty v `src/app/i18n.ts` (`t(key)`); názvy herných objektov
+- **Lokalizácia:** všetky UI texty cez `t(key)` z `src/app/i18n.ts`, slovníky v `src/app/locales/` (sk je zdroj, cs/en musia mať rovnaké kľúče a parametre — kontroluje `tests/unit/locales.test.ts`); názvy z herných dát cez `app/names.ts` (`buildingName`, `techName`, …), preklady v `src/data/locales/`. Zmena jazyka prekreslí HUD (`key={language}` v `App`); názvy herných objektov
   v JSON dátach.
 
 ## Tok dát v etape 2

@@ -1,4 +1,5 @@
 import { formatAmount, formatDelta } from '@/app/format';
+import { buildingName } from '@/app/names';
 import { controller } from '@/app/game';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
@@ -118,7 +119,7 @@ export function StatisticsPanel() {
           <dl className="detail-list">
             {counts.map(({ definition, count }) => (
               <div key={definition.id} className="detail-row">
-                <dt>{definition.name}</dt>
+                <dt>{buildingName(definition.id)}</dt>
                 <dd>{count}</dd>
               </div>
             ))}

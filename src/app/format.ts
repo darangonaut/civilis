@@ -1,5 +1,18 @@
-/** Formátovanie čísel pre UI (slovenská desatinná čiarka). */
-const oneDecimal = new Intl.NumberFormat('sk-SK', { maximumFractionDigits: 1 });
+import { currentLanguage, LOCALES } from './i18n';
+
+/** Formátovanie čísel pre UI podľa jazyka (desatinná čiarka / bodka). */
+const formatters = new Map<string, Intl.NumberFormat>();
+const oneDecimal = {
+  format(value: number): string {
+    const locale = LOCALES[currentLanguage()];
+    let formatter = formatters.get(locale);
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+      formatters.set(locale, formatter);
+    }
+    return formatter.format(value);
+  },
+};
 
 export function formatAmount(value: number): string {
   return oneDecimal.format(value);

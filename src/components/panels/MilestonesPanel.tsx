@@ -1,4 +1,5 @@
 import { formatAmount } from '@/app/format';
+import { eraName, milestoneTitle } from '@/app/names';
 import { resourceLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
@@ -27,7 +28,7 @@ export function MilestonesPanel() {
       {!current && <p className="all-done">{t('milestones.allDone')}</p>}
       {gameData.eras.map((era) => (
         <section key={era.id} className="era-group" data-era-id={era.id}>
-          <h3>{era.name}</h3>
+          <h3>{eraName(era.id)}</h3>
           <ol className="milestone-list">
             {gameData.milestones
               .filter((m) => m.era === era.id)
@@ -41,7 +42,7 @@ export function MilestonesPanel() {
                     data-milestone-id={milestone.id}
                   >
                     <div className="milestone-header">
-                      <strong>{milestone.title}</strong>
+                      <strong>{milestoneTitle(milestone.id)}</strong>
                       <span className="tag">
                         {done
                           ? t('milestones.completed')

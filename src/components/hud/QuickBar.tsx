@@ -1,4 +1,5 @@
 import { zoomCamera } from '@/app/camera';
+import { techName } from '@/app/names';
 import { t, type TranslationKey } from '@/app/i18n';
 import { useCompact } from '@/app/useCompact';
 import { useGameState } from '@/app/useGameState';
@@ -24,7 +25,9 @@ export function QuickBar() {
     const tech = s.research.activeTechnologyId
       ? gameData.technologiesById.get(s.research.activeTechnologyId)
       : undefined;
-    return tech ? { name: tech.name, ratio: s.research.investedKnowledge / tech.cost } : null;
+    return tech
+      ? { name: techName(tech.id), ratio: s.research.investedKnowledge / tech.cost }
+      : null;
   });
 
   return (

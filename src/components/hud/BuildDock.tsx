@@ -1,4 +1,5 @@
 import { formatAmount } from '@/app/format';
+import { buildingName, techName } from '@/app/names';
 import { categoryLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
@@ -112,7 +113,7 @@ export function BuildDock() {
             const { definition, level, locked, cost } = tile;
             const selected = buildModeId === definition.id && buildLevel === level;
             const canAfford = affordable(cost, resources);
-            const name = effectiveDefinition(definition, level).name;
+            const name = buildingName(definition.id, level);
             return (
               <button
                 key={`${definition.id}@${level}`}
@@ -165,7 +166,7 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
   return (
     <div className="hud-panel dock-tooltip" role="tooltip" data-testid="dock-tooltip">
       <div className="tooltip-head">
-        <span className="tooltip-title">{definition.name}</span>
+        <span className="tooltip-title">{buildingName(base.id, level)}</span>
         <span className="muted">
           {categoryLabel(base.category)}
           {maxLevel(base) > 1 && ` · ${t('detail.level')} ${level}`}
@@ -173,7 +174,7 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
       </div>
       {locked && tech && (
         <span className="tooltip-note warn">
-          <Icon name="lock" size={13} /> {t('catalog.locked')}: {tech.name}
+          <Icon name="lock" size={13} /> {t('catalog.locked')}: {techName(tech.id)}
         </span>
       )}
       {level > 1 && <span className="tooltip-note">{t('hud.directBuild')}</span>}

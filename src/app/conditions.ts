@@ -1,5 +1,5 @@
 import { gameData } from '@/data';
-import { levelName } from '@/engine';
+import { buildingName } from './names';
 import type { MilestoneCondition } from '@/types';
 import { resourceLabel, t } from './i18n';
 
@@ -7,12 +7,14 @@ import { resourceLabel, t } from './i18n';
 export function conditionLabel(condition: MilestoneCondition): string {
   switch (condition.type) {
     case 'building_count': {
-      const name = gameData.buildingsById.get(condition.buildingId)?.name ?? condition.buildingId;
+      const name = buildingName(condition.buildingId);
       return `${t('condition.building_count')}: ${name}`;
     }
     case 'building_level': {
       const definition = gameData.buildingsById.get(condition.buildingId);
-      const name = definition ? levelName(definition, condition.level) : condition.buildingId;
+      const name = definition
+        ? buildingName(condition.buildingId, condition.level)
+        : condition.buildingId;
       return `${t('condition.building_level')}: ${name}`;
     }
     case 'resource_balance':

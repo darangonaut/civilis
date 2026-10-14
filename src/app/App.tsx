@@ -9,7 +9,8 @@ import { NewEraDialog } from '@/components/NewEraDialog';
 import { Notice } from '@/components/Notice';
 import { PanelHost } from '@/components/panels/PanelHost';
 import { VictoryDialog } from '@/components/VictoryDialog';
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
+import { useLanguageStore } from '@/stores/languageStore';
 import { useUiStore } from '@/stores/uiStore';
 import { controller } from './game';
 import { installGameEventNotifications } from './gameEvents';
@@ -30,20 +31,27 @@ export function App() {
   }, []);
 
   const selected = useUiStore((s) => s.selectedInstanceId !== null);
+  const language = useLanguageStore((s) => s.language);
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   // Mapa je na celú obrazovku, ovládanie pláva nad ňou.
   return (
     <div className={`game-layout${selected ? ' has-selection' : ''}`}>
       <MapView />
-      <TopHud />
-      <GoalTracker />
-      <Inspector />
-      <BuildDock />
-      <QuickBar />
-      <MapInfo />
-      <Notice />
-      <PanelHost />
-      <NewEraDialog />
-      <VictoryDialog />
+      {/* Zmena jazyka prekreslí celé rozhranie (mapa zostane, texty v nej nie sú). */}
+      <Fragment key={language}>
+        <TopHud />
+        <GoalTracker />
+        <Inspector />
+        <BuildDock />
+        <QuickBar />
+        <MapInfo />
+        <Notice />
+        <PanelHost />
+        <NewEraDialog />
+        <VictoryDialog />
+      </Fragment>
     </div>
   );
 }

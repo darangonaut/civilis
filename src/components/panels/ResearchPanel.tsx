@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { buildingName, eraName, techName } from '@/app/names';
 import { formatAmount, formatCompact } from '@/app/format';
 import { controller } from '@/app/game';
 import { commandReasonLabel, effectLabel, t } from '@/app/i18n';
@@ -19,17 +20,21 @@ const GAP_X = 56;
 const GAP_Y = 18;
 
 /** Čo technológia odomyká: nové budovy aj vyššie úrovne budov (sprite + názov). */
-const unlocks = new Map<string, { spriteKey: string; name: string }[]>();
+const unlocks = new Map<string, { spriteKey: string; buildingId: string; level: number }[]>();
 for (const building of gameData.buildings) {
   if (building.requiredTechnologyId) {
     const list = unlocks.get(building.requiredTechnologyId) ?? [];
-    list.push({ spriteKey: building.id, name: building.name });
+    list.push({ spriteKey: building.id, buildingId: building.id, level: 1 });
     unlocks.set(building.requiredTechnologyId, list);
   }
   building.levels?.forEach((level, index) => {
     if (!level.requiredTechnologyId) return;
     const list = unlocks.get(level.requiredTechnologyId) ?? [];
-    list.push({ spriteKey: `${building.id}@${index + 2}`, name: level.name });
+    list.push({
+      spriteKey: `${building.id}@${index + 2}`,
+      buildingId: building.id,
+      level: index + 2,
+    });
     unlocks.set(level.requiredTechnologyId, list);
   });
 }
@@ -109,7 +114,7 @@ export function ResearchPanel() {
       {active ? (
         <span className="research-active">
           <span className="muted">
-            {t('research.active')}: <span className="text">{active.name}</span>
+            {t('research.active')}: <span className="text">{techName(active.id)}</span>
           </span>
           <span className="bar thick green">
             <span style={{ width: `${ratio * 100}%` }} />
@@ -148,7 +153,7 @@ export function ResearchPanel() {
               disabled={locked}
               title={
                 locked
-                  ? t('research.eraLocked', { era: gameData.eras[index - 1]!.name })
+                  ? t('research.eraLocked', { era: eraName(gameData.eras[index - 1]!.id) })
                   : undefined
               }
               className={`${e.id === era.id ? 'active' : ''}${done === techs.length ? ' done' : ''}`}
@@ -156,7 +161,7 @@ export function ResearchPanel() {
               data-era-id={e.id}
             >
               {done === techs.length && '✓ '}
-              {e.name}
+              {eraName(e.id)}
               {!locked && done < techs.length && (
                 <span className="tab-count">
                   {done}/{techs.length}
@@ -208,7 +213,7 @@ function TechTree({
             const done = research.completedTechnologyIds.includes(id);
             return (
               <span key={id} className={done ? 'met' : 'unmet'}>
-                {done ? '✓' : '○'} {gameData.technologiesById.get(id)?.name ?? id}{' '}
+                {done ? '✓' : '○'} {techName(id)}{' '}
               </span>
             );
           })}
@@ -294,7 +299,7 @@ function TechNode({
       onClick={() => onSelect(tech.id)}
     >
       <div className="tech-node-head">
-        <span className="tech-node-name">{tech.name}</span>
+        <span className="tech-node-name">{techName(tech.id)}</span>
         <span className="tech-node-badge">
           {status === 'completed' ? (
             '✓'
@@ -317,7 +322,10 @@ function TechNode({
       ) : (
         <div className="tech-node-foot">
           {icons.length > 0 && (
-            <span className="tech-unlocks" title={icons.map((i) => i.name).join(', ')}>
+            <span
+              className="tech-unlocks"
+              title={icons.map((i) => buildingName(i.buildingId, i.level)).join(', ')}
+            >
               {icons.slice(0, 4).map((icon) => (
                 <span key={icon.spriteKey} className="mini-icon">
                   <BuildingIcon spriteKey={icon.spriteKey} />
@@ -368,7 +376,7 @@ function TechDetail({ tech, research }: { tech: TechnologyDefinition; research: 
           </span>
         )}
         <div>
-          <span className="tech-detail-name">{tech.name}</span>
+          <span className="tech-detail-name">{techName(tech.id)}</span>
           <span className="muted">
             {t('research.cost')}: {formatCompact(tech.cost)}
           </span>
@@ -380,14 +388,13 @@ function TechDetail({ tech, research }: { tech: TechnologyDefinition; research: 
         ))}
         {icons.map((icon) => (
           <li key={icon.spriteKey}>
-            {t('research.unlocks')}: {icon.name}
+            {t('research.unlocks')}: {buildingName(icon.buildingId, icon.level)}
           </li>
         ))}
       </ul>
       {tech.prerequisites.length > 0 && (
         <div className="muted">
-          {t('research.requires')}:{' '}
-          {tech.prerequisites.map((id) => gameData.technologiesById.get(id)?.name ?? id).join(', ')}
+          {t('research.requires')}: {tech.prerequisites.map(techName).join(', ')}
         </div>
       )}
       <div className="tech-detail-actions">
@@ -436,7 +443,7 @@ function ResearchQueue({ research }: { research: ResearchState }) {
         <ol>
           {research.queue.map((id) => (
             <li key={id}>
-              <span>{gameData.technologiesById.get(id)?.name ?? id}</span>
+              <span>{techName(id)}</span>
               <button
                 className="icon-button"
                 onClick={() => remove(id)}

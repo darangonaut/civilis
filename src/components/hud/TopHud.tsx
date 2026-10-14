@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
+import { eraName } from '@/app/names';
 import { formatCompact, formatDelta } from '@/app/format';
 import { controller } from '@/app/game';
 import { resourceLabel, t, type TranslationKey } from '@/app/i18n';
@@ -50,7 +51,7 @@ export function TopHud() {
         <div className="hud-divider" />
         <div className="era-block">
           <span className="era-name" data-testid="era-name">
-            {era.name}
+            {eraName(era.id)}
           </span>
           <span className="era-day">
             {phase && (
