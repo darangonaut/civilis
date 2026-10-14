@@ -35,6 +35,11 @@ export const P = {
   road: 0xb59f86,
   roadDark: 0x8a7560,
   roadLight: 0xd2c2ac,
+  // Hlinený chodník: svetlý piesok, nie červenohnedá ornica (tá patrí úrodnej pôde).
+  dirt: 0xd9b97c,
+  dirtDark: 0xb08a55,
+  dirtLight: 0xecd6a0,
+  dirtEdge: 0x7d6a3e,
   plaster: 0xead4aa,
   plasterShade: 0xc9a77c,
   plasterDark: 0xa4805c,
@@ -1170,24 +1175,77 @@ const PAINTERS: Record<string, Painter> = {
   },
 };
 
-const FLAT: Record<string, Painter> = {
-  // Hlinený chodník (pred Kamenárstvom).
-  road: (pc, cx, cy) => {
-    pc.fillDiamond(cx, cy, HW, (x, y) => {
-      const rut = ((x >> 1) + y) % 8 === 2 || ((x >> 1) + y) % 8 === 5;
-      if (rut) return P.soilDark;
-      return pixelNoise(x, y, 41) < 0.1 ? P.soilLight : P.soil;
-    });
-  },
-  // Dláždená cesta (po Kamenárstve).
-  'road+': (pc, cx, cy) => {
-    pc.fillDiamond(cx, cy, HW, (x, y) => {
-      const joint = (x + 2 * y) % 6 === 0 || (x - 2 * y + 600) % 8 === 0;
-      if (joint) return P.roadDark;
-      return pixelNoise(x, y, 31) < 0.08 ? P.roadLight : P.road;
-    });
-  },
+/** Smery napojenia cesty (bity masky): +x, +y, −x, −y v súradniciach mapy. */
+export const ROAD_EAST = 1;
+export const ROAD_SOUTH = 2;
+export const ROAD_WEST = 4;
+export const ROAD_NORTH = 8;
+/** Rovný úsek pozdĺž osi x — ikona v doku a náhľad stavby. */
+const ROAD_STRAIGHT = ROAD_EAST | ROAD_WEST;
+
+/**
+ * Cesta ako pás cez políčko, napojený na susedné cesty (`mask`); okolo pásu zostane terén.
+ * Súradnice (u, v) sú v jednotkách políčka od stredu, pás má šírku `width`.
+ */
+function paintRoad(
+  pc: PixelCanvas,
+  cx: number,
+  cy: number,
+  mask: number,
+  width: number,
+  fill: (x: number, y: number) => Rgb,
+  edge: Rgb,
+): void {
+  const half = width / 2;
+  // Mimo políčka pás pokračuje len v napojených smeroch — na styku so susedom tak nevznikne okraj.
+  const inside = (x: number, y: number) => {
+    const sx = (x + 0.5 - cx) / HW;
+    const sy = (y + 0.5 - cy) / HH;
+    const u = (sx + sy) / 2;
+    const v = (sy - sx) / 2;
+    const alongU =
+      Math.abs(v) <= half &&
+      (Math.abs(u) <= half || (u > 0 && mask & ROAD_EAST) || (u < 0 && mask & ROAD_WEST));
+    const alongV =
+      Math.abs(u) <= half &&
+      (Math.abs(v) <= half || (v > 0 && mask & ROAD_SOUTH) || (v < 0 && mask & ROAD_NORTH));
+    return Boolean(alongU || alongV);
+  };
+  pc.fillDiamond(cx, cy, HW, (x, y) => {
+    if (!inside(x, y)) return null;
+    const border = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
+    return border ? edge : fill(x, y);
+  });
+}
+
+const dirtFill = (x: number, y: number): Rgb => {
+  const n = pixelNoise(x, y, 41);
+  return n < 0.12 ? P.dirtDark : n > 0.9 ? P.dirtLight : P.dirt;
 };
+
+const paveFill = (x: number, y: number): Rgb => {
+  const joint = (x + 2 * y) % 6 === 0 || (x - 2 * y + 600) % 8 === 0;
+  if (joint) return P.roadDark;
+  return pixelNoise(x, y, 31) < 0.08 ? P.roadLight : P.road;
+};
+
+function roadPainter(mask: number, paved: boolean): Painter {
+  return (pc, cx, cy) =>
+    paved
+      ? paintRoad(pc, cx, cy, mask, 0.62, paveFill, P.stoneDeep)
+      : paintRoad(pc, cx, cy, mask, 0.5, dirtFill, P.dirtEdge);
+}
+
+const FLAT: Record<string, Painter> = {
+  // Hlinený chodník (pred Kamenárstvom) a dláždená cesta (po ňom).
+  road: roadPainter(ROAD_STRAIGHT, false),
+  'road+': roadPainter(ROAD_STRAIGHT, true),
+};
+
+/** Kľúč sprite-u cesty podľa napojenia na susedov, napr. `road+#5`. */
+export function roadSpriteKey(baseKey: string, mask: number): string {
+  return `${baseKey}#${mask}`;
+}
 
 /** Technológia, ktorá zmení vzhľad budovy (rozpoznávací znak „+“ v kľúči sprite-u). */
 export const TECH_LOOKS: Readonly<Record<string, string>> = {
@@ -1213,7 +1271,8 @@ export function buildingSpriteKey(
 }
 
 export function drawBuilding(key: string): PixelSprite {
-  const flat = FLAT[key];
+  const [base, maskText] = key.split('#');
+  const flat = maskText !== undefined ? roadPainter(Number(maskText), base === 'road+') : FLAT[key];
   if (flat) {
     const { pc, cx, cy } = tileCanvas(0);
     flat(pc, cx, cy);

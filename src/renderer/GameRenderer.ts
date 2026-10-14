@@ -4,7 +4,15 @@ import { tileToWorld, worldBounds, worldToTile } from './iso';
 import type { DayPhase } from './dayNight';
 import { dragPositions, dragShapeFor } from './dragPath';
 import { CityEffects, type BuildingVisual, type CityActivity } from './effects';
-import { buildingSpriteKey, type MarkerKind } from './pixel/sprites';
+import {
+  buildingSpriteKey,
+  ROAD_EAST,
+  ROAD_NORTH,
+  ROAD_SOUTH,
+  ROAD_WEST,
+  roadSpriteKey,
+  type MarkerKind,
+} from './pixel/sprites';
 import {
   TERRAIN_VARIANTS,
   createTextureAtlas,
@@ -318,19 +326,37 @@ export class GameRenderer {
 
   private syncBuildings(state: Readonly<GameState>): void {
     const present = new Set<string>();
+    const { width, height } = state.world;
+    const roads = new Set(
+      state.city.buildings
+        .filter((b) => b.definitionId === 'road')
+        .map((b) => b.position.y * width + b.position.x),
+    );
+    const isRoad = (x: number, y: number) =>
+      x >= 0 && y >= 0 && x < width && y < height && roads.has(y * width + x);
     for (const building of state.city.buildings) {
       present.add(building.id);
-      // Vzhľad závisí od úrovne a preskúmaných technológií.
-      const key = buildingSpriteKey(
+      // Vzhľad závisí od úrovne a preskúmaných technológií; cesta aj od susedných ciest.
+      let key = buildingSpriteKey(
         building.definitionId,
         building.level,
         state.research.completedTechnologyIds,
       );
+      if (building.definitionId === 'road') {
+        const { x, y } = building.position;
+        key = roadSpriteKey(
+          key,
+          (isRoad(x + 1, y) ? ROAD_EAST : 0) |
+            (isRoad(x, y + 1) ? ROAD_SOUTH : 0) |
+            (isRoad(x - 1, y) ? ROAD_WEST : 0) |
+            (isRoad(x, y - 1) ? ROAD_NORTH : 0),
+        );
+      }
       let sprite = this.buildingSprites.get(building.id);
       if (
         sprite &&
         sprite.label !== key &&
-        sprite.label.split(/[@+]/)[0] === building.definitionId
+        sprite.label.split(/[@+#]/)[0] === building.definitionId
       ) {
         sprite.label = key;
         applyTexture(sprite, this.atlas.building(key));
