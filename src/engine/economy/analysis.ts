@@ -15,6 +15,8 @@ export type BuildingProblem =
   | { code: 'disabled' }
   /** Budova zasiahnutá udalosťou (požiar) — dočasne nefunguje. */
   | { code: 'damaged' }
+  /** Domu výrazne chýba tovar; po čase klesne o úroveň. */
+  | { code: 'no_goods' }
   | { code: 'no_road' }
   | { code: 'no_workers' }
   | { code: 'understaffed' }
@@ -169,6 +171,7 @@ export function analyzeCity(state: Readonly<GameState>, data: GameData): CityAna
       if (definition.requiresRoad) status.problems.push({ code: 'no_road' });
       continue;
     }
+    if (building.neglect) status.problems.push({ code: 'no_goods' });
 
     const producesSomething =
       definition.moneyOutput > 0 || RESOURCE_IDS.some((id) => (definition.outputs[id] ?? 0) > 0);

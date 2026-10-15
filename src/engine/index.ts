@@ -55,3 +55,4 @@ export {
   type AchievementProgress,
 } from './milestones/achievements';
 export { eventEligible, isMitigated } from './events/randomEvents';
+export { environmentFactor, isPolluted, pollutionGrid } from './population/needs';

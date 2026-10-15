@@ -1,4 +1,4 @@
-import { coverageOverlay, cssColor, effectiveLayer, LAYER_COLORS } from '@/app/coverage';
+import { coverageOverlay, cssColor, effectiveLayer, LAYER_COLORS, layerName } from '@/app/coverage';
 import { t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { useUiStore } from '@/stores/uiStore';
@@ -18,7 +18,7 @@ export function LayerLegend() {
     <section className="hud-panel layer-legend" data-testid="layer-legend">
       <div className="layer-legend-head">
         <span className="hud-caption">
-          {t('layers.title')}: <span className="capitalize">{t(`service.${layer}`)}</span>
+          {t('layers.title')}: <span className="capitalize">{layerName(layer)}</span>
         </span>
         {!automatic && (
           <button
@@ -33,13 +33,17 @@ export function LayerLegend() {
       </div>
       <span className="layer-row">
         <span className="layer-swatch" style={{ background: cssColor(LAYER_COLORS[layer]) }} />
-        {t('layers.covered')}
+        {layer === 'pollution' ? t('layers.pollutedTiles') : t('layers.covered')}
       </span>
       <span className="layer-row">
         <span className="layer-swatch missing" />
-        {t('layers.missing')}
+        {layer === 'pollution' ? t('layers.pollutedHomes') : t('layers.missing')}
       </span>
-      <span className="layer-share">{t('layers.share', { percent: Math.round(share * 100) })}</span>
+      <span className="layer-share">
+        {t(layer === 'pollution' ? 'layers.clean' : 'layers.share', {
+          percent: Math.round(share * 100),
+        })}
+      </span>
     </section>
   );
 }

@@ -5,7 +5,13 @@ import { commandReasonLabel, effectLabel, problemLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { demolishRefund, effectiveDefinition, maxLevel, upgradeRequirements } from '@/engine';
+import {
+  demolishRefund,
+  effectiveDefinition,
+  isPolluted,
+  maxLevel,
+  upgradeRequirements,
+} from '@/engine';
 import { buildingSpriteKey, TECH_LOOKS } from '@/renderer/pixel/sprites';
 import { useUiStore } from '@/stores/uiStore';
 import { RESOURCE_IDS, type BuildingInstance, type Resources } from '@/types';
@@ -130,6 +136,15 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
       )}
 
       {definition.housingCapacity > 0 && (
+        <HouseNeeds instance={instance} occupancy={occupancy ?? 0} />
+      )}
+      {definition.pollution && (
+        <div className="inspector-note pollution">
+          {t('pollution.label')}: {t('pollution.range', definition.pollution)}
+        </div>
+      )}
+
+      {definition.housingCapacity > 0 && (
         <Meter
           label={t('hud.residents')}
           value={`${Math.round((occupancy ?? 0) * definition.housingCapacity)} / ${definition.housingCapacity}`}
@@ -226,6 +241,39 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
         </button>
       </div>
     </aside>
+  );
+}
+
+/** Potreby obyvateľov domu (tovar za deň), varovanie pred poklesom úrovne a znečistenie. */
+function HouseNeeds({ instance, occupancy }: { instance: BuildingInstance; occupancy: number }) {
+  const polluted = useGameState((s) => isPolluted(s, gameData, instance, controller.pollution));
+  const base = gameData.buildingsById.get(instance.definitionId)!;
+  const definition = effectiveDefinition(base, instance.level);
+  const residents = definition.housingCapacity * occupancy;
+  const need: Partial<Resources> = {};
+  for (const id of RESOURCE_IDS) {
+    const perResident = definition.needs?.[id] ?? 0;
+    if (perResident > 0) need[id] = perResident * residents;
+  }
+  const { downgradeDays, downgradeSpread } = gameData.balance.needs;
+  const limit = downgradeDays + (Number(instance.id.slice(1)) % (downgradeSpread + 1) || 0);
+  return (
+    <>
+      {hasAny(need) && (
+        <div className="needs-box" data-testid="house-needs">
+          <span className="muted">
+            {t('needs.title')} / {t('topbar.perDay')}
+          </span>
+          <Amounts resources={need} money={0} />
+        </div>
+      )}
+      {(instance.neglect ?? 0) > 0 && instance.level > 1 && (
+        <div className="inspector-note warn">
+          {t('needs.warning', { days: Math.max(0, limit - (instance.neglect ?? 0)) })}
+        </div>
+      )}
+      {polluted && <div className="inspector-note pollution">{t('pollution.polluted')}</div>}
+    </>
   );
 }
 

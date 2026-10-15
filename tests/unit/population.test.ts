@@ -23,6 +23,8 @@ describe('spokojnosť', () => {
       water: 0,
       education: 0,
       leisure: 0,
+      goods: 100,
+      environment: 100,
     });
   });
 

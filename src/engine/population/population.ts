@@ -11,6 +11,7 @@ import type { CityAnalysis } from '../economy/analysis';
 import { footprint, tileIndex } from '../world/grid';
 import { wonderHappiness } from '../economy/modifiers';
 import { eventHappiness } from '../events/randomEvents';
+import { environmentFactor } from './needs';
 
 /**
  * Mriežka políčok v dosahu aktívnej služby daného typu. Dosah je štvorec (Chebyševova
@@ -88,6 +89,8 @@ export function computeHappinessFactors(
   data: GameData,
   analysis: CityAnalysis,
   foodSatisfaction: number,
+  /** Zásobenie tovarom 0–100 z posledného dňa (potreby obyvateľov). */
+  goods = 100,
 ): HappinessFactors {
   const population = state.city.population.total;
   const capacity = analysis.housingCapacity;
@@ -99,6 +102,8 @@ export function computeHappinessFactors(
     water: Math.round(serviceCoverage(state, data, analysis, 'water') * 100),
     education: Math.round(serviceCoverage(state, data, analysis, 'education') * 100),
     leisure: Math.round(serviceCoverage(state, data, analysis, 'leisure') * 100),
+    goods,
+    environment: environmentFactor(state, data, analysis),
   };
 }
 
@@ -110,7 +115,10 @@ export function targetHappiness(factors: HappinessFactors, data: GameData): numb
     factors.water * w.water +
     factors.education * w.education +
     // Parky a dekorácie: bonus navyše nad vážený priemer (strop 100 drží simulácia).
-    (factors.leisure / 100) * data.balance.leisureBonus
+    (factors.leisure / 100) * data.balance.leisureBonus -
+    // Nedostatok tovaru a znečistenie: postih do stropu z balance.
+    (1 - factors.goods / 100) * data.balance.needs.happinessPenalty -
+    (1 - factors.environment / 100) * data.balance.pollution.happinessPenalty
   );
 }
 
@@ -123,10 +131,11 @@ export function simulatePopulation(
   data: GameData,
   analysis: CityAnalysis,
   foodSatisfaction: number,
+  goods = 100,
 ): void {
   const { balance } = data;
   const population = state.city.population;
-  const factors = computeHappinessFactors(state, data, analysis, foodSatisfaction);
+  const factors = computeHappinessFactors(state, data, analysis, foodSatisfaction, goods);
   population.happinessFactors = factors;
 
   const target =

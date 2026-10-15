@@ -44,7 +44,15 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
         availableWorkers: 0,
         employedWorkers: 0,
         happiness: 70,
-        happinessFactors: { food: 100, housing: 0, water: 0, education: 0, leisure: 0 },
+        happinessFactors: {
+          food: 100,
+          housing: 0,
+          water: 0,
+          education: 0,
+          leisure: 0,
+          goods: 100,
+          environment: 100,
+        },
         growthProgress: 0,
       },
       economy: {

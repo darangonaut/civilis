@@ -230,6 +230,9 @@ test('mapové vrstvy: výber vrstvy ukáže legendu, pri stavbe služby sa zapne
   await page.getByTestId('open-layers').click();
   await page.getByTestId('layer-water').click();
   await expect(page.getByTestId('layer-legend')).toContainText(/voda/i);
+  await page.getByTestId('open-layers').click();
+  await page.getByTestId('layer-pollution').click();
+  await expect(page.getByTestId('layer-legend')).toContainText(/čistom prostredí/i);
   await page.getByTestId('layer-legend').getByRole('button').click();
   await expect(page.getByTestId('layer-legend')).toBeHidden();
 

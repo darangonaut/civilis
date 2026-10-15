@@ -5,6 +5,7 @@ import { currentEraIndex } from '../milestones/eras';
 import { evaluateMilestones } from '../milestones/milestones';
 import { evaluateAchievements } from '../milestones/achievements';
 import { simulatePopulation } from '../population/population';
+import { simulateNeeds } from '../population/needs';
 import { advanceResearch } from '../research/research';
 import { UNCAPPED_RESOURCES, analyzeCity, refreshDerivedState } from './analysis';
 import { autoSell } from './trade';
@@ -51,6 +52,10 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const foodSatisfaction = foodNeeded > 0 ? foodEaten / foodNeeded : 1;
   if (foodSatisfaction < 1) events.push({ type: 'food_shortage' });
 
+  // 6c. Potreby obyvateľov lepších domov (tovar zo skladu).
+  const needs = simulateNeeds(state, data, analysis, resources, consumption);
+  if (needs.downgraded > 0) events.push({ type: 'houses_downgraded', count: needs.downgraded });
+
   for (const id of RESOURCE_IDS) resources[id] = Math.max(0, resources[id]);
   economy.resources = resources;
   economy.dailyProduction = production;
@@ -61,7 +66,7 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
 
   // 7. Spokojnosť a rast populácie.
   const populationBefore = state.city.population.total;
-  simulatePopulation(state, data, analysis, foodSatisfaction);
+  simulatePopulation(state, data, analysis, foodSatisfaction, needs.goods);
   const populationDelta = state.city.population.total - populationBefore;
   if (populationDelta !== 0) events.push({ type: 'population_changed', delta: populationDelta });
 
@@ -88,8 +93,10 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   refreshDerivedState(state, data);
 
   // 11. Náhodné udalosti (rozšírenie).
-  events.push(...advanceEvents(state, data));
-  refreshDerivedState(state, data);
+  const randomEvents = advanceEvents(state, data);
+  events.push(...randomEvents);
+  // Prepočet len ak udalosť niečo zmenila (analýza mesta je pri veľkom meste drahá).
+  if (randomEvents.length > 0) refreshDerivedState(state, data);
 
   // 12. Úspechy (rozšírenie) — po prepočte, aby videli aktuálny stav.
   for (const achievementId of evaluateAchievements(state, data))

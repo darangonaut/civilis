@@ -55,6 +55,7 @@ const buildingLevelSchema = z.strictObject({
   workersRequired: z.number().int().nonnegative().optional(),
   maintenanceCost: nonNegative.optional(),
   productionMultiplier: z.number().positive().optional(),
+  needs: partialResourcesSchema.optional(),
 });
 
 export const buildingDefinitionSchema = z.strictObject({
@@ -78,6 +79,8 @@ export const buildingDefinitionSchema = z.strictObject({
   service: z.strictObject({ type: z.enum(SERVICE_TYPES), radius: positiveInt }).optional(),
   requiredTechnologyId: id.optional(),
   levels: z.array(buildingLevelSchema).optional(),
+  needs: partialResourcesSchema.optional(),
+  pollution: z.strictObject({ amount: z.number().positive(), radius: positiveInt }).optional(),
   wonder: z
     .strictObject({
       effects: z.array(technologyEffectSchema),
@@ -272,6 +275,21 @@ export const balanceSchema = z.strictObject({
   happinessDeclineThreshold: z.number().min(0).max(100),
   /** Bonus k spokojnosti pri plnom pokrytí bývania parkami a dekoráciami. */
   leisureBonus: nonNegative,
+  /** Potreby obyvateľov: strop postihu spokojnosti a pokles úrovne pri dlhom nedostatku. */
+  needs: z.strictObject({
+    happinessPenalty: nonNegative,
+    /** Pod týmto zásobením (0–1) sa domu počítajú dni nedostatku. */
+    downgradeBelow: z.number().min(0).max(1),
+    downgradeDays: positiveInt,
+    /** Rozptyl limitu medzi domami, aby neklesali všetky naraz. */
+    downgradeSpread: z.number().int().nonnegative(),
+  }),
+  /** Znečistenie: strop postihu spokojnosti, prah znečisteného políčka, čistenie parkami. */
+  pollution: z.strictObject({
+    happinessPenalty: nonNegative,
+    threshold: z.number().positive(),
+    leisureCleansing: nonNegative,
+  }),
   /** Náhodné udalosti: prvá najskôr v deň `firstDay`, potom každých min–max dní. */
   events: z.strictObject({
     firstDay: z.number().int().nonnegative(),

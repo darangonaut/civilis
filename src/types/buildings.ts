@@ -30,6 +30,8 @@ export interface BuildingLevelDefinition {
   maintenanceCost?: number;
   /** Násobič výroby aj spotreby oproti základnej úrovni. */
   productionMultiplier?: number;
+  /** Tovar, ktorý obyvatelia domu spotrebujú za deň (na obyvateľa). Platí od tejto úrovne. */
+  needs?: Partial<Resources>;
 }
 
 export interface BuildingDefinition {
@@ -75,6 +77,15 @@ export interface BuildingDefinition {
   /** Úrovne 2, 3, … (rozšírenie oproti špecifikácii). */
   levels?: BuildingLevelDefinition[];
 
+  /** Potreby obyvateľov (tovar na obyvateľa za deň) — efektívna hodnota podľa úrovne. */
+  needs?: Partial<Resources>;
+
+  /** Znečistenie okolia počas prevádzky: sila a dosah (Chebyševova vzdialenosť). */
+  pollution?: {
+    amount: number;
+    radius: number;
+  };
+
   /** Div sveta: v meste najviac raz, trvalé efekty ako technológie a bonus k spokojnosti. */
   wonder?: {
     effects: TechnologyEffect[];
@@ -90,4 +101,6 @@ export interface BuildingInstance {
   priority: number;
   /** Úroveň budovy od 1 (rozšírenie oproti špecifikácii, schéma v2). */
   level: number;
+  /** Dni po sebe, keď domu výrazne chýba tovar (pri prekročení limitu klesne úroveň). */
+  neglect?: number;
 }

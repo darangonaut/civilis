@@ -269,6 +269,28 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
             <dd>{formatAmount(definition.maintenanceCost)}</dd>
           </>
         )}
+        {definition.needs && (
+          <>
+            <dt>{t('needs.title')}</dt>
+            <dd>
+              {amounts(
+                Object.fromEntries(
+                  Object.entries(definition.needs).map(([id, perResident]) => [
+                    id,
+                    perResident * definition.housingCapacity,
+                  ]),
+                ),
+              )}{' '}
+              / {t('topbar.perDay')}
+            </dd>
+          </>
+        )}
+        {definition.pollution && (
+          <>
+            <dt>{t('pollution.label')}</dt>
+            <dd>{t('pollution.range', definition.pollution)}</dd>
+          </>
+        )}
         {services.length > 0 && (
           <>
             <dt>{t('detail.requires')}</dt>

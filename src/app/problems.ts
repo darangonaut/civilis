@@ -11,6 +11,7 @@ const SEVERITY: BuildingProblem['code'][] = [
   'no_funds',
   'missing_input',
   'no_tools',
+  'no_goods',
   'understaffed',
   'storage_full',
   'poor_terrain',

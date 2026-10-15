@@ -69,7 +69,15 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
         availableWorkers: Math.floor(start.population * data.balance.workforceShare),
         employedWorkers: 0,
         happiness: start.happiness,
-        happinessFactors: { food: 100, housing: 0, water: 0, education: 0, leisure: 0 },
+        happinessFactors: {
+          food: 100,
+          housing: 0,
+          water: 0,
+          education: 0,
+          leisure: 0,
+          goods: 100,
+          environment: 100,
+        },
         growthProgress: 0,
       },
       economy: {

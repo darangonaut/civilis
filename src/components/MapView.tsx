@@ -63,7 +63,9 @@ export function MapView() {
           gameData.buildings.map((b) => ({
             id: b.id,
             size: b.size.width,
-            ...(b.service ? { serviceRadius: b.service.radius } : {}),
+            ...(b.service || b.pollution
+              ? { serviceRadius: b.service?.radius ?? b.pollution!.radius }
+              : {}),
           })),
           {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),

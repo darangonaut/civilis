@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { cssColor, LAYER_COLORS } from '@/app/coverage';
+import { cssColor, LAYER_COLORS, layerName, MAP_LAYERS } from '@/app/coverage';
 import { t } from '@/app/i18n';
 import { useUiStore } from '@/stores/uiStore';
-import { SERVICE_TYPES } from '@/types';
 import { Icon } from './Icon';
 
 /** Tlačidlo mapových vrstiev s ponukou služieb. */
@@ -16,7 +15,7 @@ export function LayerControl() {
       {open && (
         <div className="hud-panel layer-menu" role="menu" data-testid="layer-menu">
           <span className="hud-caption">{t('layers.title')}</span>
-          {[null, ...SERVICE_TYPES].map((type) => (
+          {[null, ...MAP_LAYERS].map((type) => (
             <button
               key={type ?? 'none'}
               role="menuitemradio"
@@ -32,7 +31,7 @@ export function LayerControl() {
                 className="layer-swatch"
                 style={{ background: type ? cssColor(LAYER_COLORS[type]) : 'transparent' }}
               />
-              <span className="capitalize">{type ? t(`service.${type}`) : t('layers.none')}</span>
+              <span className="capitalize">{type ? layerName(type) : t('layers.none')}</span>
             </button>
           ))}
         </div>

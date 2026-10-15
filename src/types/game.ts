@@ -12,6 +12,10 @@ export interface HappinessFactors {
   education: number;
   /** Podiel bývania v dosahu parkov a dekorácií (bonus navyše, schéma v6). */
   leisure: number;
+  /** Zásobenie domov tovarom 0–100 (schéma v8). */
+  goods: number;
+  /** Podiel bývania mimo znečistenia 0–100 (schéma v8). */
+  environment: number;
 }
 
 export interface PopulationState {

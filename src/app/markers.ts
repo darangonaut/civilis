@@ -10,6 +10,7 @@ const PROBLEM_MARKERS: [BuildingProblem['code'], MarkerKind][] = [
   ['no_workers', 'workers'],
   ['no_funds', 'money'],
   ['missing_input', 'goods'],
+  ['no_goods', 'goods'],
   ['no_tools', 'goods'],
   ['understaffed', 'understaffed'],
   ['storage_full', 'storage'],

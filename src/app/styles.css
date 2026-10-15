@@ -872,6 +872,34 @@ button.danger:hover:not(:disabled),
   color: var(--red-text);
 }
 
+.needs-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding: 6px 10px;
+  background: rgb(58 68 102 / 30%);
+  font-size: 13px;
+}
+
+.inspector-note {
+  padding: 6px 10px;
+  font-size: 13px;
+  background: var(--well);
+  color: var(--text-soft);
+}
+
+.inspector-note.warn {
+  background: rgb(228 59 68 / 18%);
+  color: var(--red-text);
+}
+
+.inspector-note.pollution {
+  background: rgb(143 86 59 / 30%);
+  color: #e0b08a;
+}
+
 .upgrade-gain {
   display: flex;
   flex-wrap: wrap;

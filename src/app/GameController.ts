@@ -10,6 +10,7 @@ import {
   type CivilisEngine,
   type GameData,
   type GameEvent,
+  pollutionGrid,
 } from '@/engine';
 import type { CommandResult, GameCommand, GameState, Position, SimulationSpeed } from '@/types';
 import type { CityActivity } from '@/renderer/effects';
@@ -37,6 +38,7 @@ export class GameController {
   private cachedUpgradable: Set<string> | null = null;
   private cachedActivity: CityActivity | null = null;
   private cachedGrids: Record<ServiceType, Uint8Array> | null = null;
+  private cachedPollution: Float32Array | null = null;
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
   private resumeSpeed: Exclude<SimulationSpeed, 0> = 1;
 
@@ -59,6 +61,12 @@ export class GameController {
   get analysis(): CityAnalysis {
     this.cachedAnalysis ??= analyzeCity(this.engine.getState(), this.data);
     return this.cachedAnalysis;
+  }
+
+  /** Znečistenie políčok (pre vrstvu a inšpektor), cachované na revíziu. */
+  get pollution(): Float32Array {
+    this.cachedPollution ??= pollutionGrid(this.engine.getState(), this.data, this.analysis);
+    return this.cachedPollution;
   }
 
   /** Budovy, ktoré sa dajú práve vylepšiť. */
@@ -172,6 +180,7 @@ export class GameController {
     this.cachedUpgradable = null;
     this.cachedActivity = null;
     this.cachedGrids = null;
+    this.cachedPollution = null;
     this.listeners.forEach((listener) => listener());
   }
 }

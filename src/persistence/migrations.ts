@@ -29,6 +29,23 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v7 → v8: zložky spokojnosti tovar a prostredie (potreby obyvateľov, znečistenie). */
+  7: (raw) => {
+    const city = raw.city as RawCity | undefined;
+    const population = city?.population as Record<string, unknown> | undefined;
+    const factors = population?.happinessFactors as Record<string, unknown> | undefined;
+    if (!city || !population || !factors) return raw;
+    return {
+      ...raw,
+      city: {
+        ...city,
+        population: {
+          ...population,
+          happinessFactors: { goods: 100, environment: 100, ...factors },
+        },
+      },
+    };
+  },
   /** v6 → v7: náhodné udalosti (prvá najskôr o 40 dní od načítania). */
   6: (raw) => {
     const simulation = raw.simulation as { day?: number } | undefined;

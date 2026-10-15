@@ -64,6 +64,10 @@ export function installGameEventNotifications(): () => void {
           ui.showNotice(`${name}: ${eventDescription(event.eventId)}${mitigated}`, kind);
           log(t('event.title'), name, kind);
         }
+      } else if (event.type === 'houses_downgraded') {
+        const text = t('needs.downgraded', { count: event.count });
+        ui.showNotice(text, 'warning');
+        log(t('happiness.goods'), text, 'warning');
       } else if (event.type === 'event_ended') {
         log(t('event.ended'), eventName(event.eventId), 'info');
       } else if (event.type === 'achievement_unlocked') {

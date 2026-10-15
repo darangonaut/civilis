@@ -2,8 +2,20 @@ import type { GameState, ResourceId, TechnologyEffect } from '@/types';
 import type { GameData } from '../core/definitions';
 import { eventProductionBonus } from '../events/randomEvents';
 
+/** Cache efektov: platí, kým sa nezmení počet budov ani preskúmaných technológií. */
+const effectsCache = new WeakMap<
+  object,
+  { buildings: number; research: number; effects: TechnologyEffect[] }
+>();
+
 /** Efekty dokončených technológií a postavených divov sveta. */
 function activeEffects(state: Readonly<GameState>, data: GameData): TechnologyEffect[] {
+  const buildings = state.city.buildings.length;
+  const research = state.research.completedTechnologyIds.length;
+  const cached = effectsCache.get(state.city.buildings);
+  if (cached && cached.buildings === buildings && cached.research === research) {
+    return cached.effects;
+  }
   const effects: TechnologyEffect[] = [];
   for (const techId of state.research.completedTechnologyIds) {
     effects.push(...(data.technologiesById.get(techId)?.effects ?? []));
@@ -11,6 +23,7 @@ function activeEffects(state: Readonly<GameState>, data: GameData): TechnologyEf
   for (const building of state.city.buildings) {
     effects.push(...(data.buildingsById.get(building.definitionId)?.wonder?.effects ?? []));
   }
+  effectsCache.set(state.city.buildings, { buildings, research, effects });
   return effects;
 }
 

@@ -212,3 +212,17 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   karavána (15 % kapacity skladu suroviny za polovičnú cenu), prisťahovalci (+5 % obyvateľov
   do voľného bývania, −5 spokojnosť 15 dní), slávnosť (+10 spokojnosť 30 dní za peniaze).
 - Udalosti sa dajú vypnúť v Nastaveniach.
+
+## Potreby obyvateľov a znečistenie (2026-10-16, na želanie)
+
+- Lepšie domy spotrebúvajú tovar zo skladu podľa počtu obyvateľov (na obyvateľa za deň):
+  meštiansky dom až patricijský dom nástroje, renesančný palác látky a nástroje, činžiak látky,
+  mrakodrap látky a elektrinu, inteligentný dom a arkológia elektrinu a trochu elektroniky.
+  Uhlie ako potreba zámerne nie je — je vstupom elektrární a oceliarní.
+- Zložka spokojnosti „tovar“ = zásobenie domov vážené kapacitou; postih až 10 bodov.
+  Ak má dom zásobenie pod 25 %, počítajú sa mu dni; po 90 dňoch (+ 0–20 podľa domu, aby neklesli
+  všetky naraz) klesne o úroveň.
+- Priemysel znečisťuje okolie len počas prevádzky (napr. dielňa sila 1 / dosah 1, huta 3 / 3,
+  oceliareň a uhoľná elektráreň 4 / 4). Park a dekorácie znižujú znečistenie v dosahu o 2.
+  Dom je znečistený pri súčte ≥ 1; zložka „prostredie“ = podiel bývania mimo znečistenia,
+  postih až 10 bodov. Vrstva Znečistenie na mape; pri stavbe priemyslu sa zapne sama.

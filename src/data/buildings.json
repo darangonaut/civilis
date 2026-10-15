@@ -40,7 +40,10 @@
         },
         "requiredTechnologyId": "city_administration",
         "requiredServices": ["water", "education"],
-        "housingCapacity": 24
+        "housingCapacity": 24,
+        "needs": {
+          "tools": 0.002
+        }
       },
       {
         "name": "Vila",
@@ -51,7 +54,10 @@
         },
         "requiredTechnologyId": "architecture",
         "requiredServices": ["water", "education", "culture"],
-        "housingCapacity": 32
+        "housingCapacity": 32,
+        "needs": {
+          "tools": 0.003
+        }
       },
       {
         "name": "Patricijský dom",
@@ -62,7 +68,10 @@
         },
         "requiredTechnologyId": "banking",
         "requiredServices": ["water", "education", "culture"],
-        "housingCapacity": 40
+        "housingCapacity": 40,
+        "needs": {
+          "tools": 0.004
+        }
       },
       {
         "name": "Renesančný palác",
@@ -73,7 +82,11 @@
         },
         "requiredTechnologyId": "arts",
         "requiredServices": ["water", "education", "culture"],
-        "housingCapacity": 48
+        "housingCapacity": 48,
+        "needs": {
+          "cloth": 0.004,
+          "tools": 0.002
+        }
       },
       {
         "name": "Mestský činžiak",
@@ -85,7 +98,10 @@
         },
         "requiredTechnologyId": "urbanism",
         "requiredServices": ["water", "education", "culture"],
-        "housingCapacity": 60
+        "housingCapacity": 60,
+        "needs": {
+          "cloth": 0.005
+        }
       },
       {
         "name": "Mrakodrap",
@@ -97,7 +113,11 @@
         },
         "requiredTechnologyId": "steel_frames",
         "requiredServices": ["water", "education", "culture", "health"],
-        "housingCapacity": 80
+        "housingCapacity": 80,
+        "needs": {
+          "cloth": 0.004,
+          "electricity": 0.003
+        }
       },
       {
         "name": "Inteligentný dom",
@@ -108,7 +128,11 @@
         },
         "requiredTechnologyId": "smart_cities",
         "requiredServices": ["water", "education", "culture", "health"],
-        "housingCapacity": 100
+        "housingCapacity": 100,
+        "needs": {
+          "electricity": 0.003,
+          "electronics": 0.0001
+        }
       },
       {
         "name": "Arkológia",
@@ -120,7 +144,11 @@
         },
         "requiredTechnologyId": "arcologies",
         "requiredServices": ["water", "education", "culture", "health"],
-        "housingCapacity": 150
+        "housingCapacity": 150,
+        "needs": {
+          "electricity": 0.004,
+          "electronics": 0.00015
+        }
       }
     ]
   },
@@ -420,7 +448,11 @@
         "maintenanceCost": 1.8,
         "productionMultiplier": 2.2
       }
-    ]
+    ],
+    "pollution": {
+      "amount": 1,
+      "radius": 1
+    }
   },
   {
     "id": "school",
@@ -530,7 +562,11 @@
         "maintenanceCost": 2.7,
         "productionMultiplier": 2.2
       }
-    ]
+    ],
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "fishery",
@@ -691,7 +727,11 @@
         "maintenanceCost": 1.8,
         "productionMultiplier": 2.2
       }
-    ]
+    ],
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "smelter",
@@ -720,7 +760,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "metallurgy"
+    "requiredTechnologyId": "metallurgy",
+    "pollution": {
+      "amount": 3,
+      "radius": 3
+    }
   },
   {
     "id": "university",
@@ -891,7 +935,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "printing"
+    "requiredTechnologyId": "printing",
+    "pollution": {
+      "amount": 1,
+      "radius": 1
+    }
   },
   {
     "id": "observatory",
@@ -1005,7 +1053,11 @@
         "maintenanceCost": 3.6,
         "productionMultiplier": 2.2
       }
-    ]
+    ],
+    "pollution": {
+      "amount": 3,
+      "radius": 2
+    }
   },
   {
     "id": "steelworks",
@@ -1034,7 +1086,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "steel"
+    "requiredTechnologyId": "steel",
+    "pollution": {
+      "amount": 4,
+      "radius": 4
+    }
   },
   {
     "id": "textile_factory",
@@ -1064,7 +1120,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "industrialization"
+    "requiredTechnologyId": "industrialization",
+    "pollution": {
+      "amount": 3,
+      "radius": 3
+    }
   },
   {
     "id": "railway_station",
@@ -1181,7 +1241,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "electricity"
+    "requiredTechnologyId": "electricity",
+    "pollution": {
+      "amount": 4,
+      "radius": 4
+    }
   },
   {
     "id": "hospital",
@@ -1268,7 +1332,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "mass_production"
+    "requiredTechnologyId": "mass_production",
+    "pollution": {
+      "amount": 3,
+      "radius": 3
+    }
   },
   {
     "id": "radio_station",
@@ -1357,7 +1425,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "computers"
+    "requiredTechnologyId": "computers",
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "nuclear_plant",
@@ -1385,7 +1457,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "nuclear_power"
+    "requiredTechnologyId": "nuclear_power",
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "data_center",
@@ -1501,7 +1577,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "robotics"
+    "requiredTechnologyId": "robotics",
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "fusion_reactor",
@@ -1591,7 +1671,11 @@
     "requiresRoad": true,
     "allowedTerrain": ["grass", "fertile"],
     "toolUsePerWorker": 0,
-    "requiredTechnologyId": "nanotechnology"
+    "requiredTechnologyId": "nanotechnology",
+    "pollution": {
+      "amount": 2,
+      "radius": 2
+    }
   },
   {
     "id": "space_port",

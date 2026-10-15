@@ -3,6 +3,9 @@ import type { CameraView } from '@/renderer/GameRenderer';
 import type { DayPhase } from '@/renderer/dayNight';
 import type { BuildingCategory, Position, ServiceType } from '@/types';
 
+/** Mapová vrstva: pokrytie službou alebo znečistenie. */
+export type MapLayer = ServiceType | 'pollution';
+
 export type PanelId =
   'research' | 'milestones' | 'trade' | 'problems' | 'statistics' | 'saves' | 'settings';
 
@@ -39,7 +42,7 @@ interface UiState {
   dayPhase: DayPhase | null;
   cameraView: CameraView | null;
   /** Zapnutá mapová vrstva pokrytia službou. */
-  mapLayer: ServiceType | null;
+  mapLayer: MapLayer | null;
   /** Budova vybraná na mape. */
   selectedInstanceId: string | null;
   hoveredTile: Position | null;
@@ -60,7 +63,7 @@ interface UiState {
   clearLog: () => void;
   setDayPhase: (phase: DayPhase | null) => void;
   setCameraView: (view: CameraView) => void;
-  setMapLayer: (layer: ServiceType | null) => void;
+  setMapLayer: (layer: MapLayer | null) => void;
   selectInstance: (id: string | null) => void;
   setHoveredTile: (position: Position | null) => void;
   showNotice: (text: string, kind?: NoticeKind) => void;

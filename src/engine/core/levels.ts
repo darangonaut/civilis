@@ -40,6 +40,7 @@ export function effectiveDefinition(
         outputs: scale(definition.outputs, multiplier),
         inputs: scale(definition.inputs, multiplier),
         moneyOutput: definition.moneyOutput * multiplier,
+        ...((next.needs ?? current.needs) ? { needs: next.needs ?? current.needs } : {}),
       };
       byLevel.push(current);
     }

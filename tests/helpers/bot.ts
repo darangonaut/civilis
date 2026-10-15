@@ -1,6 +1,6 @@
 import { analyzeCity } from '@/engine/economy/analysis';
 import { validatePlacement } from '@/engine/core/commands';
-import { upgradableBuildings } from '@/engine/core/upgrade';
+import { upgradableBuildings, upgradeRequirements } from '@/engine/core/upgrade';
 import { nextLevel } from '@/engine/core/levels';
 import { currentMilestone } from '@/engine/milestones/milestones';
 import { computeRoadNetwork } from '@/engine/world/connectivity';
@@ -34,8 +34,17 @@ export class Bot {
     return this.engine.getState();
   }
 
+  private counts = { length: -1, byId: new Map<string, number>() };
+
+  /** Počet budov daného typu (cache, kým sa nezmení počet budov v meste). */
   private count(definitionId: string): number {
-    return this.state.city.buildings.filter((b) => b.definitionId === definitionId).length;
+    const buildings = this.state.city.buildings;
+    if (this.counts.length !== buildings.length) {
+      const byId = new Map<string, number>();
+      for (const b of buildings) byId.set(b.definitionId, (byId.get(b.definitionId) ?? 0) + 1);
+      this.counts = { length: buildings.length, byId };
+    }
+    return this.counts.byId.get(definitionId) ?? 0;
   }
 
   private center(): Position {
@@ -160,6 +169,17 @@ export class Bot {
 
   /** Postaví budovu pri ceste; ak nie je miesto, predĺži cestu. */
   private build(buildingId: string, priority?: number): boolean {
+    // Neúspešné hľadanie miesta je drahé — rovnakú budovu chvíľu neskúšať znova.
+    const day = this.state.simulation.day;
+    if ((this.failedUntil.get(buildingId) ?? -1) > day) return false;
+    const built = this.tryBuild(buildingId, priority);
+    if (!built) this.failedUntil.set(buildingId, day + 20);
+    return built;
+  }
+
+  private failedUntil = new Map<string, number>();
+
+  private tryBuild(buildingId: string, priority?: number): boolean {
     const network = this.networkRoads();
     const spot = this.roadsideSpots(buildingId, network)[0];
     const definition = this.data.buildingsById.get(buildingId)!;
@@ -371,8 +391,27 @@ export class Bot {
         next !== undefined && RESOURCE_IDS.every((id) => (next.upgradeCost[id] ?? 0) * 5 <= r[id])
       );
     };
+    // Najvyššie úrovne prednostne — míľniky chcú domy vyššej úrovne.
+    const houses = city.buildings
+      .filter((b) => upgradable.has(b.id) && b.definitionId === 'house')
+      .sort((a, b) => b.level - a.level);
+    // Míľnik chce domy úrovne L a dom na L − 1 čaká už len na suroviny: šetriť
+    // (inak by lacnejšie vylepšenia minuli železo potrebné na L).
+    const levelGoal = currentMilestone(this.state, this.data)?.conditions.find(
+      (c) => c.type === 'building_level' && c.buildingId === 'house',
+    ) as { level: number; minimum: number } | undefined;
+    const savingForGoal =
+      levelGoal !== undefined &&
+      !houses.some((b) => b.level === levelGoal.level - 1) &&
+      city.buildings.some((b) => {
+        if (b.definitionId !== 'house' || b.level !== levelGoal.level - 1) return false;
+        const req = upgradeRequirements(this.state, this.data, b, analysis);
+        return (
+          req !== null && req.technologyMet && req.services.every((sv) => sv.met) && !req.affordable
+        );
+      });
     const toUpgrade =
-      city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'house') ??
+      (savingForGoal ? undefined : houses[0]) ??
       city.buildings.find((b) => upgradable.has(b.id) && b.definitionId === 'warehouse');
     if (toUpgrade && r.stone > 10) {
       if (this.engine.execute({ type: 'UPGRADE_BUILDING', instanceId: toUpgrade.id }).success) {
@@ -480,6 +519,25 @@ export class Bot {
     }
     if (this.affordable('cathedral', 2) && this.count('cathedral') === 0 && freeWorkers >= 6) {
       if (this.build('cathedral')) return true;
+    }
+
+    // Tovar pre potreby obyvateľov: keď spotreba prevyšuje výrobu a zásoba klesá,
+    // postaví najvýkonnejšieho dostupného výrobcu (reťazce sa doplnia samy — napr. uhlie).
+    for (const id of ['cloth', 'coal', 'electricity', 'electronics'] as const) {
+      const used = economy.dailyConsumption[id] ?? 0;
+      const made = economy.dailyProduction[id] ?? 0;
+      // Len pri skutočnom nedostatku: zásoba dochádza a výroba nestíha (s malou rezervou).
+      if (used <= made * 0.9 || economy.resources[id] > economy.storageCapacity * 0.1) continue;
+      const producer = this.data.buildings
+        .filter(
+          (b) =>
+            (b.outputs[id] ?? 0) > 0 &&
+            !b.wonder &&
+            this.affordable(b.id, 2) &&
+            freeWorkers >= b.workersRequired,
+        )
+        .sort((a, b) => (b.outputs[id] ?? 0) - (a.outputs[id] ?? 0))[0];
+      if (producer && this.build(producer.id)) return true;
     }
 
     // --- Éry 4–8: tabuľka „koľko budov chcem“ ---
