@@ -173,7 +173,8 @@ export class Bot {
     const day = this.state.simulation.day;
     if ((this.failedUntil.get(buildingId) ?? -1) > day) return false;
     const built = this.tryBuild(buildingId, priority);
-    if (!built) this.failedUntil.set(buildingId, day + 20);
+    // Domy sú pre rast kľúčové — tie sa skúšajú vždy.
+    if (!built && buildingId !== 'house') this.failedUntil.set(buildingId, day + 20);
     return built;
   }
 
@@ -225,6 +226,15 @@ export class Bot {
    * domu, inak (služby bez cesty) na ľubovoľné voľné políčko bloku.
    */
   private buildServiceNear(buildingId: string): boolean {
+    const key = `near:${buildingId}`;
+    const day = this.state.simulation.day;
+    if ((this.failedUntil.get(key) ?? -1) > day) return false;
+    const built = this.tryBuildServiceNear(buildingId);
+    if (!built) this.failedUntil.set(key, day + 10);
+    return built;
+  }
+
+  private tryBuildServiceNear(buildingId: string): boolean {
     const definition = this.data.buildingsById.get(buildingId)!;
     const service = definition.service!;
     const analysis = analyzeCity(this.state, this.data);
@@ -422,7 +432,10 @@ export class Bot {
 
     // 5. Bývanie s rezervou nad 10 %.
     if (free < Math.max(3, population.housingCapacity * 0.15) && this.affordable('house', 2)) {
-      if (this.build('house')) return true;
+      // Ako hráč, ktorý ťahaním postaví celý blok: až 5 domov v jednej akcii.
+      let built = 0;
+      while (built < 5 && this.affordable('house', 2) && this.build('house')) built++;
+      if (built > 0) return true;
     }
 
     // 6. Sklad, keď sa niečo blíži ku kapacite (rozumný počet).
@@ -440,6 +453,8 @@ export class Bot {
     // 7. Drevo a kameň podľa veľkosti mesta.
     if (
       balance('wood') < 4 + population.total / 25 &&
+      // Plný sklad dreva netreba ďalej rozširovať (inak by drevorubači zobrali pracovníkov).
+      r.wood < economy.storageCapacity * 0.5 &&
       freeWorkers >= 3 &&
       this.affordable('lumberjack', 2)
     ) {
@@ -447,10 +462,23 @@ export class Bot {
     }
     if (
       balance('stone') < 1 + population.total / 60 &&
+      r.stone < economy.storageCapacity * 0.5 &&
       freeWorkers >= 3 &&
       this.affordable('quarry', 2)
     ) {
       if (this.build('quarry')) return true;
+    }
+
+    // 7b. Parky a dekorácie pri domoch (bonus k spokojnosti, čistia znečistenie) —
+    // najväčší dosah z odomknutých, keď je v dosahu oddychu menej ako 60 % bývania.
+    if (
+      city.buildings.length > 30 &&
+      serviceCoverage(this.state, this.data, analysis, 'leisure') < 0.6
+    ) {
+      const decoration = ['botanical_garden', 'statue', 'plaza', 'fountain', 'park'].find((id) =>
+        this.affordable(id, 2),
+      );
+      if (decoration && this.buildServiceNear(decoration)) return true;
     }
 
     // 8. Škola pre vedomosti a vzdelanie (aj pri domoch mimo dosahu — meštianske domy ju potrebujú).
@@ -481,6 +509,7 @@ export class Bot {
     if (
       this.affordable('fishery') &&
       this.count('fishery') < 1 + Math.floor(population.total / 200) &&
+      r.food < economy.storageCapacity * 0.5 &&
       freeWorkers >= 2
     ) {
       if (this.build('fishery')) return true;
