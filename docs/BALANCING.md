@@ -74,6 +74,19 @@ technológie a nároky míľnikov sú doplnené na želanie a vyladené simulova
 | Dom → Arkológia        | 10     | 200 železo, 150 elektronika, 200 elektrina, 200 nástroje | Arkológie           | voda, vzdelanie, kultúra, zdravotníctvo | bývanie 150         |
 | Sklad → Veľký sklad    | 2      | 30 drevo, 30 kameň, 5 nástroje                           | Organizácia práce   | —                                       | sklad 450, údržba 1 |
 
+### Potreby domov (`needs`, na obyvateľa za deň)
+
+| Úroveň | Dom              | Nástroje | Látky  | Uhlie  | Elektrina | Elektronika |
+| ------ | ---------------- | -------- | ------ | ------ | --------- | ----------- |
+| 3      | Meštiansky dom   | 0,002    | —      | —      | —         | —           |
+| 4      | Vila             | 0,003    | —      | —      | —         | —           |
+| 5      | Patricijský dom  | 0,004    | —      | —      | —         | —           |
+| 6      | Renesančný palác | 0,004    | 0,01   | —      | —         | —           |
+| 7      | Mestský činžiak  | 0,004    | 0,0075 | 0,005  | —         | —           |
+| 8      | Mrakodrap        | 0,004    | 0,0075 | 0,0025 | 0,05      | —           |
+| 9      | Inteligentný dom | 0,004    | 0,0075 | —      | 0,08      | 0,005       |
+| 10     | Arkológia        | 0,004    | 0,0075 | —      | 0,1       | 0,008       |
+
 ## Technológie (`technologies.json`)
 
 Neskoré míľniky vyžadujú **počet** technológií s rezervou (napr. 48 z 58), takže časť výskumu je
@@ -185,6 +198,22 @@ Splnenie posledného míľnika éry odomkne ďalšiu éru (jej technológie a bu
 | `populationBaseGrowth` / `populationGrowthRate`    | 0,3 / 0,005        | prírastok za deň: prisťahovalci + podiel populácie                 |
 | `populationMaxGrowth` / `populationMaxGrowthShare` | 5 / 0,001          | strop prírastku: väčšie z čísla a podielu populácie                |
 | `happinessChangePerDay`                            | 5                  | max. zmena spokojnosti za deň                                      |
+| `difficulties`                                     | presety            | násobiče podľa obtiažnosti hry (tabuľka nižšie)                    |
+
+### Obtiažnosť (`balance.difficulties`)
+
+Obtiažnosť sa volí pri založení novej hry (`GameState.difficulty`). Normálna má všetky násobiče 1,
+takže hra sa nemení. Ceny surovín a výskumu sa zaokrúhľujú nahor; stavba a každé vylepšenie
+zvlášť. Vrátenie pri zbúraní = `demolishRefund` × násobič zo skutočne zaplatenej ceny.
+
+| Násobič            | Ľahká | Normálna | Ťažká |
+| ------------------ | ----- | -------- | ----- |
+| `constructionCost` | 0,75  | 1        | 1,5   |
+| `maintenance`      | 0,75  | 1        | 1,5   |
+| `researchCost`     | 0,75  | 1        | 1,5   |
+| `foodPerCapita`    | 0,8   | 1        | 1,25  |
+| `baseProduction`   | 1     | 1        | 0     |
+| `demolishRefund`   | 1,5   | 1        | 0,5   |
 
 ## Výsledky vyvažovania (2026-10-13, 8 ér)
 
@@ -206,5 +235,6 @@ Rýchly test F overuje prvé tri éry na 4 mapách; celú hru `npm run test:full
 
 ## Otvorené body
 
-- Neskoré éry nechávajú veľké prebytky základných surovín — priestor pre ďalšie spotrebiče alebo obchod.
+- Neskoré éry nechávajú veľké prebytky základných surovín a nástrojov — priestor pre ďalšie spotrebiče alebo obchod.
+- Prebytok elektriny v neskorej hre zostáva (jadrová a fúzna elektráreň); látky, uhlie a elektroniku odoberajú domy.
 - Populácia v sandboxe po splnení cieľov rastie ďalej (strop rastu je podiel populácie).

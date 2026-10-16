@@ -252,7 +252,7 @@ describe('recyklácia', () => {
     const { demolishRefund } = await import('@/engine/core/levels');
     const house = testData.buildingsById.get('house')!;
     const l2 = house.levels![0]!.upgradeCost;
-    expect(demolishRefund(house, 2, 0.5)).toEqual({
+    expect(demolishRefund(house, 2, 1, 0.5)).toEqual({
       wood: 5,
       stone: Math.floor(l2.stone! / 2),
       tools: Math.floor(l2.tools! / 2),

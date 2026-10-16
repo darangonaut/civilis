@@ -66,18 +66,30 @@ export function levelName(definition: BuildingDefinition, level: number): string
   return effectiveDefinition(definition, level).name;
 }
 
-/** Suroviny, ktoré vráti zbúranie: `share` zo stavby a všetkých vylepšení (zaokrúhlené nadol). */
+/** Cena vynásobená obtiažnosťou, zaokrúhlená nahor (− 1e-9 proti chybe plávajúcej čiarky). */
+export function scaleAmount(value: number, factor: number): number {
+  return Math.ceil(value * factor - 1e-9);
+}
+
+export function scaleCost(cost: Partial<Resources>, factor: number): Partial<Resources> {
+  const scaled: Partial<Resources> = {};
+  for (const id of RESOURCE_IDS) {
+    if (cost[id]) scaled[id] = scaleAmount(cost[id]!, factor);
+  }
+  return scaled;
+}
+
+/**
+ * Suroviny, ktoré vráti zbúranie: `share` zo zaplatenej stavby a všetkých vylepšení
+ * (cena po obtiažnosti `costFactor`, zaokrúhlené nadol).
+ */
 export function demolishRefund(
   definition: BuildingDefinition,
   level: number,
+  costFactor: number,
   share: number,
 ): Partial<Resources> {
-  const invested: Partial<Resources> = { ...definition.constructionCost };
-  for (const next of (definition.levels ?? []).slice(0, Math.max(0, level - 1))) {
-    for (const id of RESOURCE_IDS) {
-      if (next.upgradeCost[id]) invested[id] = (invested[id] ?? 0) + next.upgradeCost[id]!;
-    }
-  }
+  const invested = buildCostAtLevel(definition, level, costFactor);
   const refund: Partial<Resources> = {};
   for (const id of RESOURCE_IDS) {
     const amount = Math.floor((invested[id] ?? 0) * share);
@@ -86,15 +98,20 @@ export function demolishRefund(
   return refund;
 }
 
-/** Cena postavenia budovy rovno na danej úrovni: stavba + všetky vylepšenia po ňu. */
+/**
+ * Cena postavenia budovy rovno na danej úrovni: stavba + všetky vylepšenia po ňu. Každá časť sa
+ * násobí `costFactor` zvlášť, aby to stálo rovnako ako stavba s postupnými vylepšeniami.
+ */
 export function buildCostAtLevel(
   definition: BuildingDefinition,
   level: number,
+  costFactor: number,
 ): Partial<Resources> {
-  const total: Partial<Resources> = { ...definition.constructionCost };
+  const total = scaleCost(definition.constructionCost, costFactor);
   for (const next of (definition.levels ?? []).slice(0, Math.max(0, level - 1))) {
+    const upgrade = scaleCost(next.upgradeCost, costFactor);
     for (const id of RESOURCE_IDS) {
-      if (next.upgradeCost[id]) total[id] = (total[id] ?? 0) + next.upgradeCost[id]!;
+      if (upgrade[id]) total[id] = (total[id] ?? 0) + upgrade[id]!;
     }
   }
   return total;

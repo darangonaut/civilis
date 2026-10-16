@@ -48,13 +48,13 @@ export function productionMultiplier(
   return Math.max(0, 1 + bonus + eventProductionBonus(state, resource));
 }
 
-/** Násobič nákladov na údržbu (aditívne). */
+/** Násobič nákladov na údržbu (technológie aditívne, potom obtiažnosť). */
 export function maintenanceMultiplier(state: Readonly<GameState>, data: GameData): number {
   let bonus = 0;
   for (const effect of activeEffects(state, data)) {
     if (effect.type === 'maintenance_multiplier') bonus += effect.multiplier - 1;
   }
-  return Math.max(0, 1 + bonus);
+  return Math.max(0, 1 + bonus) * data.balance.difficulties[state.difficulty].maintenance;
 }
 
 /** Násobič príjmu peňazí (aditívne). */
