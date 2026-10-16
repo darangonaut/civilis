@@ -113,6 +113,9 @@ myšou nad budovou; legenda je v Nastaveniach.
 - **Bloky polí:** farma, drevorubač, kameňolom a baňa sú pripojené aj cez susednú pripojenú
   budovu rovnakého typu — blok stačí napojiť na cestu v jednom bode.
 - **Recyklácia:** zbúranie vráti 50 % surovín investovaných do stavby a vylepšení.
+- **Búranie ťahaním:** tlačidlo koša vpravo dole zapne režim búrania; ťahanie vyberie obdĺžnik
+  (max. 256 políčok), zbúrajú sa všetky budovy na ňom (aj cesty, okrem posledného skladu). Jedna
+  budova sa zbúra hneď, viac naraz až po potvrdení v dialógu. Esc režim vypne.
 
 ## Osem ér (2026-10-13, na želanie)
 

@@ -19,6 +19,7 @@ const PATHS = {
   lock: 'M5 11h14v10H5zM8 11V8a4 4 0 0 1 8 0v3',
   close: 'M6 6l12 12M18 6L6 18',
   pause: 'M8 5v14M16 5v14',
+  demolish: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
 } as const;
 
 export type IconName = keyof typeof PATHS;
