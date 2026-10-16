@@ -7,6 +7,7 @@ import { useGameState } from '@/app/useGameState';
 import { MARKER_LEGEND } from '@/app/markers';
 import { MarkerIcon } from '../MarkerIcon';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { DIFFICULTY_IDS, type DifficultyId } from '@/types';
 import { PanelFrame } from './PanelFrame';
 
 const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
@@ -22,6 +23,8 @@ const SHORTCUTS: [TranslationKey, string | TranslationKey][] = [
 export function SettingsPanel() {
   const seed = useGameState((s) => s.simulation.seed);
   const [seedInput, setSeedInput] = useState('');
+  const currentDifficulty = useGameState((s) => s.difficulty);
+  const [difficulty, setDifficulty] = useState<DifficultyId>(currentDifficulty);
   const display = useSettingsStore();
   const eventsEnabled = useGameState((s) => s.events.enabled);
   const language = useLanguageStore((s) => s.language);
@@ -33,7 +36,7 @@ export function SettingsPanel() {
   const newGame = (event: React.FormEvent) => {
     event.preventDefault();
     if (seedValid && window.confirm(t('settings.confirmNewGame'))) {
-      startNewGame(parsedSeed);
+      startNewGame(parsedSeed, difficulty);
       setSeedInput('');
     }
   };
@@ -57,6 +60,21 @@ export function SettingsPanel() {
       </div>
 
       <h3>{t('settings.newGame')}</h3>
+      <div className="segmented" role="group" aria-label={t('settings.difficulty')}>
+        <span className="segmented-label">{t('settings.difficulty')}</span>
+        {DIFFICULTY_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={difficulty === id ? 'active' : ''}
+            aria-pressed={difficulty === id}
+            onClick={() => setDifficulty(id)}
+            data-testid={`difficulty-${id}`}
+          >
+            {t(`difficulty.${id}`)}
+          </button>
+        ))}
+      </div>
       <form className="new-game-form" onSubmit={newGame}>
         <label>
           <span className="muted">{t('settings.seed')}</span>
@@ -75,6 +93,8 @@ export function SettingsPanel() {
       </form>
       <p className="muted hint">
         {t('settings.currentSeed')}: {seed}
+        <br />
+        {t('settings.currentDifficulty')}: {t(`difficulty.${currentDifficulty}`)}
       </p>
 
       <h3>{t('settings.display')}</h3>

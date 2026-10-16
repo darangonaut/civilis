@@ -45,6 +45,7 @@ const snapshot = (page: Page) =>
     const s = window.__civilis!.getState();
     return {
       gameId: s.gameId,
+      difficulty: s.difficulty,
       buildings: s.city.buildings,
       resources: s.city.economy.resources,
       day: s.simulation.day,
@@ -115,8 +116,10 @@ test('export do JSON a import späť', async ({ page }) => {
   // Nová hra cez nastavenia, potom import pôvodnej.
   await page.getByTestId('open-settings').click();
   await page.getByTestId('seed-input').fill('7');
+  await page.getByTestId('difficulty-hard').click();
   await page.getByTestId('new-game').click();
   expect((await snapshot(page)).gameId).not.toBe(exported.gameId);
+  expect((await snapshot(page)).difficulty).toBe('hard');
 
   await page.getByTestId('open-saves').click();
   await page

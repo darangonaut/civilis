@@ -2,7 +2,7 @@ import { AUTOSAVE_SLOT_ID, MANUAL_SLOT_IDS, type SlotId } from '@/persistence/db
 import { SaveError } from '@/persistence/migrations';
 import { writeUnloadSnapshot } from '@/persistence/unloadSnapshot';
 import { useUiStore } from '@/stores/uiStore';
-import type { GameState } from '@/types';
+import type { DifficultyId, GameState } from '@/types';
 import { controller, createFreshGame, saveService } from './game';
 import { t, type TranslationKey } from './i18n';
 
@@ -101,8 +101,8 @@ export async function importGameFile(file: File): Promise<void> {
   }
 }
 
-export function startNewGame(seed?: number): void {
-  applyLoadedState(createFreshGame(seed), t('settings.newGameStarted'));
+export function startNewGame(seed?: number, difficulty?: DifficultyId): void {
+  applyLoadedState(createFreshGame(seed, difficulty), t('settings.newGameStarted'));
 }
 
 export function slotLabel(slotId: SlotId): string {

@@ -40,12 +40,18 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
   const status = useGameState(() => controller.analysis.statuses.get(instance.id));
   const occupancy = useGameState(() => controller.activity.occupancy.get(instance.id));
   const completedTech = useGameState((s) => s.research.completedTechnologyIds);
+  const difficulty = useGameState((s) => gameData.balance.difficulties[s.difficulty]);
 
   const base = gameData.buildingsById.get(instance.definitionId)!;
   const definition = effectiveDefinition(base, instance.level);
   const levels = maxLevel(base);
   const problems = status?.problems ?? [];
-  const refund = demolishRefund(base, instance.level, gameData.balance.demolishRefund);
+  const refund = demolishRefund(
+    base,
+    instance.level,
+    difficulty.constructionCost,
+    gameData.balance.demolishRefund * difficulty.demolishRefund,
+  );
   const lookTechId = TECH_LOOKS[instance.definitionId];
   const lookTech =
     lookTechId && completedTech.includes(lookTechId) ? techName(lookTechId) : undefined;
@@ -296,7 +302,7 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
   if (maxLevel(base) <= 1) return null;
   if (!requirements) return <p className="muted hint">{t('detail.maxLevel')}</p>;
 
-  const { next, technologyMet, services, affordable } = requirements;
+  const { next, technologyMet, services, affordable, cost } = requirements;
   const ready = technologyMet && affordable && services.every((s) => s.met);
   const tech = next.requiredTechnologyId
     ? gameData.technologiesById.get(next.requiredTechnologyId)
@@ -358,7 +364,7 @@ function UpgradeSection({ instance }: { instance: BuildingInstance }) {
           </Requirement>
         ))}
       </ul>
-      <Cost cost={next.upgradeCost} stock={resources} />
+      <Cost cost={cost} stock={resources} />
       <div className="upgrade-actions">
         <button className="btn primary" disabled={!ready} onClick={upgrade} data-testid="upgrade">
           {t('detail.upgrade')}

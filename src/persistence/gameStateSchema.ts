@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { partialResourcesSchema, resourcesSchema } from '@/engine/core/definitions';
-import { RESOURCE_IDS, TERRAIN_TYPES, type GameState } from '@/types';
+import { DIFFICULTY_IDS, RESOURCE_IDS, TERRAIN_TYPES, type GameState } from '@/types';
 
 const finite = z.number().finite();
 const nonNegative = finite.nonnegative();
@@ -30,6 +30,7 @@ export const gameStateSchema = z
     gameId: z.string().min(1),
     createdAt: z.string(),
     lastSavedAt: z.string(),
+    difficulty: z.enum(DIFFICULTY_IDS),
     simulation: z.strictObject({
       day: nonNegativeInt,
       speed: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(4)]),

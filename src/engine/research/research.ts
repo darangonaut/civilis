@@ -2,6 +2,7 @@ import type { CommandResult, GameState } from '@/types';
 import type { CommandFailureReason } from '../core/commandReasons';
 import type { GameData } from '../core/definitions';
 import { isEraUnlocked } from '../milestones/eras';
+import { scaleAmount } from '../core/levels';
 
 const fail = (reason: CommandFailureReason): CommandResult => ({ success: false, reason });
 
@@ -95,13 +96,17 @@ export function advanceResearch(state: GameState, data: GameData): string | null
     ? data.technologiesById.get(research.activeTechnologyId)
     : undefined;
   if (!technology) return null;
+  const cost = scaleAmount(
+    technology.cost,
+    data.balance.difficulties[state.difficulty].researchCost,
+  );
 
   const resources = state.city.economy.resources;
-  const invest = Math.min(resources.knowledge, technology.cost - research.investedKnowledge);
+  const invest = Math.min(resources.knowledge, cost - research.investedKnowledge);
   resources.knowledge -= invest;
   research.investedKnowledge += invest;
 
-  if (research.investedKnowledge >= technology.cost) {
+  if (research.investedKnowledge >= cost) {
     research.completedTechnologyIds.push(technology.id);
     research.activeTechnologyId = null;
     research.investedKnowledge = 0;

@@ -4,19 +4,22 @@ import {
   type BuildingLevelDefinition,
   type CommandResult,
   type GameState,
+  type Resources,
   type ServiceType,
 } from '@/types';
 import { analyzeCity, refreshDerivedState, type CityAnalysis } from '../economy/analysis';
 import { isBuildingCovered, serviceCoverageGrid } from '../population/population';
 import type { CommandFailureReason } from './commandReasons';
 import type { GameData } from './definitions';
-import { effectiveDefinition, nextLevel } from './levels';
+import { effectiveDefinition, nextLevel, scaleCost } from './levels';
 
 export interface UpgradeRequirements {
   next: BuildingLevelDefinition;
   technologyMet: boolean;
   services: { type: ServiceType; met: boolean }[];
   affordable: boolean;
+  /** Cena vylepšenia po obtiažnosti. */
+  cost: Partial<Resources>;
 }
 
 /**
@@ -40,13 +43,18 @@ export function upgradeRequirements(
     return { type, met: isBuildingCovered(state, definition, building, grid) };
   });
   const resources = state.city.economy.resources;
+  const cost = scaleCost(
+    next.upgradeCost,
+    data.balance.difficulties[state.difficulty].constructionCost,
+  );
   return {
     next,
     technologyMet:
       !next.requiredTechnologyId ||
       state.research.completedTechnologyIds.includes(next.requiredTechnologyId),
     services,
-    affordable: RESOURCE_IDS.every((id) => (next.upgradeCost[id] ?? 0) <= resources[id]),
+    affordable: RESOURCE_IDS.every((id) => (cost[id] ?? 0) <= resources[id]),
+    cost,
   };
 }
 
@@ -77,7 +85,11 @@ export function upgradeBuilding(
   if (!validation.success) return validation;
   const building = state.city.buildings.find((b) => b.id === instanceId)!;
   const next = nextLevel(data.buildingsById.get(building.definitionId)!, building.level)!;
-  for (const id of RESOURCE_IDS) state.city.economy.resources[id] -= next.upgradeCost[id] ?? 0;
+  const cost = scaleCost(
+    next.upgradeCost,
+    data.balance.difficulties[state.difficulty].constructionCost,
+  );
+  for (const id of RESOURCE_IDS) state.city.economy.resources[id] -= cost[id] ?? 0;
   building.level += 1;
   refreshDerivedState(state, data);
   return validation;

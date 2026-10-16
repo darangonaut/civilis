@@ -199,4 +199,13 @@ describe('migrácie', () => {
     expect(migrated.city.name).toBe('Migrované');
     expect(migrated.city.population.happinessFactors.food).toBe(100);
   });
+
+  it('v8 bez obtiažnosti sa načíta ako normálna', () => {
+    const old = structuredClone(current()) as unknown as Record<string, unknown>;
+    delete old.difficulty;
+    old.schemaVersion = 8;
+    const migrated = migrateGameState(old);
+    expect(migrated.difficulty).toBe('normal');
+    expect(migrated.schemaVersion).toBe(SCHEMA_VERSION);
+  });
 });

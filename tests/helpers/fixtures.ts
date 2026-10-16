@@ -2,7 +2,15 @@ import { createGameEngine } from '@/engine/core/engine';
 import { SCHEMA_VERSION } from '@/engine/core/constants';
 import type { CivilisEngine } from '@/engine/core/engine';
 import { RESOURCE_IDS } from '@/types';
-import type { GameEngine, GameState, Position, Resources, TerrainType, Tile } from '@/types';
+import type {
+  DifficultyId,
+  GameEngine,
+  GameState,
+  Position,
+  Resources,
+  TerrainType,
+  Tile,
+} from '@/types';
 import { economyTestData as testData } from './gameData';
 
 export interface TestCityOptions {
@@ -13,6 +21,7 @@ export interface TestCityOptions {
   population?: number;
   resources?: Partial<Resources>;
   money?: number;
+  difficulty?: DifficultyId;
 }
 
 /**
@@ -34,6 +43,7 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
     gameId: 'test',
     createdAt: '2026-01-01T00:00:00.000Z',
     lastSavedAt: '2026-01-01T00:00:00.000Z',
+    difficulty: options.difficulty ?? 'normal',
     simulation: { day: 0, speed: 1, seed: 1 },
     world: { seed: 1, width, height, tiles },
     city: {

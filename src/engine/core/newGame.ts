@@ -1,4 +1,4 @@
-import type { BuildingInstance, GameState, Position, World } from '@/types';
+import type { BuildingInstance, DifficultyId, GameState, Position, World } from '@/types';
 import { generateWorld, getStartCenter } from '../world/generateWorld';
 import { footprint, tileIndex } from '../world/grid';
 import { DEFAULT_BUILDING_PRIORITY, SCHEMA_VERSION } from './constants';
@@ -13,6 +13,7 @@ export interface NewGameOptions {
   gameId: string;
   now: string;
   cityName?: string;
+  difficulty?: DifficultyId;
 }
 
 /** Rozloženie počiatočnej osady relatívne k stredu štartovacej oblasti. */
@@ -59,6 +60,7 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
     gameId: options.gameId,
     createdAt: options.now,
     lastSavedAt: options.now,
+    difficulty: options.difficulty ?? 'normal',
     simulation: { day: 0, speed: 1, seed },
     world,
     city: {

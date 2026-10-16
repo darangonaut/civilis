@@ -5,6 +5,9 @@ import type { Resources } from './resources';
 import type { MilestoneState, ResearchState } from './research';
 import type { Position, World } from './world';
 
+export const DIFFICULTY_IDS = ['easy', 'normal', 'hard'] as const;
+export type DifficultyId = (typeof DIFFICULTY_IDS)[number];
+
 export interface HappinessFactors {
   food: number;
   housing: number;
@@ -59,6 +62,8 @@ export interface GameState {
   gameId: string;
   createdAt: string;
   lastSavedAt: string;
+  /** Obtiažnosť zvolená pri založení hry (schéma v9). */
+  difficulty: DifficultyId;
 
   simulation: {
     day: number;
