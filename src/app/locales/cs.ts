@@ -70,6 +70,8 @@ export const cs: Record<keyof typeof sk, string> = {
   'detail.requiresRoad': 'Vyžaduje cestu',
   'detail.terrain': 'Povolený terén',
   'detail.serviceRadius': 'Dosah služby',
+  'hud.rangeHint':
+    'Žlutý rámeček při stavbě ukazuje dosah — samotná budova zabere zvýrazněné políčko.',
   'detail.yes': 'ano',
   'detail.no': 'ne',
   'detail.none': '—',

@@ -71,6 +71,8 @@ export const sk = {
   'detail.requiresRoad': 'Vyžaduje cestu',
   'detail.terrain': 'Povolený terén',
   'detail.serviceRadius': 'Dosah služby',
+  'hud.rangeHint':
+    'Žltý rámik pri stavbe ukazuje dosah — samotná budova zaberie zvýraznené políčko.',
   'detail.yes': 'áno',
   'detail.no': 'nie',
   'detail.none': '—',

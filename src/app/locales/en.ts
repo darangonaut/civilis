@@ -70,6 +70,8 @@ export const en: Record<keyof typeof sk, string> = {
   'detail.requiresRoad': 'Requires road',
   'detail.terrain': 'Allowed terrain',
   'detail.serviceRadius': 'Service range',
+  'hud.rangeHint':
+    'The yellow frame while building shows the range — the building itself takes the highlighted tile.',
   'detail.yes': 'yes',
   'detail.no': 'no',
   'detail.none': '—',

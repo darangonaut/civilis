@@ -550,7 +550,18 @@ export class GameRenderer {
       p.x,
       p.y,
     ]);
-    g.poly(points).fill({ color: 0xfee761, alpha: 0.12 }).stroke({ color: 0xfee761, width: 2 });
+    // Dosah iba ako jemný obrys — nesmie pôsobiť ako plocha stavby.
+    g.poly(points).stroke({ color: 0xfee761, width: 1, alpha: 0.7 });
+    // Políčka, ktoré budova naozaj zaberie, výrazne.
+    const size = this.buildModeId ? this.sizeOf(this.buildModeId) : 1;
+    const foot = (dx: number, dy: number) => tileToWorld(hovered.x + dx, hovered.y + dy);
+    const footprint = [
+      foot(-0.5, -0.5),
+      foot(size - 0.5, -0.5),
+      foot(size - 0.5, size - 0.5),
+      foot(-0.5, size - 0.5),
+    ].flatMap((p) => [p.x, p.y]);
+    g.poly(footprint).fill({ color: 0xffffff, alpha: 0.35 });
   }
 
   /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */
