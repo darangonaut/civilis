@@ -9,6 +9,7 @@ import { useUiStore } from '@/stores/uiStore';
 export function MapInfo() {
   const hovered = useUiStore((s) => s.hoveredTile);
   const buildModeId = useUiStore((s) => s.buildModeId);
+  const demolishMode = useUiStore((s) => s.demolishMode);
   const info = useGameState((state) => {
     if (!hovered) return null;
     const tile = state.world.tiles[hovered.y * state.world.width + hovered.x];
@@ -33,12 +34,17 @@ export function MapInfo() {
   const buildLevel = useUiStore((s) => s.buildLevel);
   const buildName = buildModeId ? buildingName(buildModeId, buildLevel) : undefined;
 
-  if (!info && !buildName) return null;
+  if (!info && !buildName && !demolishMode) return null;
   return (
     <div className="map-info" data-testid="map-info">
       {buildName && (
         <div>
           <span className="muted">{t('map.buildMode')}:</span> {buildName}
+        </div>
+      )}
+      {demolishMode && (
+        <div>
+          <span className="muted">{t('hud.demolishMode')}:</span> {t('hud.demolishHint')}
         </div>
       )}
       {info?.buildingName && (

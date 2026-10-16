@@ -42,7 +42,8 @@ Náhľad buildu: `npm run preview`.
 
 Stavať sa dá aj ťahaním: cesta sa natiahne ako čiara, ostatné budovy vyplnia obdĺžnik. Susedné farmy
 (aj drevorubači, lomy, bane) tvoria blok, ktorý stačí napojiť na cestu v jednom bode. Zbúranie vráti
-polovicu surovín.
+polovicu surovín. Tlačidlo koša vpravo dole zapne búranie — ťahaním vyberieš obdĺžnik, viac budov
+naraz sa zbúra po potvrdení.
 
 Budova s problémom má nad sebou značku so symbolom (cesta, pracovníci, surovina, peniaze, plný sklad);
 zelená šípka znamená, že sa dá vylepšiť. Dôvod uvidíš po prejdení myšou alebo kliknutí na budovu,
@@ -58,14 +59,15 @@ legenda značiek je v Nastaveniach.
 
 ### Ovládanie
 
-| Akcia                              | Myš a klávesnica                      | Dotyk                        |
-| ---------------------------------- | ------------------------------------- | ---------------------------- |
-| Posun mapy                         | ťahanie, pravé tlačidlo, šípky / WASD | jeden prst (pri stavbe dva)  |
-| Priblíženie                        | koliesko, tlačidlá + / −              | roztiahnutie dvoch prstov    |
-| Výber / stavba                     | ľavé tlačidlo, ťahanie = viac naraz   | ťuknutie, ťahanie prstom     |
-| Zrušenie stavby, zatvorenie panelu | Escape                                | tlačidlo „Zrušiť stavbu“ / ✕ |
-| Pauza / rýchlosť 1× 2× 4×          | medzerník / 1 2 3                     | tlačidlá v hornej lište      |
-| Uloženie                           | Ctrl/Cmd + S                          | panel Uložiť                 |
+| Akcia                              | Myš a klávesnica                      | Dotyk                         |
+| ---------------------------------- | ------------------------------------- | ----------------------------- |
+| Posun mapy                         | ťahanie, pravé tlačidlo, šípky / WASD | jeden prst (pri stavbe dva)   |
+| Priblíženie                        | koliesko, tlačidlá + / −              | roztiahnutie dvoch prstov     |
+| Výber / stavba                     | ľavé tlačidlo, ťahanie = viac naraz   | ťuknutie, ťahanie prstom      |
+| Búranie viac budov                 | tlačidlo koša, ťahanie ľavým          | tlačidlo koša, ťahanie prstom |
+| Zrušenie stavby, zatvorenie panelu | Escape                                | tlačidlo „Zrušiť stavbu“ / ✕  |
+| Pauza / rýchlosť 1× 2× 4×          | medzerník / 1 2 3                     | tlačidlá v hornej lište       |
+| Uloženie                           | Ctrl/Cmd + S                          | panel Uložiť                  |
 
 Na mobile sa dá hra pridať na plochu („Pridať na plochu“) a spúšťa sa potom na celú obrazovku.
 

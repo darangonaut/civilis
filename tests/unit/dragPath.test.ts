@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dragPositions, dragShapeFor, MAX_DRAG_TILES } from '@/renderer/dragPath';
+import { buildingsInArea, dragPositions, dragShapeFor, MAX_DRAG_TILES } from '@/renderer/dragPath';
 
 describe('ťahanie pri stavbe', () => {
   it('cesta je lomená čiara: najprv x, potom y', () => {
@@ -37,5 +37,16 @@ describe('ťahanie pri stavbe', () => {
     expect(dragPositions('area', { x: 0, y: 0 }, { x: 63, y: 63 })).toHaveLength(MAX_DRAG_TILES);
     expect(dragShapeFor('road')).toBe('line');
     expect(dragShapeFor('farm')).toBe('area');
+  });
+
+  it('búranie: budovy v obdĺžniku, každá raz a v poradí po riadkoch', () => {
+    // Mapa 4 × 3: div 2 × 2 „b1“ na (1, 0), „b2“ na (0, 2), „b3“ na (3, 2) mimo výberu.
+    const tiles: { buildingId?: string }[] = Array.from({ length: 12 }, () => ({}));
+    for (const i of [1, 2, 5, 6]) tiles[i]!.buildingId = 'b1';
+    tiles[8]!.buildingId = 'b2';
+    tiles[11]!.buildingId = 'b3';
+    const world = { width: 4, tiles };
+    expect(buildingsInArea(world, { x: 2, y: 2 }, { x: 0, y: 1 })).toEqual(['b2', 'b1']);
+    expect(buildingsInArea(world, { x: 3, y: 0 }, { x: 3, y: 0 })).toEqual([]);
   });
 });
