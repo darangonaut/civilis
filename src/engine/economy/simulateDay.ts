@@ -22,6 +22,7 @@ function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
 export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const events: GameEvent[] = [];
   const economy = state.city.economy;
+  const difficulty = data.balance.difficulties[state.difficulty];
 
   // 1.–4. Pripojenie, pracovníci, kapacita, rezervácia vstupov.
   const analysis = analyzeCity(state, data);
@@ -30,7 +31,10 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const consumption: Partial<Resources> = {};
 
   // 5. Výroba, orezaná kapacitou skladu (už preplnený sklad sa neznižuje).
-  addTo(production, data.balance.baseProduction);
+  for (const id of RESOURCE_IDS) {
+    const base = (data.balance.baseProduction[id] ?? 0) * difficulty.baseProduction;
+    if (base > 0) production[id] = (production[id] ?? 0) + base;
+  }
   for (const status of analysis.statuses.values()) {
     addTo(consumption, status.consumed);
     addTo(production, status.produced);
@@ -45,7 +49,8 @@ export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   }
 
   // 6. Spotreba potravín obyvateľmi.
-  const foodNeeded = state.city.population.total * data.balance.foodPerCapita;
+  const foodNeeded =
+    state.city.population.total * data.balance.foodPerCapita * difficulty.foodPerCapita;
   const foodEaten = Math.min(resources.food, foodNeeded);
   resources.food -= foodEaten;
   if (foodEaten > 0) consumption.food = (consumption.food ?? 0) + foodEaten;

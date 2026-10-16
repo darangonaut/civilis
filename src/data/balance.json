@@ -30,6 +30,32 @@
     "wood": 1,
     "stone": 0.5
   },
+  "difficulties": {
+    "easy": {
+      "constructionCost": 0.75,
+      "maintenance": 0.75,
+      "researchCost": 0.75,
+      "foodPerCapita": 0.8,
+      "baseProduction": 1,
+      "demolishRefund": 1.5
+    },
+    "normal": {
+      "constructionCost": 1,
+      "maintenance": 1,
+      "researchCost": 1,
+      "foodPerCapita": 1,
+      "baseProduction": 1,
+      "demolishRefund": 1
+    },
+    "hard": {
+      "constructionCost": 1.5,
+      "maintenance": 1.5,
+      "researchCost": 1.5,
+      "foodPerCapita": 1.25,
+      "baseProduction": 0,
+      "demolishRefund": 0.5
+    }
+  },
   "noToolsEfficiency": 0.5,
   "noFundsEfficiency": 0.5,
   "happinessWeights": {

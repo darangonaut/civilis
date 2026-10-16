@@ -38,6 +38,7 @@ function dockTiles(
   eraIndex: number,
   completed: readonly string[],
   builtWonders: ReadonlySet<string>,
+  costFactor: number,
 ): DockTile[] {
   const tiles: DockTile[] = [];
   for (const definition of gameData.buildings) {
@@ -46,7 +47,13 @@ function dockTiles(
     const locked =
       !!definition.requiredTechnologyId && !completed.includes(definition.requiredTechnologyId);
     const built = builtWonders.has(definition.id);
-    tiles.push({ definition, level: 1, locked, built, cost: definition.constructionCost });
+    tiles.push({
+      definition,
+      level: 1,
+      locked,
+      built,
+      cost: buildCostAtLevel(definition, 1, costFactor),
+    });
     if (locked) continue;
     for (let level = 2; level <= maxLevel(definition); level++) {
       if (!technologiesForLevel(definition, level).every((id) => completed.includes(id))) break;
@@ -55,7 +62,7 @@ function dockTiles(
         level,
         locked: false,
         built: false,
-        cost: buildCostAtLevel(definition, level),
+        cost: buildCostAtLevel(definition, level, costFactor),
       });
     }
   }
@@ -93,7 +100,10 @@ export function BuildDock() {
       .map((b) => b.definitionId)
       .join(','),
   );
-  const tiles = dockTiles(category, eraIndex, completed, new Set(builtKey.split(',')));
+  const costFactor = useGameState(
+    (s) => gameData.balance.difficulties[s.difficulty].constructionCost,
+  );
+  const tiles = dockTiles(category, eraIndex, completed, new Set(builtKey.split(',')), costFactor);
   const tooltipTile =
     tiles.find((tile) => tile.definition.id === hovered?.id && tile.level === hovered.level) ??
     tiles.find((tile) => tile.definition.id === buildModeId && tile.level === buildLevel);
@@ -177,6 +187,9 @@ export function BuildDock() {
 
 function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
   const { definition: base, level, locked, cost } = tile;
+  const maintenanceFactor = useGameState(
+    (s) => gameData.balance.difficulties[s.difficulty].maintenance,
+  );
   const definition = effectiveDefinition(base, level);
   const services = level > 1 ? (nextLevel(base, level - 1)?.requiredServices ?? []) : [];
   const tech = locked ? gameData.technologiesById.get(base.requiredTechnologyId!) : undefined;
@@ -269,7 +282,7 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
         {definition.maintenanceCost > 0 && (
           <>
             <dt>{t('detail.maintenance')}</dt>
-            <dd>{formatAmount(definition.maintenanceCost)}</dd>
+            <dd>{formatAmount(definition.maintenanceCost * maintenanceFactor)}</dd>
           </>
         )}
         {definition.needs && (

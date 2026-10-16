@@ -30,6 +30,7 @@ export {
   levelName,
   maxLevel,
   nextLevel,
+  scaleAmount,
   technologiesForLevel,
 } from './core/levels';
 export {

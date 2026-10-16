@@ -185,6 +185,22 @@ Splnenie posledného míľnika éry odomkne ďalšiu éru (jej technológie a bu
 | `populationBaseGrowth` / `populationGrowthRate`    | 0,3 / 0,005        | prírastok za deň: prisťahovalci + podiel populácie                 |
 | `populationMaxGrowth` / `populationMaxGrowthShare` | 5 / 0,001          | strop prírastku: väčšie z čísla a podielu populácie                |
 | `happinessChangePerDay`                            | 5                  | max. zmena spokojnosti za deň                                      |
+| `difficulties`                                     | presety            | násobiče podľa obtiažnosti hry (tabuľka nižšie)                    |
+
+### Obtiažnosť (`balance.difficulties`)
+
+Obtiažnosť sa volí pri založení novej hry (`GameState.difficulty`). Normálna má všetky násobiče 1,
+takže hra sa nemení. Ceny surovín a výskumu sa zaokrúhľujú nahor; stavba a každé vylepšenie
+zvlášť. Vrátenie pri zbúraní = `demolishRefund` × násobič zo skutočne zaplatenej ceny.
+
+| Násobič            | Ľahká | Normálna | Ťažká |
+| ------------------ | ----- | -------- | ----- |
+| `constructionCost` | 0,75  | 1        | 1,5   |
+| `maintenance`      | 0,75  | 1        | 1,5   |
+| `researchCost`     | 0,75  | 1        | 1,5   |
+| `foodPerCapita`    | 0,8   | 1        | 1,25  |
+| `baseProduction`   | 1     | 1        | 0     |
+| `demolishRefund`   | 1,5   | 1        | 0,5   |
 
 ## Výsledky vyvažovania (2026-10-13, 8 ér)
 

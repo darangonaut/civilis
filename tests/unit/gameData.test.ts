@@ -144,4 +144,12 @@ describe('herné dáta', () => {
     (raw.balance as { happinessWeights: { food: number } }).happinessWeights.food = 0.5;
     expectIssue(raw, /súčet 1/);
   });
+
+  it('odmietne obtiažnosť, pri ktorej by zbúranie vrátilo viac, než stálo', () => {
+    const raw = validRaw();
+    (
+      raw.balance as { difficulties: { hard: { demolishRefund: number } } }
+    ).difficulties.hard.demolishRefund = 3;
+    expectIssue(raw, /balance\.difficulties\.hard/);
+  });
 });

@@ -5,7 +5,7 @@ import { controller } from '@/app/game';
 import { commandReasonLabel, effectLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { currentEraIndex, validateResearch } from '@/engine';
+import { currentEraIndex, scaleAmount, validateResearch } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import type { ResearchState, TechnologyDefinition } from '@/types';
 import { BuildingIcon } from '../BuildingIcon';
@@ -87,6 +87,9 @@ export function ResearchPanel() {
   const knowledge = useGameState((s) => s.city.economy.resources.knowledge);
   const rate = useGameState((s) => s.city.economy.dailyProduction.knowledge ?? 0);
   const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
+  const researchFactor = useGameState(
+    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
+  );
   const [tab, setTab] = useState(eraIndex);
   const era = gameData.eras[Math.min(tab, eraIndex)]!;
   const active = research.activeTechnologyId
@@ -101,7 +104,7 @@ export function ResearchPanel() {
   const selected =
     (selectedId && gameData.technologiesById.get(selectedId)) || defaultSelection || undefined;
 
-  const ratio = active ? research.investedKnowledge / active.cost : 0;
+  const ratio = active ? research.investedKnowledge / scaleAmount(active.cost, researchFactor) : 0;
   const header = (
     <div className="research-header">
       <span className="research-knowledge" title={t('research.knowledge')}>
@@ -123,7 +126,9 @@ export function ResearchPanel() {
             {Math.floor(ratio * 100)} %
             {rate > 0 &&
               ` · ${t('research.daysLeft', {
-                days: Math.ceil((active.cost - research.investedKnowledge) / rate),
+                days: Math.ceil(
+                  (scaleAmount(active.cost, researchFactor) - research.investedKnowledge) / rate,
+                ),
               })}`}
           </span>
         </span>
@@ -285,10 +290,14 @@ function TechNode({
   onSelect: (id: string) => void;
 }) {
   const start = useStartResearch();
+  const researchFactor = useGameState(
+    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
+  );
   const { tech } = node;
   const queueIndex = research.queue.indexOf(tech.id);
   const icons = unlocks.get(tech.id) ?? [];
-  const ratio = status === 'active' ? research.investedKnowledge / tech.cost : 0;
+  const ratio =
+    status === 'active' ? research.investedKnowledge / scaleAmount(tech.cost, researchFactor) : 0;
 
   return (
     <div
@@ -310,7 +319,7 @@ function TechNode({
               #{queueIndex + 1}
             </span>
           ) : (
-            <span className="num">{formatCompact(tech.cost)}</span>
+            <span className="num">{formatCompact(scaleAmount(tech.cost, researchFactor))}</span>
           )}
         </span>
       </div>
@@ -354,6 +363,9 @@ function TechNode({
 function TechDetail({ tech, research }: { tech: TechnologyDefinition; research: ResearchState }) {
   const start = useStartResearch();
   const showNotice = useUiStore((s) => s.showNotice);
+  const researchFactor = useGameState(
+    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
+  );
   const status = statusOf(research, tech);
   const icons = unlocks.get(tech.id) ?? [];
   const queued = research.queue.includes(tech.id);
@@ -378,7 +390,7 @@ function TechDetail({ tech, research }: { tech: TechnologyDefinition; research: 
         <div>
           <span className="tech-detail-name">{techName(tech.id)}</span>
           <span className="muted">
-            {t('research.cost')}: {formatCompact(tech.cost)}
+            {t('research.cost')}: {formatCompact(scaleAmount(tech.cost, researchFactor))}
           </span>
         </div>
       </div>
