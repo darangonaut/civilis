@@ -84,8 +84,8 @@
         "requiredServices": ["water", "education", "culture"],
         "housingCapacity": 48,
         "needs": {
-          "cloth": 0.004,
-          "tools": 0.002
+          "cloth": 0.01,
+          "tools": 0.004
         }
       },
       {
@@ -100,7 +100,9 @@
         "requiredServices": ["water", "education", "culture"],
         "housingCapacity": 60,
         "needs": {
-          "cloth": 0.005
+          "cloth": 0.0075,
+          "coal": 0.005,
+          "tools": 0.004
         }
       },
       {
@@ -115,8 +117,10 @@
         "requiredServices": ["water", "education", "culture", "health"],
         "housingCapacity": 80,
         "needs": {
-          "cloth": 0.004,
-          "electricity": 0.003
+          "cloth": 0.0075,
+          "coal": 0.0025,
+          "electricity": 0.05,
+          "tools": 0.004
         }
       },
       {
@@ -130,8 +134,10 @@
         "requiredServices": ["water", "education", "culture", "health"],
         "housingCapacity": 100,
         "needs": {
-          "electricity": 0.003,
-          "electronics": 0.0001
+          "cloth": 0.0075,
+          "electricity": 0.08,
+          "electronics": 0.005,
+          "tools": 0.004
         }
       },
       {
@@ -146,8 +152,10 @@
         "requiredServices": ["water", "education", "culture", "health"],
         "housingCapacity": 150,
         "needs": {
-          "electricity": 0.004,
-          "electronics": 0.00015
+          "cloth": 0.0075,
+          "electricity": 0.1,
+          "electronics": 0.008,
+          "tools": 0.004
         }
       }
     ]

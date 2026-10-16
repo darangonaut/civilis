@@ -215,10 +215,11 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
 
 ## Potreby obyvateľov a znečistenie (2026-10-16, na želanie)
 
-- Lepšie domy spotrebúvajú tovar zo skladu podľa počtu obyvateľov (na obyvateľa za deň):
-  meštiansky dom až patricijský dom nástroje, renesančný palác látky a nástroje, činžiak látky,
-  mrakodrap látky a elektrinu, inteligentný dom a arkológia elektrinu a trochu elektroniky.
-  Uhlie ako potreba zámerne nie je — je vstupom elektrární a oceliarní.
+- Lepšie domy spotrebúvajú tovar zo skladu podľa počtu obyvateľov (na obyvateľa za deň), potreby
+  sa sčítavajú ako v Anne: meštiansky dom až patricijský dom nástroje; renesančný palác + látky;
+  činžiak + uhlie (kúrenie); mrakodrap + elektrina (uhlia polovica); inteligentný dom
+  a arkológia namiesto uhlia elektrinu a elektroniku. Vila látky nepotrebuje — pastvina prichádza
+  až v renesancii; elektronika až v informačnom veku (2026-10-16, na želanie).
 - Zložka spokojnosti „tovar“ = zásobenie domov vážené kapacitou; postih až 10 bodov.
   Ak má dom zásobenie pod 25 %, počítajú sa mu dni; po 90 dňoch (+ 0–20 podľa domu, aby neklesli
   všetky naraz) klesne o úroveň.
