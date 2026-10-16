@@ -28,6 +28,12 @@ async function buildHouse(page: Page) {
         if (hook.canPlace('house', tile)) return hook.tileToClient(tile);
       }
     }
+    // Náhodná mapa bez voľného miesta pri ceste: dom kdekoľvek v okolí (na test stačí).
+    const center = roads[0]!.position;
+    for (let d = 2; d < 15; d++)
+      for (let y = center.y - d; y <= center.y + d; y++)
+        for (let x = center.x - d; x <= center.x + d; x++)
+          if (hook.canPlace('house', { x, y })) return hook.tileToClient({ x, y });
     throw new Error('Žiadne miesto pre dom');
   });
   await page.mouse.click(client.x, client.y);
