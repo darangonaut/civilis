@@ -10,6 +10,7 @@ import { useUiStore } from '@/stores/uiStore';
 import { conditionLabel } from '@/app/conditions';
 import { LayerLegend } from './LayerLegend';
 import { ActiveEvents } from './ActiveEvents';
+import { StreetVoice } from './StreetVoice';
 
 /** Vľavo hore: aktuálny míľnik s priebehom podmienok a krátky záznam udalostí. */
 export function GoalTracker() {
@@ -129,6 +130,7 @@ export function GoalTracker() {
       </section>
       <ActiveEvents />
       <LayerLegend />
+      <StreetVoice />
       {!compact && <EventLog />}
     </div>
   );

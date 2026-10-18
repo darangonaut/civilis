@@ -16,6 +16,7 @@ import { useUiStore } from '@/stores/uiStore';
 import { controller } from './game';
 import { installGameEventNotifications } from './gameEvents';
 import { installAutosave } from './saving';
+import { installStreetVoice } from './voice/streetVoice';
 import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
 export function App() {
@@ -23,10 +24,12 @@ export function App() {
   useEffect(() => {
     const uninstallNotifications = installGameEventNotifications();
     const uninstallAutosave = installAutosave();
+    const uninstallVoice = installStreetVoice();
     controller.startLoop();
     return () => {
       controller.stopLoop();
       uninstallAutosave();
+      uninstallVoice();
       uninstallNotifications();
     };
   }, []);

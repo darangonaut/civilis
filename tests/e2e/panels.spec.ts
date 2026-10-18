@@ -272,3 +272,14 @@ test('udalosť s voľbou: karta, prijatie prisťahovalcov pridá obyvateľov', a
   expect(state.city.population.total).toBeGreaterThan(before);
   await expect(page.getByTestId('active-events')).toContainText('Prisťahovalci');
 });
+
+test('hlas ulice: obyvatelia komentujú stav mesta', async ({ page }) => {
+  await openGame(page);
+  const voice = page.getByTestId('street-voice');
+  await expect(voice).toContainText('Odkazy na skale');
+  await page.evaluate(() => window.__civilis!.advanceDays(40));
+  // Aspoň tri príspevky za 40 dní (každých 6–12 dní).
+  await expect(voice.locator('li')).toHaveCount(3);
+  // Text príspevku nemá nevyplnené zástupné symboly.
+  await expect(voice).not.toContainText('{');
+});

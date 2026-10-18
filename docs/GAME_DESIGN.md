@@ -226,3 +226,13 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   oceliareň a uhoľná elektráreň 4 / 4). Park a dekorácie znižujú znečistenie v dosahu o 2.
   Dom je znečistený pri súčte ≥ 1; zložka „prostredie“ = podiel bývania mimo znečistenia,
   postih až 10 bodov. Vrstva Znečistenie na mape; pri stavbe priemyslu sa zapne sama.
+
+## Hlas ulice (2026-10-18, na želanie)
+
+- Každých 6–12 dní napíše obyvateľ krátky príspevok. Téma sa vyberá váhovane podľa toho, čo
+  mesto najviac trápi (hlad 10, chýbajúci tovar 6, bývanie / voda / smog 5, škola / pokladnica 4…),
+  pri spokojnom meste chvála alebo vtip z doby. Tá istá téma nejde dvakrát po sebe a rovnaký vtip
+  sa neopakuje, kým sa neminú ostatné.
+- Reakcie: prvá budova nového typu (okrem bežných), div sveta, míľnik, éra, polovica objavov,
+  pokles domov, náhodné udalosti — najviac jedna reakcia denne.
+- Je to iba prezentačná vrstva (náhoda v UI, nie v engine) — príspevky sa neukladajú.

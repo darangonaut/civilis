@@ -1,0 +1,240 @@
+import type { VoiceTexts } from './types';
+
+export const en: VoiceTexts = {
+  media: {
+    rock: 'Messages on the rock',
+    forum: 'Forum tablets',
+    crier: 'Town crier',
+    leaflet: 'Leaflets',
+    newspaper: 'Morning paper',
+    radio: 'Radio Civilis',
+    network: 'The Net',
+    holonet: 'Holonet',
+  },
+  topics: {
+    hunger: [
+      'Dinner is water and hope again. Mayor, where are the farms?',
+      'I saw a mouse packing a suitcase. Even it can’t find food here anymore.',
+      'My kids beg the neighbor for crusts. The neighbor begs us for crusts.',
+    ],
+    housing: [
+      'I’m living with my mother-in-law. Third month. Please build houses.',
+      'Looking for a home. Anything with a roof will do. Even a henhouse.',
+      'Twelve of us live in our house. One sleeps in the bathtub and calls it luxury.',
+    ],
+    water: [
+      'The well is so far away I age on the way there.',
+      'Last bath was on New Year’s. Which year, I don’t remember.',
+      'My cow drinks more than I do. At least she knows where the water is.',
+    ],
+    education: [
+      'My son says the Earth is a cube. We need a school!',
+      'No school, so the kids are bored. Yesterday they painted the neighbor green.',
+      'I asked my grandson what two plus two is. He said “a lot”.',
+    ],
+    pollution: [
+      'There’s a {building} next to my house. I hang the laundry white and take it down gray.',
+      'I cough so much the neighbors call me the bell tower. Thanks, {building}.',
+      'My canary started coughing. Culprit: {building}.',
+    ],
+    goods: [
+      'Not enough {resourceGen}! Without it my palace is just a very expensive barn.',
+      'You can’t live in a nice district without {resourceGen}. Moving in with grandma.',
+      'My neighbor borrowed the last of our {resourceGen}. We no longer say hello.',
+    ],
+    surplus: [
+      'There is so much {resourceGen} in storage we use it as furniture.',
+      'The storekeeper says there’s no room left for {resource}. Suggests selling it at the market.',
+      'The kids built a castle out of spare {resourceGen}. Bigger than ours.',
+    ],
+    unemployment: [
+      'I have three hobbies and no job. Build something where people can work.',
+      'I count pigeons all day. There are 214. Tomorrow I start over.',
+    ],
+    money: [
+      'The treasury is empty. I hear the mayor sold his own shoes.',
+      'The handyman fixes roads with a teaspoon. No money for a shovel.',
+    ],
+    noParks: [
+      'Where am I supposed to walk my dog? On the roof?',
+      'Not a single tree in town. The pigeons sit on me.',
+    ],
+    parks: [
+      'The park is lovely. The pigeons agree.',
+      'I sat in the park and forgot about my debts. Excellent park.',
+    ],
+    happy: [
+      'Smiled at my neighbor today. He smiled back. Good town.',
+      'The most beautiful town in the world. Well, I haven’t seen another, but still.',
+      'Mayor, you’re a star. I’ll build you a statue. Out of clay. A small one.',
+    ],
+    newBuilding: [
+      'New in town: {building}! Going to see it in my Sunday best.',
+      'Finally something new: {building}. The whole street stood in front of it clapping.',
+      'Apparently we got a new building: {building}. No idea what it’s for, but it’s ours.',
+    ],
+    wonder: [
+      'Wonder of the world complete: {building}! Tourists take photos of me too, I stand in front of it.',
+      '{building} is done. Now when we argue with other towns, I just point.',
+    ],
+    milestone: [
+      '“{milestone}” — that’s what they call us now. Wearing the T-shirt proudly.',
+      'We reached the milestone “{milestone}”. I celebrated. Still celebrating.',
+    ],
+    era: [
+      'Welcome to a new era: {era}! I need a new hat.',
+      'It’s official: {era}. Grandma says it was better in her day.',
+    ],
+    research: [
+      'Scholars discovered: {tech}. I don’t understand it, but I clapped.',
+      'New discovery: {tech}. My neighbor claims he invented it. Years ago.',
+    ],
+    downgrade: [
+      'My house shrank! Something about missing goods. I sleep in the hallway.',
+      'We lived in a nice district. Now we live in a worse one. Same address.',
+    ],
+    drought: [
+      'It rains so little even the cactus asked for water.',
+      'Saw a cloud this morning. Turned out to be a sheep.',
+    ],
+    fire: [
+      'Fire! {building} was burning. The firefighters came quickly. Well… they came.',
+      'Fire at {building}. At least the heating was free.',
+    ],
+    festival: [
+      'Festival! Danced till morning, my feet are still dancing.',
+      'Best festival in history. Well, since the last one.',
+    ],
+    epidemic: [
+      'Everyone is coughing. Me too, but just out of solidarity.',
+      'The doctor prescribed tea and rest. I can’t afford rest.',
+    ],
+    immigrants: [
+      'New neighbors arrived. They wear strange hats and bake great cakes.',
+      'The newcomers asked where the fun is. I showed them the warehouse.',
+    ],
+    harvest: [
+      'What a harvest! I eat four times a day and there’s still more.',
+      'The pumpkin in my garden is bigger than my house. Considering moving in.',
+    ],
+    caravan: [
+      'Foreign merchants at the market. They sold me a camel. I don’t have a yard.',
+      'The caravan brought a miracle cream for everything. So far it helped with nothing.',
+    ],
+  },
+  flavor: [
+    [
+      'Saw a wheel today. Nobody knows what it’s for yet, but it’s round and pretty.',
+      'Fire is a great invention. Mostly until you touch it.',
+    ],
+    [
+      'A philosopher in the square asks why we are here. I know: to make bricks.',
+      'Bought a toga. It’s draftier than I hoped.',
+    ],
+    [
+      'A knight lost his horse. Reward for the finder: one chicken.',
+      'The town crier announces that the town crier is announcing. Thank you for your attention.',
+    ],
+    [
+      'A painter has been painting me for three weeks. Says I have a mysterious smile.',
+      'They invented the printing press. Finally I can hand out my poems. To everyone.',
+    ],
+    [
+      'Steam is the future! Says my uncle, who singed his mustache with it.',
+      'Saw a train. It was fast. About 30 kilometers an hour!',
+    ],
+    [
+      'Grandma bought a TV and now watches it even when it’s off.',
+      'My phone cord is five meters long. I can call from anywhere in the kitchen.',
+    ],
+    [
+      'The internet was down for five minutes. I met my neighbor for the first time.',
+      'My fridge texted me that I ate the last yogurt.',
+    ],
+    [
+      'A robot made my coffee and said I need more sleep. It’s right.',
+      'Flying cars are great until your neighbor parks on your roof.',
+    ],
+  ],
+  hashtags: {
+    hunger: '#hungry',
+    housing: '#housing',
+    water: '#water',
+    education: '#school',
+    pollution: '#smog',
+    goods: '#shortage',
+    surplus: '#surplus',
+    unemployment: '#jobs',
+    money: '#treasury',
+    noParks: '#green',
+    parks: '#park',
+    happy: '#mytown',
+    newBuilding: '#new',
+    wonder: '#wonder',
+    milestone: '#proud',
+    era: '#newera',
+    research: '#science',
+    downgrade: '#disappointed',
+    drought: '#drought',
+    fire: '#fire',
+    festival: '#festival',
+    epidemic: '#health',
+    immigrants: '#welcome',
+    harvest: '#harvest',
+    caravan: '#market',
+  },
+  names: {
+    male: ['John', 'Frank', 'Andrew', 'George', 'Mike', 'Paul', 'Simon', 'Matt', 'Victor', 'Henry'],
+    female: [
+      'Mary',
+      'Susan',
+      'Kate',
+      'Hannah',
+      'Eve',
+      'Annie',
+      'Betty',
+      'Lucy',
+      'Joanna',
+      'Maggie',
+    ],
+    surnames: [
+      'Smith',
+      'Miller',
+      'Weaver',
+      'Potter',
+      'Newman',
+      'Shepherd',
+      'King',
+      'Farmer',
+      'Carpenter',
+      'Fisher',
+    ],
+  },
+  feminine: null,
+  occupations: {
+    male: [
+      'baker',
+      'farmer',
+      'blacksmith',
+      'teacher',
+      'carpenter',
+      'fisher',
+      'merchant',
+      'grandpa',
+      'student',
+      'guard',
+    ],
+    female: [
+      'baker',
+      'farmer',
+      'seamstress',
+      'teacher',
+      'weaver',
+      'fisher',
+      'merchant',
+      'grandma',
+      'student',
+      'florist',
+    ],
+  },
+};

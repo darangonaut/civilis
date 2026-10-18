@@ -674,6 +674,128 @@ button.danger:hover:not(:disabled),
   color: #8fb6ff;
 }
 
+/* --- Hlas ulice --- */
+.street-voice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.voice-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  text-align: left;
+}
+
+.voice-head:hover:not(:disabled) {
+  background: none;
+}
+
+.voice-medium {
+  font-family: var(--pixel);
+  font-size: 12px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.street-voice ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.voice-item {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 6px;
+  background: rgb(58 68 102 / 25%);
+  text-align: left;
+  font: inherit;
+}
+
+.voice-item.linked {
+  cursor: pointer;
+}
+
+.voice-item.linked:hover:not(:disabled) {
+  background: rgb(58 68 102 / 50%);
+}
+
+.voice-avatar {
+  flex-shrink: 0;
+  image-rendering: pixelated;
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.voice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.voice-author {
+  font-size: 11px;
+}
+
+.voice-author strong {
+  font-family: var(--pixel);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.voice-text {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-soft);
+}
+
+.voice-text.angry {
+  color: #ffc2b8;
+}
+
+.voice-text.happy {
+  color: var(--green-text);
+}
+
+/* Médium podľa éry: kameň, papier, rádio, sieť. */
+.medium-rock .voice-item,
+.medium-forum .voice-item {
+  background: rgb(139 155 180 / 22%);
+  font-style: italic;
+}
+
+.medium-leaflet .voice-item,
+.medium-newspaper .voice-item {
+  background: rgb(234 212 170 / 14%);
+}
+
+.medium-newspaper .voice-text {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.medium-radio .voice-medium::before {
+  content: '♪ ';
+}
+
+.medium-network .voice-item,
+.medium-holonet .voice-item {
+  background: rgb(0 153 219 / 16%);
+}
+
+.medium-holonet .voice-medium {
+  color: #2ce8f5;
+}
+
 /* --- Inšpektor --- */
 .inspector {
   position: absolute;

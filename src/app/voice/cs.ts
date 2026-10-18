@@ -1,0 +1,237 @@
+import type { VoiceTexts } from './types';
+
+export const cs: VoiceTexts = {
+  media: {
+    rock: 'Vzkazy na skále',
+    forum: 'Tabulky na fóru',
+    crier: 'Městský vyvolávač',
+    leaflet: 'Letáky',
+    newspaper: 'Ranní noviny',
+    radio: 'Rádio Civilis',
+    network: 'Síť',
+    holonet: 'Holonet',
+  },
+  topics: {
+    hunger: [
+      'K večeři zase jen voda a naděje. Starosto, kde jsou farmy?',
+      'Viděl jsem myš, jak si balí kufr. Ani ona tu už nic k jídlu nenajde.',
+      'Moje děti žebrají kůrky od souseda. Soused žebrá kůrky od nás.',
+    ],
+    housing: [
+      'Bydlím u tchyně. Třetí měsíc. Prosím, postavte domy.',
+      'Hledám bydlení. Vezmu cokoli se střechou. I kurník.',
+      'V našem domě nás žije dvanáct. Jeden spí ve vaně a tvrdí, že je to luxus.',
+    ],
+    water: [
+      'Ke studni je to tak daleko, že cestou stárnu.',
+      'Naposledy jsem se myl na Nový rok. Který to byl, si už nepamatuju.',
+      'Moje kráva pije víc než já. Protože ona aspoň ví, kde je voda.',
+    ],
+    education: [
+      'Můj syn tvrdí, že Země je kostka. Potřebujeme školu!',
+      'Děti nemají školu, tak se nudí. Včera natřely souseda na zeleno.',
+      'Zeptal jsem se vnuka, kolik je dva a dva. Řekl, že hodně.',
+    ],
+    pollution: [
+      'U mého domu stojí {building}. Prádlo věším bílé, sundávám šedé.',
+      'Kašlu tak, že mi sousedé říkají zvonice. Děkuju, {building}.',
+      'Můj kanárek začal kašlat. Viník: {building}.',
+    ],
+    goods: [
+      'Nedostatek {resourceGen}! Můj palác je bez toho jen hodně drahá stodola.',
+      'V lepší čtvrti se bez {resourceGen} nedá žít. Stěhuju se k babičce.',
+      'Sousedka si půjčila poslední zásoby {resourceGen}. Od té doby se nezdravíme.',
+    ],
+    surplus: [
+      'Ve skladu je tolik {resourceGen}, že to používáme jako nábytek.',
+      'Skladník hlásí: {resource} už nemáme kam dávat. Navrhuje prodávat na trhu.',
+      'Z přebytku {resourceGen} si děti postavily hrad. Větší než ten náš.',
+    ],
+    unemployment: [
+      'Mám tři koníčky a žádnou práci. Postavte něco, kde se dá dělat.',
+      'Celý den počítám holuby. Je jich 214. Zítra začnu znovu.',
+    ],
+    money: [
+      'Pokladna je prázdná. Prý starosta prodal i vlastní boty.',
+      'Údržbář opravuje cestu lžičkou. Na lopatu nejsou peníze.',
+    ],
+    noParks: ['Kde mám venčit psa? Na střeše?', 'V celém městě ani strom. Holubi sedí na mně.'],
+    parks: [
+      'Park je krásný. Holubi souhlasí.',
+      'Seděl jsem v parku a zapomněl, že mám dluhy. Výborný park.',
+    ],
+    happy: [
+      'Dnes jsem se usmál na souseda. On na mě taky. Dobré město.',
+      'Nejkrásnější město na světě. Teda, jiné jsem neviděl, ale i tak.',
+      'Starosto, jste hvězda. Postavím vám sochu. Z hlíny. Malou.',
+    ],
+    newBuilding: [
+      'Nová stavba ve městě: {building}! Jdu se podívat v nedělních šatech.',
+      'Konečně novinka: {building}. Celá ulice stála před ní a tleskala.',
+      'Prý vyrostla nová budova: {building}. Nevím, k čemu je, ale je naše.',
+    ],
+    wonder: [
+      'Div světa je hotový: {building}! Turisti fotí i mě, protože stojím před ním.',
+      '{building} je hotová věc. Při hádkách se sousedními městy teď jen ukážu prstem.',
+    ],
+    milestone: [
+      '„{milestone}“ — tak nám teď říkají. Hrdě nosím tričko s nápisem.',
+      'Dosáhli jsme milníku „{milestone}“. Slavil jsem. Pořád slavím.',
+    ],
+    era: [
+      'Vítejte v éře: {era}! Musím si koupit nový klobouk.',
+      'Je to oficiální: {era}. Babička říká, že za jejího mládí to bylo lepší.',
+    ],
+    research: [
+      'Učenci objevili: {tech}. Nerozumím tomu, ale tleskal jsem.',
+      'Nový objev: {tech}. Soused tvrdí, že to vymyslel on. Už před lety.',
+    ],
+    downgrade: [
+      'Můj dům se zmenšil! Prý chybí zboží. Spím na chodbě.',
+      'Bydleli jsme v lepší čtvrti. Teď bydlíme v horší. Stejná adresa.',
+    ],
+    drought: [
+      'Prší tak málo, že i kaktus požádal o vodu.',
+      'Ráno jsem viděl mrak. Ukázalo se, že to byla ovce.',
+    ],
+    fire: [
+      'Požár! Hořela budova {building}. Hasiči přijeli rychle. Teda… přijeli.',
+      'Požár: {building}. Aspoň jsme měli teplo zadarmo.',
+    ],
+    festival: [
+      'Slavnost! Tančil jsem do rána, nohy tančí dodnes.',
+      'Nejlepší slavnost v dějinách. Teda, od té poslední.',
+    ],
+    epidemic: [
+      'Všichni kašlou. Já taky, ale jen ze solidarity.',
+      'Lékař mi předepsal čaj a klid. Klid si nemůžu dovolit.',
+    ],
+    immigrants: [
+      'Přišli noví sousedé. Nosí zvláštní klobouky a pečou výborné koláče.',
+      'Noví obyvatelé se ptali, kde je tu zábava. Ukázal jsem jim sklad.',
+    ],
+    harvest: [
+      'Tolik úrody! Jím čtyřikrát denně a ještě zbývá.',
+      'Dýně na zahradě je větší než můj dům. Zvažuju přestěhování.',
+    ],
+    caravan: [
+      'Na trhu jsou cizí obchodníci. Prodali mi velblouda. Nemám dvůr.',
+      'Karavana přivezla zázračný krém na všechno. Zatím nepomohl na nic.',
+    ],
+  },
+  flavor: [
+    [
+      'Dnes jsem viděl kolo. Zatím nevíme, k čemu je, ale je kulaté a hezké.',
+      'Oheň je super vynález. Hlavně dokud se ho nedotkneš.',
+    ],
+    [
+      'Filozof na náměstí se ptá, proč tu jsme. Já vím: stavět z cihel.',
+      'Koupil jsem si tógu. Fouká v ní víc, než bych chtěl.',
+    ],
+    [
+      'Rytíř ztratil koně. Odměna pro nálezce: jedna slepice.',
+      'Vyvolávač dnes vyvolává, že vyvolávač dnes vyvolává. Děkuji za pozornost.',
+    ],
+    [
+      'Malíř mě maluje už třetí týden. Prý mám záhadný úsměv.',
+      'Vynalezli knihtisk. Konečně můžu rozdávat svoje básně. Všem.',
+    ],
+    [
+      'Pára je budoucnost! Říká strýc, který si jí opálil knír.',
+      'Viděl jsem vlak. Byl rychlý. Asi 30 kilometrů za hodinu!',
+    ],
+    [
+      'Babička si koupila televizi a teď kouká i na vypnutou.',
+      'Mám telefon s kabelem dlouhým pět metrů. Volám z celé kuchyně.',
+    ],
+    [
+      'Internet na pět minut spadl. Poprvé jsem viděl souseda.',
+      'Lednička mi poslala zprávu, že jsem snědl poslední jogurt.',
+    ],
+    [
+      'Robot mi uvařil kávu a řekl, že potřebuju víc spánku. Má pravdu.',
+      'Létající auta jsou super, dokud ti sousedka nezaparkuje na střeše.',
+    ],
+  ],
+  hashtags: {
+    hunger: '#hlad',
+    housing: '#bydlení',
+    water: '#voda',
+    education: '#škola',
+    pollution: '#smog',
+    goods: '#nedostatek',
+    surplus: '#přebytek',
+    unemployment: '#práce',
+    money: '#pokladna',
+    noParks: '#zeleň',
+    parks: '#park',
+    happy: '#mojeměsto',
+    newBuilding: '#novinka',
+    wonder: '#divsvěta',
+    milestone: '#hrdost',
+    era: '#novádoba',
+    research: '#věda',
+    downgrade: '#zklamání',
+    drought: '#sucho',
+    fire: '#požár',
+    festival: '#slavnost',
+    epidemic: '#zdraví',
+    immigrants: '#vítejte',
+    harvest: '#úroda',
+    caravan: '#trh',
+  },
+  names: {
+    male: ['Honza', 'Franta', 'Pepa', 'Jirka', 'Míra', 'Pavel', 'Šimon', 'Matěj', 'Vláďa', 'Karel'],
+    female: [
+      'Marie',
+      'Zuzka',
+      'Káťa',
+      'Hanka',
+      'Eva',
+      'Anča',
+      'Bětka',
+      'Libuše',
+      'Jolana',
+      'Magda',
+    ],
+    surnames: [
+      'Kovář',
+      'Mlynář',
+      'Tkadlec',
+      'Hrnčíř',
+      'Novák',
+      'Bača',
+      'Král',
+      'Sedlák',
+      'Tesař',
+      'Rybář',
+    ],
+  },
+  feminine: (surname) => `${surname}ová`,
+  occupations: {
+    male: [
+      'pekař',
+      'farmář',
+      'kovář',
+      'učitel',
+      'tesař',
+      'rybář',
+      'kupec',
+      'děda',
+      'student',
+      'strážník',
+    ],
+    female: [
+      'pekařka',
+      'farmářka',
+      'švadlena',
+      'učitelka',
+      'tkadlena',
+      'rybářka',
+      'kupcová',
+      'babička',
+      'studentka',
+      'květinářka',
+    ],
+  },
+};
