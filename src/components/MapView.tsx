@@ -18,6 +18,13 @@ function handleTileClick(position: Position): void {
   ui.selectInstance(tile?.buildingId ?? null);
 }
 
+/** Cesta cez vodu sa postaví ako most (drahší). */
+function roadOrBridge(buildingId: string, position: Position): string {
+  if (buildingId !== 'road') return buildingId;
+  const tile = controller.state.world.tiles[position.y * controller.state.world.width + position.x];
+  return tile?.terrain === 'water' ? 'bridge' : buildingId;
+}
+
 /** Ťahanie v režime stavby: postaví budovy postupne a zhrnie výsledok. */
 function handlePlaceMany(buildingId: string, positions: Position[]): void {
   const ui = useUiStore.getState();
@@ -25,7 +32,12 @@ function handlePlaceMany(buildingId: string, positions: Position[]): void {
   let placed = 0;
   let firstFailure: string | null = null;
   for (const position of positions) {
-    const result = controller.execute({ type: 'PLACE_BUILDING', buildingId, position, level });
+    const result = controller.execute({
+      type: 'PLACE_BUILDING',
+      buildingId: roadOrBridge(buildingId, position),
+      position,
+      level,
+    });
     if (result.success) placed++;
     else firstFailure ??= result.reason;
   }
@@ -72,7 +84,11 @@ export function MapView() {
             onTileClick: handleTileClick,
             onPlaceMany: handlePlaceMany,
             canPlace: (buildingId, position) =>
-              controller.canPlace(buildingId, position, useUiStore.getState().buildLevel).success,
+              controller.canPlace(
+                roadOrBridge(buildingId, position),
+                position,
+                useUiStore.getState().buildLevel,
+              ).success,
             onCameraChange: (view) => useUiStore.getState().setCameraView(view),
             onDayPhase: (phase) => useUiStore.getState().setDayPhase(phase),
           },

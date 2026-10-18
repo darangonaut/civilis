@@ -72,6 +72,7 @@ export const en: Record<keyof typeof sk, string> = {
   'detail.serviceRadius': 'Service range',
   'hud.rangeHint':
     'The yellow frame while building shows the range — the building itself takes the highlighted tile.',
+  'hud.bridgeHint': 'Across water the road is built as a bridge (more expensive: wood and stone).',
   'detail.yes': 'yes',
   'detail.no': 'no',
   'detail.none': '—',

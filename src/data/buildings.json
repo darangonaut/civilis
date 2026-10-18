@@ -171,7 +171,32 @@
     "moneyOutput": 0,
     "storageCapacity": 0,
     "requiresRoad": false,
+    "isRoad": true,
     "allowedTerrain": ["grass", "fertile", "forest", "rock", "hill"],
+    "toolUsePerWorker": 0
+  },
+  {
+    "id": "bridge",
+    "name": "Most",
+    "category": "infrastructure",
+    "size": {
+      "width": 1,
+      "height": 1
+    },
+    "constructionCost": {
+      "wood": 6,
+      "stone": 4
+    },
+    "inputs": {},
+    "outputs": {},
+    "workersRequired": 0,
+    "housingCapacity": 0,
+    "maintenanceCost": 0.1,
+    "moneyOutput": 0,
+    "storageCapacity": 0,
+    "requiresRoad": false,
+    "isRoad": true,
+    "allowedTerrain": ["water"],
     "toolUsePerWorker": 0
   },
   {

@@ -248,3 +248,46 @@ test('div sveta: pyramída na 2 × 2 políčka, druhá sa už postaviť nedá', 
     page.getByTestId('building-catalog').locator('[data-building-id="pyramid"]'),
   ).toBeDisabled();
 });
+
+test('cesta ťahaná cez vodu sa nad vodou postaví ako most', async ({ page }) => {
+  await openGame(page);
+  const line = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    hook.grantForTest({ resources: { wood: 200, stone: 200 } });
+    const s = hook.getState();
+    const w = s.world.width;
+    const terrain = (x: number, y: number) => s.world.tiles[y * w + x]?.terrain;
+    const wh = s.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let d = 0; d < 25; d++)
+      for (const y of [wh.y - d, wh.y + d])
+        for (let x = wh.x - 25; x < wh.x + 25; x++) {
+          if (!terrain(x, y) || terrain(x, y) === 'water' || terrain(x - 1, y) === 'water')
+            continue;
+          let k = x + 1;
+          while (terrain(k, y) === 'water') k++;
+          const length = k - x - 1;
+          if (length < 1 || length > 5 || !terrain(k, y)) continue;
+          const tiles = Array.from({ length: k - x + 1 }, (_, i) => ({ x: x + i, y }));
+          if (
+            !tiles.every((t) => hook.canPlace(terrain(t.x, t.y) === 'water' ? 'bridge' : 'road', t))
+          )
+            continue;
+          return {
+            from: hook.tileToClient(tiles[0]!),
+            to: hook.tileToClient(tiles.at(-1)!),
+            water: length,
+          };
+        }
+    throw new Error('Žiadna voda na premostenie');
+  });
+  await pickBuilding(page, 'road');
+  await page.mouse.move(line.from.x, line.from.y);
+  await page.mouse.down();
+  await page.mouse.move(line.to.x, line.to.y, { steps: 8 });
+  await page.mouse.up();
+  const bridges = await page.evaluate(
+    () =>
+      window.__civilis!.getState().city.buildings.filter((b) => b.definitionId === 'bridge').length,
+  );
+  expect(bridges).toBe(line.water);
+});

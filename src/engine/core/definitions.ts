@@ -73,6 +73,7 @@ export const buildingDefinitionSchema = z.strictObject({
   storageCapacity: z.number().int().nonnegative(),
   requiresRoad: z.boolean(),
   connectsAdjacent: z.boolean().optional(),
+  isRoad: z.boolean().optional(),
   allowedTerrain: z.array(z.enum(TERRAIN_TYPES)).min(1),
   terrainEfficiency: z.partialRecord(z.enum(TERRAIN_TYPES), z.number().min(0).max(1)).optional(),
   toolUsePerWorker: nonNegative,

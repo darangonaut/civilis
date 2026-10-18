@@ -83,7 +83,8 @@
     "castle": "Hrad",
     "colossus": "Kolos",
     "iron_tower": "Železná věž",
-    "stadium": "Olympijský stadion"
+    "stadium": "Olympijský stadion",
+    "bridge": "Most"
   },
   "technologies": {
     "woodworking": "Zpracování dřeva",

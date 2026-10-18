@@ -214,6 +214,7 @@ function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
         </>
       )}
       {base.connectsAdjacent && <span className="tooltip-note">{t('hud.connectsAdjacent')}</span>}
+      {base.id === 'road' && <span className="tooltip-note">{t('hud.bridgeHint')}</span>}
       {(base.service || base.pollution) && (
         <span className="tooltip-note">{t('hud.rangeHint')}</span>
       )}

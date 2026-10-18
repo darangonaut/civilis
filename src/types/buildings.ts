@@ -59,6 +59,8 @@ export interface BuildingDefinition {
   storageCapacity: number;
 
   requiresRoad: boolean;
+  /** Budova je súčasť cestnej siete (cesta, most). Rozšírenie. */
+  isRoad?: boolean;
   /** Pripojenie sa šíri cez susedné budovy rovnakého typu (bloky polí). Rozšírenie. */
   connectsAdjacent?: boolean;
   allowedTerrain: TerrainType[];

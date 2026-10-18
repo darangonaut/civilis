@@ -73,6 +73,7 @@ export const sk = {
   'detail.serviceRadius': 'Dosah služby',
   'hud.rangeHint':
     'Žltý rámik pri stavbe ukazuje dosah — samotná budova zaberie zvýraznené políčko.',
+  'hud.bridgeHint': 'Cez vodu sa cesta postaví ako most (drahší: drevo a kameň).',
   'detail.yes': 'áno',
   'detail.no': 'nie',
   'detail.none': '—',

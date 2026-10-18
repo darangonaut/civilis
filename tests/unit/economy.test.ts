@@ -219,6 +219,21 @@ describe('cestná sieť', () => {
     expect(status(engine, house).connected).toBe(true);
   });
 
+  it('most cez vodu spojí cestnú sieť s druhým brehom', () => {
+    // Riadok y = 4 je voda: dom na y = 6 sa pripojí len cez most.
+    const engine = createTestCity({
+      population: 10,
+      terrain: (_, y) => (y === 4 ? 'water' : 'grass'),
+    });
+    const house = build(engine, 'house', { x: 3, y: 6 });
+    build(engine, 'road', { x: 3, y: 3 });
+    build(engine, 'road', { x: 3, y: 5 });
+    expect(status(engine, house).connected).toBe(false);
+    expect(() => build(engine, 'road', { x: 3, y: 4 })).toThrow(/invalid_terrain/);
+    build(engine, 'bridge', { x: 3, y: 4 });
+    expect(status(engine, house).connected).toBe(true);
+  });
+
   it('studňa nepotrebuje cestu', () => {
     const engine = createTestCity({ population: 10 });
     const well = build(engine, 'well', { x: 8, y: 6 });

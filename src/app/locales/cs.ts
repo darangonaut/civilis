@@ -72,6 +72,7 @@ export const cs: Record<keyof typeof sk, string> = {
   'detail.serviceRadius': 'Dosah služby',
   'hud.rangeHint':
     'Žlutý rámeček při stavbě ukazuje dosah — samotná budova zabere zvýrazněné políčko.',
+  'hud.bridgeHint': 'Přes vodu se cesta postaví jako most (dražší: dřevo a kámen).',
   'detail.yes': 'ano',
   'detail.no': 'ne',
   'detail.none': '—',

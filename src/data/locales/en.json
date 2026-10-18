@@ -83,7 +83,8 @@
     "castle": "Castle",
     "colossus": "Colossus",
     "iron_tower": "Iron Tower",
-    "stadium": "Olympic Stadium"
+    "stadium": "Olympic Stadium",
+    "bridge": "Bridge"
   },
   "technologies": {
     "woodworking": "Woodworking",

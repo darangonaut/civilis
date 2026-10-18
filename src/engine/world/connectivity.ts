@@ -2,7 +2,6 @@ import type { BuildingInstance, GameState } from '@/types';
 import type { GameData } from '../core/definitions';
 import { footprint, neighbors4, tileIndex } from './grid';
 
-const ROAD_ID = 'road';
 const WAREHOUSE_ID = 'warehouse';
 
 function isRoadTile(
@@ -21,7 +20,9 @@ function isRoadTile(
 export function computeRoadNetwork(state: Readonly<GameState>, data: GameData): Set<number> {
   const world = state.world;
   const roadIds = new Set(
-    state.city.buildings.filter((b) => b.definitionId === ROAD_ID).map((b) => b.id),
+    state.city.buildings
+      .filter((b) => data.buildingsById.get(b.definitionId)?.isRoad)
+      .map((b) => b.id),
   );
   const network = new Set<number>();
   const queue: number[] = [];
@@ -103,7 +104,7 @@ export function isBuildingConnected(
 ): boolean {
   const definition = data.buildingsById.get(building.definitionId);
   if (!definition) return false;
-  if (building.definitionId === ROAD_ID) {
+  if (definition.isRoad) {
     return network.has(tileIndex(state.world, building.position.x, building.position.y));
   }
   if (!definition.requiresRoad) return true;

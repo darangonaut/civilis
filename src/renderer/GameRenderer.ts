@@ -79,6 +79,9 @@ function placeOnTile(sprite: Sprite, position: Position, size = 1): void {
   sprite.position.set(world.x, world.y);
 }
 
+/** Budovy cestnej siete — kreslia sa ako napojený pás vo vrstve ciest. */
+const ROAD_IDS = new Set(['road', 'bridge']);
+
 /** Poradie kreslenia: podľa predného rohu pôdorysu. */
 const depthOf = (position: Position, size = 1) => position.x + position.y + 2 * (size - 1);
 
@@ -275,6 +278,7 @@ export class GameRenderer {
   ): void {
     const worldChanged = this.renderedWorld !== state.world;
     this.state = state;
+    this.syncRevision++;
     if (worldChanged) {
       this.buildTerrain(state.world);
       this.animateNewBuildings = false;
@@ -412,7 +416,7 @@ export class GameRenderer {
     const { width, height } = state.world;
     const roads = new Set(
       state.city.buildings
-        .filter((b) => b.definitionId === 'road')
+        .filter((b) => ROAD_IDS.has(b.definitionId))
         .map((b) => b.position.y * width + b.position.x),
     );
     const isRoad = (x: number, y: number) =>
@@ -425,7 +429,7 @@ export class GameRenderer {
         building.level,
         state.research.completedTechnologyIds,
       );
-      if (building.definitionId === 'road') {
+      if (ROAD_IDS.has(building.definitionId)) {
         const { x, y } = building.position;
         key = roadSpriteKey(
           key,
@@ -450,10 +454,12 @@ export class GameRenderer {
         sprite.label = key;
         sprite.cullable = true;
         applyTexture(sprite, this.atlas.building(key));
-        (building.definitionId === 'road' ? this.roadLayer : this.buildingLayer).addChild(sprite);
+        (ROAD_IDS.has(building.definitionId) ? this.roadLayer : this.buildingLayer).addChild(
+          sprite,
+        );
         this.buildingSprites.set(building.id, sprite);
         placeOnTile(sprite, building.position, this.sizeOf(building.definitionId));
-        if (this.animateNewBuildings && building.definitionId !== 'road') {
+        if (this.animateNewBuildings && !ROAD_IDS.has(building.definitionId)) {
           this.effects.pop(sprite, building.position);
         }
       }
@@ -523,11 +529,13 @@ export class GameRenderer {
     this.preview.visible = showPreview;
     if (showPreview) {
       const valid = this.callbacks.canPlace(this.buildModeId!, hovered);
-      const previewKey = buildingSpriteKey(
-        this.buildModeId!,
-        this.buildLevel,
-        this.state.research.completedTechnologyIds,
-      );
+      const previewKey = ROAD_IDS.has(this.buildModeId!)
+        ? this.roadPreviewKey(hovered, new Set([hovered.y * this.state.world.width + hovered.x]))
+        : buildingSpriteKey(
+            this.buildModeId!,
+            this.buildLevel,
+            this.state.research.completedTechnologyIds,
+          );
       applyTexture(this.preview, this.atlas.building(previewKey));
       placeOnTile(this.preview, hovered, buildSize);
       this.preview.zIndex = depthOf(hovered, buildSize) + 0.5;
@@ -564,6 +572,45 @@ export class GameRenderer {
     g.poly(footprint).fill({ color: 0xffffff, alpha: 0.35 });
   }
 
+  /**
+   * Kľúč sprite-u cesty v náhľade: napojenie na susedov v ťahanej trase (`inPath`) aj na hotové
+   * cesty, nad vodou most — náhľad vyzerá presne ako výsledok.
+   */
+  private roadPreviewKey(position: Position, inPath: ReadonlySet<number>): string {
+    const state = this.state!;
+    const world = state.world;
+    if (this.roadTilesRevision !== this.syncRevision) {
+      this.roadTiles = new Set(
+        state.city.buildings
+          .filter((b) => ROAD_IDS.has(b.definitionId))
+          .map((b) => b.position.y * world.width + b.position.x),
+      );
+      this.roadTilesRevision = this.syncRevision;
+    }
+    const linked = (x: number, y: number) => {
+      if (x < 0 || y < 0 || x >= world.width || y >= world.height) return false;
+      const index = y * world.width + x;
+      return inPath.has(index) || this.roadTiles.has(index);
+    };
+    const { x, y } = position;
+    const mask =
+      (linked(x + 1, y) ? ROAD_EAST : 0) |
+      (linked(x, y + 1) ? ROAD_SOUTH : 0) |
+      (linked(x - 1, y) ? ROAD_WEST : 0) |
+      (linked(x, y - 1) ? ROAD_NORTH : 0);
+    const water = world.tiles[y * world.width + x]?.terrain === 'water';
+    const base = buildingSpriteKey(
+      water ? 'bridge' : 'road',
+      1,
+      state.research.completedTechnologyIds,
+    );
+    return roadSpriteKey(base, mask);
+  }
+
+  private roadTiles: ReadonlySet<number> = new Set();
+  private roadTilesRevision = -1;
+  private syncRevision = 0;
+
   /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */
   private refreshDragPreview(): void {
     const drag = this.dragBuild;
@@ -582,11 +629,19 @@ export class GameRenderer {
           this.state?.research.completedTechnologyIds ?? [],
         )
       : null;
+    // Cesta: každé políčko náhľadu sa napojí na susedov v ťahanej trase aj na hotové cesty,
+    // nad vodou ako most — náhľad vyzerá presne ako výsledok (aj zákruty a druhý smer).
+    const roadPreview = this.buildModeId !== null && ROAD_IDS.has(this.buildModeId) && this.state;
+    const world = this.state?.world;
+    const inPath = new Set(world ? positions.map((p) => p.y * world.width + p.x) : []);
+    const keyFor = (position: Position): string | null =>
+      roadPreview ? this.roadPreviewKey(position, inPath) : key;
     this.dragPreview.forEach((sprite, i) => {
       const position = positions[i];
-      sprite.visible = position !== undefined && key !== null;
-      if (!position || !key) return;
-      applyTexture(sprite, this.atlas.building(key));
+      const spriteKey = position ? keyFor(position) : null;
+      sprite.visible = position !== undefined && spriteKey !== null;
+      if (!position || !spriteKey) return;
+      applyTexture(sprite, this.atlas.building(spriteKey));
       placeOnTile(sprite, position, dragSize);
       sprite.zIndex = depthOf(position, dragSize) + 0.5;
       sprite.tint = this.callbacks.canPlace(this.buildModeId!, position)

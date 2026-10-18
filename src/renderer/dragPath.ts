@@ -7,7 +7,7 @@ export type DragShape = 'line' | 'area';
 
 /** Cesty sa kreslia ako čiara, ostatné budovy vypĺňajú obdĺžnik. */
 export function dragShapeFor(buildingId: string): DragShape {
-  return buildingId === 'road' ? 'line' : 'area';
+  return buildingId === 'road' || buildingId === 'bridge' ? 'line' : 'area';
 }
 
 /**

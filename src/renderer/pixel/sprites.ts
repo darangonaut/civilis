@@ -1706,6 +1706,36 @@ const paveFill = (x: number, y: number): Rgb => {
   return pixelNoise(x, y, 31) < 0.08 ? P.roadLight : P.road;
 };
 
+/** Most: drevená alebo kamenná mostovka s piliermi, napojená ako cesta. */
+function bridgePainter(mask: number, stone: boolean): Painter {
+  return (pc, cx, cy) => {
+    const pillar = stone ? P.stoneDeep : P.woodDark;
+    // Piliere pod mostovkou (stoja vo vode).
+    for (const [dx, dy] of [
+      [-7, 1],
+      [5, 1],
+      [-1, 4],
+    ])
+      pc.fillRect(cx + dx!, cy + dy!, 2, 4, pillar);
+    paintRoad(
+      pc,
+      cx,
+      cy,
+      mask,
+      0.6,
+      stone
+        ? (x, y) =>
+            (x + 2 * y) % 6 === 0
+              ? P.stoneDark
+              : pixelNoise(x, y, 17) < 0.1
+                ? P.stoneLight
+                : P.stone
+        : (x, y) => ((x + 2 * y) % 4 === 0 ? P.woodShade : P.wood),
+      stone ? P.stoneDeep : P.woodDark,
+    );
+  };
+}
+
 function roadPainter(mask: number, paved: boolean): Painter {
   return (pc, cx, cy) =>
     paved
@@ -1717,6 +1747,8 @@ const FLAT: Record<string, Painter> = {
   // Hlinený chodník (pred Kamenárstvom) a dláždená cesta (po ňom).
   road: roadPainter(ROAD_STRAIGHT, false),
   'road+': roadPainter(ROAD_STRAIGHT, true),
+  bridge: bridgePainter(ROAD_STRAIGHT, false),
+  'bridge+': bridgePainter(ROAD_STRAIGHT, true),
 };
 
 /** Kľúč sprite-u cesty podľa napojenia na susedov, napr. `road+#5`. */
@@ -1727,6 +1759,7 @@ export function roadSpriteKey(baseKey: string, mask: number): string {
 /** Technológia, ktorá zmení vzhľad budovy (rozpoznávací znak „+“ v kľúči sprite-u). */
 export const TECH_LOOKS: Readonly<Record<string, string>> = {
   road: 'masonry',
+  bridge: 'masonry',
   lumberjack: 'woodworking',
   farm: 'irrigation',
   quarry: 'masonry',
@@ -1755,7 +1788,12 @@ export function drawBuilding(key: string): PixelSprite {
     return finish(pc, cx, cy);
   }
   const [base, maskText] = key.split('#');
-  const flat = maskText !== undefined ? roadPainter(Number(maskText), base === 'road+') : FLAT[key];
+  const flat =
+    maskText === undefined
+      ? FLAT[key]
+      : base?.startsWith('bridge')
+        ? bridgePainter(Number(maskText), base === 'bridge+')
+        : roadPainter(Number(maskText), base === 'road+');
   if (flat) {
     const { pc, cx, cy } = tileCanvas(0);
     flat(pc, cx, cy);

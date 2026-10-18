@@ -519,6 +519,21 @@ button.danger:hover:not(:disabled),
   font-weight: 700;
 }
 
+/* Počas stavby panely okolo mapy ustúpia (priesvitné, myšou sa zobrazia naplno). */
+.game-layout.building .top-hud,
+.game-layout.building .hud-left,
+.game-layout.building .hud-right-bottom,
+.game-layout.building .map-info {
+  opacity: 0.35;
+  transition: opacity 0.15s;
+}
+
+.game-layout.building .top-hud:hover,
+.game-layout.building .hud-left:hover,
+.game-layout.building .hud-right-bottom:hover {
+  opacity: 1;
+}
+
 /* --- Cieľ a udalosti --- */
 .hud-left {
   position: absolute;
