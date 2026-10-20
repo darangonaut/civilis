@@ -503,6 +503,95 @@
           "description": "The colonists would like to celebrate the landing anniversary. It costs {cost}, but improves the mood for a month."
         }
       }
+    },
+    "proxima": {
+      "buildings": {
+        "lumberjack": "Purple Wood Gatherer",
+        "lumberjack@2": "Purple Sawmill",
+        "lumberjack@3": "Forest Combine",
+        "farm": "Mushroom Farm",
+        "farm@2": "Glowing Fields",
+        "farm@3": "Centauri Biofarm",
+        "fishery": "Jellyfish Catcher",
+        "fishery@2": "Jellyfish Harbor",
+        "fishery@3": "Jellyfish Fleet",
+        "pasture": "Hexapod Pasture",
+        "pasture@2": "Hexapod Ranch",
+        "pasture@3": "Hexapod Breeding Station",
+        "mine": "Crystal Mine",
+        "mine@2": "Deep Crystal Mine",
+        "mine@3": "Mechanized Crystal Mine",
+        "coal_mine": "Fossil Mushroom Mine",
+        "coal_mine@2": "Deep Mushroom Mine",
+        "coal_mine@3": "Automated Mushroom Mine",
+        "temple": "Temple of Two Suns",
+        "park": "Purple Park",
+        "botanical_garden": "Earth Garden",
+        "pyramid": "Crystal Pyramid",
+        "great_library": "Library of Three Worlds",
+        "castle": "Cliff Castle",
+        "colossus": "Colossus of Centauri",
+        "iron_tower": "Tower of Light",
+        "stadium": "Hexapod Arena",
+        "space_port": "Interstellar Beacon",
+        "market": "Market of Two Worlds"
+      },
+      "eras": {
+        "settlement": {
+          "name": "Awakening",
+          "description": "The colonists woke from hibernation under a red sun. The forest is purple, the air smells sweet and something in the bushes is playing a flute."
+        },
+        "antiquity": {
+          "name": "Settlement under the Red Sun",
+          "description": "Bricks, temples of two suns and aqueducts. Jellyfish are caught on the lakes."
+        },
+        "middle_ages": {
+          "name": "Purple Town",
+          "description": "Crystal mines, smelters and universities. The town grows among giant mushrooms."
+        },
+        "renaissance": {
+          "name": "Proxima Renaissance",
+          "description": "Trade, art and science. Hexapods give wool and theaters stage plays about three worlds."
+        },
+        "industrial": {
+          "name": "Centauri Industry",
+          "description": "Coal from fossil mushrooms, steel and railways across the purple plains."
+        },
+        "modern": {
+          "name": "Modern Proxima",
+          "description": "Power plants, hospitals and the first skyscrapers above the forest."
+        },
+        "information": {
+          "name": "Network of Three Worlds",
+          "description": "Computers and nuclear power. News from Earth takes four years — we reply anyway."
+        },
+        "future": {
+          "name": "Home among the Stars",
+          "description": "Fusion and artificial intelligence. The interstellar beacon will tell Earth we are home."
+        }
+      },
+      "events": {
+        "drought": {
+          "name": "Red Flare",
+          "description": "The red sun has flared — mushroom farms produce less food."
+        },
+        "epidemic": {
+          "name": "Alien Allergy",
+          "description": "Nobody tolerates the purple tree pollen. Some colonists left and the mood dropped."
+        },
+        "ancient_ruins": {
+          "name": "Ruins of a Native Civilization",
+          "description": "Builders found real alien ruins. This time it really is not an old rover."
+        },
+        "caravan": {
+          "name": "Hexapod Caravan",
+          "description": "Traders from the neighboring continent offer {amount} × {resource} for {cost} — half price."
+        },
+        "bumper_harvest": {
+          "name": "Mushroom Season",
+          "description": "Mushrooms are springing up like mushrooms — farms produce more food."
+        }
+      }
     }
   }
 }

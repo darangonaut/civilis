@@ -54,25 +54,33 @@ describe('preklady', () => {
   it.each([
     ['cs', csNames],
     ['en', enNames],
-  ])('názvy kolónie (%s): všetko, čo Mars premenúva, a všetky dedičstvá', (_, names) => {
+  ])('názvy kolónií (%s): všetko, čo planéty premenúvajú, a všetky dedičstvá', (_, names) => {
+    type Override = { name?: string; levels?: unknown[]; description?: string };
+    type Translated = {
+      buildings: Record<string, string>;
+      eras: Record<string, { name: string; description: string }>;
+      events: Record<string, { name: string; description: string }>;
+    };
     for (const planet of planets.planets) {
-      const overrides = 'overrides' in planet ? planet.overrides : undefined;
+      const overrides = (planet as { overrides?: Record<string, Record<string, Override>> })
+        .overrides;
       if (!overrides) continue;
-      const translated = (names.planets as Record<string, typeof names.planets.mars>)[planet.id]!;
-      for (const [id, override] of Object.entries(overrides.buildings)) {
-        if ('name' in override) expect(translated.buildings, id).toHaveProperty([id]);
-        ('levels' in override ? override.levels : []).forEach((_, i) =>
+      const translated = (names.planets as unknown as Record<string, Translated>)[planet.id]!;
+      expect(translated, planet.id).toBeDefined();
+      for (const [id, override] of Object.entries(overrides.buildings ?? {})) {
+        if (override.name) expect(translated.buildings, id).toHaveProperty([id]);
+        (override.levels ?? []).forEach((_, i) =>
           expect(translated.buildings).toHaveProperty([`${id}@${i + 2}`]),
         );
       }
-      for (const id of Object.keys(overrides.eras)) {
+      for (const id of Object.keys(overrides.eras ?? {})) {
         expect(translated.eras).toHaveProperty([id, 'name']);
         expect(translated.eras).toHaveProperty([id, 'description']);
       }
-      for (const [id, event] of Object.entries(overrides.events)) {
-        const text = translated.events[id as keyof typeof translated.events];
+      for (const [id, event] of Object.entries(overrides.events ?? {})) {
+        const text = translated.events[id];
         expect(text, id).toBeDefined();
-        expect(placeholders(text.description), id).toEqual(placeholders(event.description));
+        expect(placeholders(text!.description), id).toEqual(placeholders(event.description!));
       }
     }
     for (const legacy of gameData.legacies) {
@@ -90,9 +98,9 @@ describe('preklady', () => {
     }
   });
 
-  it('texty planéty (mars:…) existujú len ako úprava existujúceho kľúča', () => {
-    for (const key of Object.keys(sk).filter((k) => k.startsWith('mars:'))) {
-      expect(sk, key).toHaveProperty([key.slice('mars:'.length)]);
+  it('texty planét (mars:…, proxima:…) existujú len ako úprava existujúceho kľúča', () => {
+    for (const key of Object.keys(sk).filter((k) => /^(mars|proxima):/.test(k))) {
+      expect(sk, key).toHaveProperty([key.slice(key.indexOf(':') + 1)]);
     }
   });
 });

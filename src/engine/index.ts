@@ -13,8 +13,10 @@ export { targetHappiness } from './population/population';
 export {
   activeLegacies,
   availableLegacies,
+  cityRecord,
   colonyLaunchBlock,
   difficultyOf,
+  nextPlanet,
   type ColonyLaunchBlock,
 } from './core/colony';
 export { createNewGame, type NewGameOptions } from './core/newGame';

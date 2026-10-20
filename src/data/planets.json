@@ -455,6 +455,181 @@
           }
         }
       }
+    },
+    {
+      "id": "proxima",
+      "name": "Proxima b",
+      "terrain": {
+        "water": 0.14,
+        "hill": 0.93,
+        "rock": 0.9,
+        "forest": 0.66,
+        "fertile": 0.48
+      },
+      "startMinimum": {
+        "forest": 8,
+        "rock": 4,
+        "fertile": 8
+      },
+      "overrides": {
+        "buildings": {
+          "lumberjack": {
+            "name": "Zberač fialového dreva",
+            "levels": [
+              {
+                "name": "Píla na fialové drevo"
+              },
+              {
+                "name": "Lesný kombinát"
+              }
+            ]
+          },
+          "farm": {
+            "name": "Hubárska farma",
+            "levels": [
+              {
+                "name": "Svietiace polia"
+              },
+              {
+                "name": "Biofarma Centauri"
+              }
+            ]
+          },
+          "fishery": {
+            "name": "Lov medúz",
+            "levels": [
+              {
+                "name": "Medúzí prístav"
+              },
+              {
+                "name": "Medúzia flotila"
+              }
+            ]
+          },
+          "pasture": {
+            "name": "Pastvina šesťnožcov",
+            "levels": [
+              {
+                "name": "Farma šesťnožcov"
+              },
+              {
+                "name": "Chovná stanica šesťnožcov"
+              }
+            ]
+          },
+          "mine": {
+            "name": "Kryštálová baňa",
+            "levels": [
+              {
+                "name": "Hlboká kryštálová baňa"
+              },
+              {
+                "name": "Strojová kryštálová baňa"
+              }
+            ]
+          },
+          "coal_mine": {
+            "name": "Ťažba skamenených húb",
+            "levels": [
+              {
+                "name": "Hlboká ťažba húb"
+              },
+              {
+                "name": "Automatická ťažba húb"
+              }
+            ]
+          },
+          "temple": {
+            "name": "Chrám dvoch sĺnk"
+          },
+          "park": {
+            "name": "Fialový park"
+          },
+          "botanical_garden": {
+            "name": "Pozemská záhrada"
+          },
+          "pyramid": {
+            "name": "Kryštálová pyramída"
+          },
+          "great_library": {
+            "name": "Knižnica troch svetov"
+          },
+          "castle": {
+            "name": "Hrad na útese"
+          },
+          "colossus": {
+            "name": "Kolos Centauri"
+          },
+          "iron_tower": {
+            "name": "Veža svetla"
+          },
+          "stadium": {
+            "name": "Aréna šesťnožcov"
+          },
+          "space_port": {
+            "name": "Medzihviezdny maják"
+          },
+          "market": {
+            "name": "Trh dvoch svetov"
+          }
+        },
+        "eras": {
+          "settlement": {
+            "name": "Prebudenie",
+            "description": "Kolonisti sa prebudili z hibernácie pod červeným slnkom. Les je fialový, vzduch voňavý a niečo v kroví hrá na flautu."
+          },
+          "antiquity": {
+            "name": "Osada pod červeným slnkom",
+            "description": "Tehly, chrámy dvoch sĺnk a akvadukty. Na jazerách sa lovia medúzy."
+          },
+          "middle_ages": {
+            "name": "Fialové mestečko",
+            "description": "Kryštálové bane, huty a univerzity. Mesto rastie medzi obrovskými hubami."
+          },
+          "renaissance": {
+            "name": "Proximská renesancia",
+            "description": "Obchod, umenie a veda. Šesťnožce dávajú vlnu a divadlá hrajú hry o troch svetoch."
+          },
+          "industrial": {
+            "name": "Industria Centauri",
+            "description": "Uhlie zo skamenených húb, oceľ a železnica cez fialové pláne."
+          },
+          "modern": {
+            "name": "Moderná Proxima",
+            "description": "Elektrárne, nemocnice a prvé mrakodrapy nad lesom."
+          },
+          "information": {
+            "name": "Sieť troch svetov",
+            "description": "Počítače a jadrová energia. Správy zo Zeme idú štyri roky — odpovedáme na ne aj tak."
+          },
+          "future": {
+            "name": "Domov medzi hviezdami",
+            "description": "Fúzia a umelá inteligencia. Medzihviezdny maják oznámi Zemi, že sme doma."
+          }
+        },
+        "events": {
+          "drought": {
+            "name": "Červená erupcia",
+            "description": "Červené slnko vyvrhlo erupciu — hubárske farmy vyrábajú menej potravín."
+          },
+          "epidemic": {
+            "name": "Mimozemská alergia",
+            "description": "Peľ fialových stromov nikomu nesvedčí. Časť kolonistov odišla a nálada klesla."
+          },
+          "ancient_ruins": {
+            "name": "Ruiny pôvodnej civilizácie",
+            "description": "Pri stavbe sa našli skutočné mimozemské ruiny. Tentoraz to naozaj nie je starý rover."
+          },
+          "caravan": {
+            "name": "Karavána šesťnožcov",
+            "description": "Obchodníci zo susedného kontinentu ponúkajú {amount} × {resource} za {cost} — polovičnú cenu."
+          },
+          "bumper_harvest": {
+            "name": "Hubová sezóna",
+            "description": "Huby rastú ako huby — farmy vyrábajú viac potravín."
+          }
+        }
+      }
     }
   ]
 }

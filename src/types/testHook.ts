@@ -21,6 +21,8 @@ export interface CivilisTestHook {
     pendingEvent?: PendingEvent;
     /** Splní všetky míľniky a označí hru za dohranú (test kolonizácie). */
     finished?: boolean;
+    /** Prepíše časť stavu kolónie (napr. kroniku ságy). */
+    colony?: Partial<GameState['colony']>;
     /** Vloží hotové budovy (bez ceny a technológií). */
     buildings?: { definitionId: string; position: Position }[];
   }): void;

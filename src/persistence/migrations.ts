@@ -29,6 +29,11 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v10 → v11: kronika dokončených miest ságy. */
+  10: (raw) => {
+    const colony = raw.colony as Record<string, unknown> | undefined;
+    return colony ? { ...raw, colony: { history: [], ...colony } } : raw;
+  },
   /** v9 → v10: planéta a kolónia; staršie hry sú prvé mesto na Zemi. */
   9: (raw) => ({
     planet: 'earth',

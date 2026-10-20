@@ -12,6 +12,16 @@ export const sk: VoiceTexts = {
     holonet: 'Holonet',
   },
   topics: {
+    proxima: [
+      'Strom pred domom mi každé ráno zamáva. Odmával som späť. Teraz sme kamaráti.',
+      'Červené slnko nikdy nezapadá úplne. Sused tvrdí, že preto nikdy nechodí spať. Sused je len lenivý.',
+      'Šesťnožec mi zjedol topánky. Všetky tri páry naraz.',
+      'Správa zo Zeme: „Ako sa máte?“ Odoslaná pred štyrmi rokmi. Odpovedal som „dobre“. Dorazí o štyri roky.',
+      'Huby v záhrade v noci svietia. Ušetril som za lampy, prišiel som o spánok.',
+      'Konečne vzduch bez kupoly! Prvý deň som len dýchal. Druhý deň som kýchal — ten peľ…',
+      'Na Marse sme sa sťažovali na prach, tu na fialovú. Všetko je fialové. Aj moje sny.',
+      'Deti sa pýtajú, čo je to modrá obloha. Ukázal som im fotku. Neverili.',
+    ],
     mars: [
       'Mama sa pýta, či mám dosť svetrov. Mami, je tu −60 °C. Nie.',
       'Správa zo Zeme prišla s 20-minútovým oneskorením. Bol to spam.',
@@ -171,6 +181,7 @@ export const sk: VoiceTexts = {
     ],
   ],
   hashtags: {
+    proxima: '#proxima',
     mars: '#mars',
     dustStorm: '#prach',
     hunger: '#hlad',

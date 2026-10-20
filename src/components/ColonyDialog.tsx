@@ -5,7 +5,8 @@ import { buildingName, legacyDescription, legacyName } from '@/app/names';
 import { slotLabel } from '@/app/saving';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { availableLegacies, colonyLaunchBlock } from '@/engine';
+import { availableLegacies, colonyLaunchBlock, nextPlanet } from '@/engine';
+import type { PlanetId } from '@/types';
 import type { SlotId } from '@/persistence/db';
 import { useUiStore } from '@/stores/uiStore';
 import { Cost } from './hud/Cost';
@@ -27,6 +28,10 @@ export function ColonyDialog() {
   const [launching, setLaunching] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const colony = gameData.colony;
+  const destination = useGameState((s) => nextPlanet(s, gameData)) as Exclude<
+    PlanetId,
+    'earth'
+  > | null;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -57,19 +62,19 @@ export function ColonyDialog() {
       data-testid="colony-dialog"
       onCancel={() => setOpen(false)}
     >
-      {open && colony && (
+      {open && colony && destination && (
         <>
           <div className="badge" aria-hidden>
             🚀
           </div>
           <h2>{t('colony.title')}</h2>
-          <p>{t('colony.intro')}</p>
+          <p>{t(`colony.intro.${destination}`)}</p>
           <h3>{t('colony.destination')}</h3>
           <div className="colony-planet">
-            <span className="colony-planet-globe" aria-hidden />
+            <span className={`colony-planet-globe ${destination}`} aria-hidden />
             <div>
-              <strong>{t('planet.mars')}</strong>
-              <p className="muted">{t('colony.marsDescription')}</p>
+              <strong>{t(`planet.${destination}`)}</strong>
+              <p className="muted">{t(`colony.description.${destination}`)}</p>
             </div>
           </div>
           <h3>{t('colony.cost')}</h3>

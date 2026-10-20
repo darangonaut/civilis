@@ -416,11 +416,7 @@ export const cs: Record<keyof typeof sk, string> = {
   'service.leisure': 'odpočinek',
   'colony.button': 'Kolonizační loď',
   'colony.title': 'Kolonizační loď',
-  'colony.intro':
-    'Vesmírný přístav je připraven. Loď s kolonisty odletí na Mars a založí nové město. Při přistání trochu havaruje — databanky se ztratí, ale jednu výhodu si kolonisté zachrání.',
   'colony.destination': 'Cíl',
-  'colony.marsDescription':
-    'Rudý písek, led a trosky předchozích misí. Úrodná půda tu není — jídlo dávají skleníky, vodu ledové vrty.',
   'colony.cost': 'Ke startu je potřeba',
   'colony.legacyTitle': 'Co si kolonisté zachrání',
   'colony.inherited': 'Zděděno z předchozích měst',
@@ -428,7 +424,6 @@ export const cs: Record<keyof typeof sk, string> = {
   'colony.noSlot': 'Všechny pozice jsou obsazené — pokud se chceš k městu vrátit, nejprve ho ulož.',
   'colony.launch': 'Vyslat loď',
   'colony.cancel': 'Zrušit',
-  'colony.landed': 'Kolonisté přistáli na Marsu — trochu tvrději, než plánovali.',
   'colony.block.not_finished': 'Nejprve dokonči všechny milníky.',
   'colony.block.missing_building': 'Chybí budova: {building}.',
   'colony.block.resources': 'Nedostatek surovin ke startu.',
@@ -448,4 +443,27 @@ export const cs: Record<keyof typeof sk, string> = {
   'mars:victory.title': 'Rudá metropole',
   'mars:victory.text':
     'Z havarované lodi je metropole na Marsu. Město můžeš dál rozvíjet nebo poslat kolonisty ještě dál.',
+  'colony.intro.mars':
+    'Vesmírný přístav je připraven. Loď s kolonisty odletí na Mars a založí nové město. Při přistání trochu havaruje — databanky se ztratí, ale jednu výhodu si kolonisté zachrání.',
+  'colony.intro.proxima':
+    'Meziplanetární přístav je připraven. Loď poletí 4,2 světelného roku k Proximě b — první planetě mimo Sluneční soustavu. Kolonisté přicestují v hibernaci a po probuzení si budou pamatovat jen jednu věc.',
+  'colony.description.mars':
+    'Rudý písek, led a trosky předchozích misí. Úrodná půda tu není — jídlo dávají skleníky, vodu ledové vrty.',
+  'colony.description.proxima':
+    'Fialové mimozemské lesy, jezera a úrodná půda pod rudým sluncem. Vzduch se dá dýchat — konečně bez kupolí. Poslední svět ságy.',
+  'colony.landed.mars': 'Kolonisté přistáli na Marsu — trochu tvrději, než plánovali.',
+  'colony.landed.proxima': 'Kolonisté se probudili na Proximě b. Strom před lodí na ně zamával.',
+  'colony.block.last_planet': 'Toto je poslední svět ságy.',
+  'planet.proxima': 'Proxima b',
+  'saga.title': 'Konec ságy',
+  'saga.text':
+    'Z hrstky osadníků na Zemi se stala civilizace tří světů. Tady sága končí — město můžeš dál rozvíjet.',
+  'saga.chronicle': 'Kronika ságy',
+  'saga.current': 'současné město',
+  'saga.entry': '{days} dní · {population} obyvatel · skóre {score}',
+  'saga.total': 'Celkové skóre ságy: {score}',
+  'proxima:terrain.grass': 'fialový mech',
+  'proxima:terrain.forest': 'mimozemský les',
+  'proxima:terrain.rock': 'krystalové skály',
+  'proxima:terrain.water': 'jezero',
 };

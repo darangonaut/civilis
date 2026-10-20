@@ -261,3 +261,15 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   ostatné budovy sú v marťanskej palete pod priehľadnou kyslíkovou kupolou (okrem ciest
   a vesmírneho prístavu).
 - Rovnaké ID budov ako na Zemi, takže míľniky, technológie aj bot platia bez zmeny.
+
+## Proxima b a koniec ságy (2026-10-20, na želanie)
+
+- Sága má tri svety v poradí z `planets.json`: Zem → Mars → Proxima b. Kolonizačná loď letí vždy
+  na ďalší svet; po poslednom sa už neponúka.
+- Proxima b: fialový mach, hubové lesy, tyrkysové jazerá, kryštálové skaly a opäť úrodná pôda.
+  Vzduch sa dá dýchať — budovy sú v mimozemskej palete bez kupol. Vlastný vzhľad: hubárska farma,
+  zberač fialového dreva, pastvina šesťnožcov, lov medúz. Vlastné éry (Prebudenie … Domov medzi
+  hviezdami), udalosti (červená erupcia, mimozemská alergia, skutočné ruiny…), divy a Hlas ulice.
+- Pri odlete sa mesto zapíše do kroniky (`colony.history`, schéma v11: názov, planéta, dni,
+  obyvatelia, skóre). Po dohraní posledného sveta ukáže obrazovka víťazstva **Koniec ságy**
+  s kronikou všetkých miest a celkovým skóre; z panela Míľniky sa dá otvoriť znova.

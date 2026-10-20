@@ -180,8 +180,8 @@ function stateTopic(lastTopic: VoiceTopic | null): void {
   add('noParks', f.leisure === 0 && population.total > 150 ? 2 : 0, () => post('noParks', 'angry'));
   add('parks', f.leisure > 60 ? 1 : 0, () => post('parks', 'happy'));
   add('happy', population.happiness >= 85 ? 3 : 0, () => post('happy', 'happy'));
-  // Na Marse namiesto vtipov z pozemských dôb komentujú život na červenej planéte.
-  const flavor: VoiceTopic = gameData.planet.id === 'mars' ? 'mars' : 'flavor';
+  // V kolóniách namiesto vtipov z pozemských dôb komentujú život na planéte.
+  const flavor: VoiceTopic = gameData.planet.id === 'earth' ? 'flavor' : gameData.planet.id;
   add(flavor, 2, () => post(flavor, 'neutral'));
 
   const total = options.reduce((sum, o) => sum + o.weight, 0);

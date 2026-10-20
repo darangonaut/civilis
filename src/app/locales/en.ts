@@ -416,11 +416,7 @@ export const en: Record<keyof typeof sk, string> = {
   'service.leisure': 'leisure',
   'colony.button': 'Colony Ship',
   'colony.title': 'Colony Ship',
-  'colony.intro':
-    'The spaceport is ready. A ship full of colonists will fly to Mars and found a new city. The landing will be a bit rough — the databanks will be lost, but the colonists will save one advantage.',
   'colony.destination': 'Destination',
-  'colony.marsDescription':
-    'Red sand, ice and the wreckage of earlier missions. There is no fertile soil — greenhouses provide food and ice drills provide water.',
   'colony.cost': 'Launch requires',
   'colony.legacyTitle': 'What the colonists save',
   'colony.inherited': 'Inherited from previous cities',
@@ -428,7 +424,6 @@ export const en: Record<keyof typeof sk, string> = {
   'colony.noSlot': 'All slots are taken — save the city first if you want to come back to it.',
   'colony.launch': 'Launch',
   'colony.cancel': 'Cancel',
-  'colony.landed': 'The colonists landed on Mars — a bit harder than planned.',
   'colony.block.not_finished': 'Complete all milestones first.',
   'colony.block.missing_building': 'Missing building: {building}.',
   'colony.block.resources': 'Not enough resources for the launch.',
@@ -448,4 +443,28 @@ export const en: Record<keyof typeof sk, string> = {
   'mars:victory.title': 'Red Metropolis',
   'mars:victory.text':
     'The crashed ship has become a metropolis on Mars. Keep developing the city or send colonists even further.',
+  'colony.intro.mars':
+    'The spaceport is ready. A ship full of colonists will fly to Mars and found a new city. The landing will be a bit rough — the databanks will be lost, but the colonists will save one advantage.',
+  'colony.intro.proxima':
+    'The interplanetary spaceport is ready. The ship will travel 4.2 light years to Proxima b — the first planet beyond the Solar System. The colonists will travel in hibernation and wake up remembering only one thing.',
+  'colony.description.mars':
+    'Red sand, ice and the wreckage of earlier missions. There is no fertile soil — greenhouses provide food and ice drills provide water.',
+  'colony.description.proxima':
+    'Purple alien forests, lakes and fertile soil under a red sun. The air is breathable — finally no domes. The last world of the saga.',
+  'colony.landed.mars': 'The colonists landed on Mars — a bit harder than planned.',
+  'colony.landed.proxima':
+    'The colonists woke up on Proxima b. A tree in front of the ship waved at them.',
+  'colony.block.last_planet': 'This is the last world of the saga.',
+  'planet.proxima': 'Proxima b',
+  'saga.title': 'End of the Saga',
+  'saga.text':
+    'A handful of settlers on Earth became a civilization of three worlds. The saga ends here — you can keep developing the city.',
+  'saga.chronicle': 'Saga Chronicle',
+  'saga.current': 'current city',
+  'saga.entry': '{days} days · {population} residents · score {score}',
+  'saga.total': 'Total saga score: {score}',
+  'proxima:terrain.grass': 'purple moss',
+  'proxima:terrain.forest': 'alien forest',
+  'proxima:terrain.rock': 'crystal rocks',
+  'proxima:terrain.water': 'lake',
 };

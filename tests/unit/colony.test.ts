@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   activeLegacies,
   availableLegacies,
+  cityRecord,
   colonyLaunchBlock,
   difficultyOf,
+  nextPlanet,
 } from '@/engine/core/colony';
 import { GameDataError, loadGameData, mergeOverride } from '@/engine/core/definitions';
 import { createNewGame } from '@/engine/core/newGame';
@@ -15,7 +17,7 @@ import eras from '@/data/eras.json';
 import milestones from '@/data/milestones.json';
 import planets from '@/data/planets.json';
 import technologies from '@/data/technologies.json';
-import { earthTestData, marsTestData } from '../helpers/gameData';
+import { earthTestData, marsTestData, proximaTestData } from '../helpers/gameData';
 import type { GameState } from '@/types';
 
 const newGame = (data = marsTestData, legacyIds: string[] = []) =>
@@ -23,7 +25,7 @@ const newGame = (data = marsTestData, legacyIds: string[] = []) =>
     seed: 7,
     gameId: 'g',
     now: 'x',
-    colony: { generation: legacyIds.length + 1, legacyIds, originCity: 'Civilis' },
+    colony: { generation: legacyIds.length + 1, legacyIds, originCity: 'Civilis', history: [] },
   });
 
 describe('planéty', () => {
@@ -125,6 +127,30 @@ describe('kolónia a dedičstvo', () => {
     delete old.colony;
     const migrated = migrateGameState(old) as GameState;
     expect(migrated.planet).toBe('earth');
-    expect(migrated.colony).toEqual({ generation: 1, legacyIds: [], originCity: null });
+    expect(migrated.colony).toEqual({
+      generation: 1,
+      legacyIds: [],
+      originCity: null,
+      history: [],
+    });
+  });
+
+  it('sága: Zem → Mars → Proxima b, po poslednom svete sa loď neponúka', () => {
+    expect(nextPlanet({ planet: 'earth' }, earthTestData)).toBe('mars');
+    expect(nextPlanet({ planet: 'mars' }, marsTestData)).toBe('proxima');
+    expect(nextPlanet({ planet: 'proxima' }, proximaTestData)).toBeNull();
+    const last = newGame(proximaTestData);
+    last.achievements.finishedDay = 900;
+    expect(colonyLaunchBlock(last, proximaTestData)).toBe('last_planet');
+    expect(cityRecord(last, proximaTestData)).toMatchObject({ planet: 'proxima', days: 900 });
+  });
+
+  it('Proxima b má úrodnú pôdu a vlastné názvy, Zem zostane bez zmeny', () => {
+    const state = newGame(proximaTestData);
+    expect(state.world.tiles.some((t) => t.terrain === 'fertile')).toBe(true);
+    expect(proximaTestData.buildingsById.get('farm')!.name).toBe('Hubárska farma');
+    expect(proximaTestData.buildingsById.get('farm')!.allowedTerrain).toEqual(
+      earthTestData.buildingsById.get('farm')!.allowedTerrain,
+    );
   });
 });

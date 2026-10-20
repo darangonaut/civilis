@@ -12,6 +12,16 @@ export const en: VoiceTexts = {
     holonet: 'Holonet',
   },
   topics: {
+    proxima: [
+      'The tree in front of my house waves at me every morning. I waved back. Now we are friends.',
+      'The red sun never fully sets. My neighbor says that is why he never goes to bed. My neighbor is just lazy.',
+      'A hexapod ate my shoes. All three pairs at once.',
+      'Message from Earth: "How are you?" Sent four years ago. I replied "fine". It will arrive in four years.',
+      'The mushrooms in my garden glow at night. I saved on lamps and lost my sleep.',
+      'Finally, air without a dome! On day one I just breathed. On day two I sneezed — that pollen…',
+      'On Mars we complained about dust, here about purple. Everything is purple. Even my dreams.',
+      'The kids ask what a blue sky is. I showed them a photo. They did not believe me.',
+    ],
     mars: [
       'Mom asks if I packed enough sweaters. Mom, it is −60 °C here. No.',
       'A message from Earth arrived with a 20-minute delay. It was spam.',
@@ -171,6 +181,7 @@ export const en: VoiceTexts = {
     ],
   ],
   hashtags: {
+    proxima: '#proxima',
     mars: '#mars',
     dustStorm: '#dust',
     hunger: '#hungry',

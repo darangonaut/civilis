@@ -326,3 +326,29 @@ test('kolonizačná loď: po dohraní odletí na Mars so zdedenou výhodou', asy
   await page.getByTestId('open-saves').click();
   await expect(page.getByTestId('slot-load').first()).toBeEnabled();
 });
+
+test('finále ságy: na Proxime b sa loď neponúka, kronika ukáže všetky mestá', async ({ page }) => {
+  await page.goto('/?seed=7&e2e&paused&planet=proxima');
+  await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
+  await page.evaluate(() =>
+    window.__civilis!.grantForTest({
+      finished: true,
+      colony: {
+        generation: 3,
+        history: [
+          { city: 'Prvé mesto', planet: 'earth', days: 2500, score: 1000, population: 12000 },
+          { city: 'Červené mesto', planet: 'mars', days: 2600, score: 1100, population: 12500 },
+        ],
+      },
+    }),
+  );
+  await page.getByTestId('open-milestones').click();
+  await expect(page.getByTestId('milestones-colony')).toHaveCount(0);
+  await page.getByTestId('milestones-saga').click();
+  const chronicle = page.getByTestId('saga-chronicle');
+  await expect(chronicle).toContainText('Prvé mesto · Zem');
+  await expect(chronicle).toContainText('Červené mesto · Mars');
+  await expect(chronicle).toContainText('Proxima b');
+  await expect(page.getByTestId('victory')).toContainText('Koniec ságy');
+  await expect(page.getByTestId('victory-colony')).toHaveCount(0);
+});

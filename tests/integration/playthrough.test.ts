@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createGameEngine } from '@/engine/core/engine';
 import { createNewGame } from '@/engine/core/newGame';
 import { playthrough } from '../helpers/bot';
-import { marsTestData, testData } from '../helpers/gameData';
+import { marsTestData, proximaTestData, testData } from '../helpers/gameData';
 import type { GameData } from '@/engine/core/definitions';
 
 /**
@@ -44,6 +44,11 @@ describe('hrateľnosť (test F)', () => {
     60_000,
   );
 
+  it('Proxima b (mapa 7): dajú sa prejsť prvé tri éry', () => {
+    const days = play(7, 3, 1200, proximaTestData);
+    expect(days.at(-1)).toBeLessThan(1200);
+  }, 60_000);
+
   it.skipIf(!import.meta.env.CIVILIS_FULL)(
     'na mape 7 sa dá prejsť všetkých 8 ér',
     () => {
@@ -57,6 +62,15 @@ describe('hrateľnosť (test F)', () => {
     'kolónia na Marse (mapa 7): dá sa prejsť všetkých 8 ér',
     () => {
       const days = play(7, marsTestData.eras.length, 4000, marsTestData);
+      expect(days.at(-1)).toBeLessThan(4000);
+    },
+    900_000,
+  );
+
+  it.skipIf(!import.meta.env.CIVILIS_FULL)(
+    'Proxima b (mapa 7): dá sa prejsť všetkých 8 ér',
+    () => {
+      const days = play(7, proximaTestData.eras.length, 4000, proximaTestData);
       expect(days.at(-1)).toBeLessThan(4000);
     },
     900_000,

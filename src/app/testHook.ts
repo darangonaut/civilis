@@ -21,6 +21,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
       pendingEvent,
       finished,
       buildings = [],
+      colony,
     }) => {
       const state = controller.serialize();
       state.research.completedTechnologyIds.push(
@@ -33,6 +34,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
         ...milestones.filter((id) => !state.milestones.completedIds.includes(id)),
       );
       if (pendingEvent) state.events.pending = pendingEvent;
+      if (colony) state.colony = { ...state.colony, ...colony };
       if (finished) {
         state.milestones.completedIds = gameData.milestones.map((m) => m.id);
         state.achievements.finishedDay = state.simulation.day;

@@ -2682,6 +2682,10 @@ button.danger:hover:not(:disabled),
   box-shadow: 0 0 0 2px var(--ink);
 }
 
+.colony-planet-globe.proxima {
+  background: radial-gradient(circle at 35% 30%, #b58ad6, #6b4a9e 45%, #2a1f4a);
+}
+
 .colony-legacies {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -2710,6 +2714,36 @@ button.danger:hover:not(:disabled),
   box-shadow:
     0 0 0 2px var(--ink),
     inset 0 0 0 2px var(--gold);
+}
+
+.saga-chronicle {
+  text-align: left;
+}
+
+.saga-chronicle h3 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.saga-chronicle ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.saga-chronicle li span {
+  display: block;
+  font-size: 12px;
+}
+
+.saga-total {
+  font-weight: 700;
+  color: var(--gold);
 }
 
 .colony-block {

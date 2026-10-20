@@ -36,3 +36,7 @@ export const marsTestData = loadGameData(
   { eras, buildings, technologies, milestones, balance, planets },
   'mars',
 );
+export const proximaTestData = loadGameData(
+  { eras, buildings, technologies, milestones, balance, planets },
+  'proxima',
+);

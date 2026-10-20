@@ -1,4 +1,5 @@
-import type { GameState, Resources } from '@/types';
+import type { CityRecord, GameState, PlanetId, Resources } from '@/types';
+import { cityScore } from '../milestones/achievements';
 import type { GameData, LegacyDefinition } from './definitions';
 
 export type DifficultyFactors = GameData['balance']['difficulties']['normal'];
@@ -29,7 +30,25 @@ export function difficultyOf(
   };
 }
 
-export type ColonyLaunchBlock = 'not_finished' | 'missing_building' | 'resources' | 'no_colony';
+export type ColonyLaunchBlock =
+  'not_finished' | 'missing_building' | 'resources' | 'no_colony' | 'last_planet';
+
+/** Ďalšia planéta ságy (poradie v dátach planét); null = posledná, sága sa končí. */
+export function nextPlanet(state: Pick<GameState, 'planet'>, data: GameData): PlanetId | null {
+  const index = data.planets.findIndex((p) => p.id === state.planet);
+  return data.planets[index + 1]?.id ?? null;
+}
+
+/** Záznam terajšieho mesta do kroniky ságy. */
+export function cityRecord(state: Readonly<GameState>, data: GameData): CityRecord {
+  return {
+    city: state.city.name,
+    planet: state.planet,
+    days: state.achievements.finishedDay ?? state.simulation.day,
+    score: cityScore(state, data),
+    population: state.city.population.total,
+  };
+}
 
 /** Prečo sa ešte nedá vyslať kolonizačná loď (null = dá sa). */
 export function colonyLaunchBlock(
@@ -38,6 +57,7 @@ export function colonyLaunchBlock(
 ): ColonyLaunchBlock | null {
   const colony = data.colony;
   if (!colony) return 'no_colony';
+  if (nextPlanet(state, data) === null) return 'last_planet';
   if (state.achievements.finishedDay === null) return 'not_finished';
   if (!state.city.buildings.some((b) => b.definitionId === colony.requiredBuilding))
     return 'missing_building';

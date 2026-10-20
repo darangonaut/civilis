@@ -1,5 +1,5 @@
 import { gameData } from '@/data';
-import { colonyLaunchBlock } from '@/engine';
+import { cityRecord, colonyLaunchBlock, nextPlanet } from '@/engine';
 import { MANUAL_SLOT_IDS, type SlotId } from '@/persistence/db';
 import type { PlanetId } from '@/types';
 import { controller, createFreshGame, randomSeed, saveService } from './game';
@@ -14,11 +14,12 @@ export async function freeSlotForColony(): Promise<SlotId | null> {
 
 /**
  * Vyšle kolonizačnú loď: uloží terajšie mesto (ak je voľná pozícia) a založí nové mesto
- * na planéte so zdedenými výhodami. Vráti false, ak loď ešte nemôže odletieť.
+ * na ďalšej planéte ságy so zdedenými výhodami. Vráti false, ak loď ešte nemôže odletieť.
  */
-export async function launchColony(legacyId: string, planet: PlanetId = 'mars'): Promise<boolean> {
+export async function launchColony(legacyId: string): Promise<boolean> {
   const state = controller.state;
-  if (colonyLaunchBlock(state, gameData) !== null) return false;
+  const planet = nextPlanet(state, gameData);
+  if (!planet || colonyLaunchBlock(state, gameData) !== null) return false;
   if (!gameData.legacies.some((l) => l.id === legacyId)) return false;
   if (state.colony.legacyIds.includes(legacyId)) return false;
 
@@ -29,7 +30,8 @@ export async function launchColony(legacyId: string, planet: PlanetId = 'mars'):
     generation: state.colony.generation + 1,
     legacyIds: [...state.colony.legacyIds, legacyId],
     originCity: state.city.name,
+    history: [...state.colony.history, cityRecord(state, gameData)],
   });
-  startColonyGame(colonyState, t('colony.landed'));
+  startColonyGame(colonyState, t(`colony.landed.${planet as Exclude<PlanetId, 'earth'>}`));
   return true;
 }

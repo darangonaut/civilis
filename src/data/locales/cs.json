@@ -503,6 +503,95 @@
           "description": "Kolonisté by rádi oslavili výročí přistání. Stojí {cost}, ale měsíc zlepší náladu."
         }
       }
+    },
+    "proxima": {
+      "buildings": {
+        "lumberjack": "Sběrač fialového dřeva",
+        "lumberjack@2": "Pila na fialové dřevo",
+        "lumberjack@3": "Lesní kombinát",
+        "farm": "Houbařská farma",
+        "farm@2": "Svítící pole",
+        "farm@3": "Biofarma Centauri",
+        "fishery": "Lov medúz",
+        "fishery@2": "Medúzí přístav",
+        "fishery@3": "Medúzí flotila",
+        "pasture": "Pastvina šestinožců",
+        "pasture@2": "Farma šestinožců",
+        "pasture@3": "Chovná stanice šestinožců",
+        "mine": "Krystalový důl",
+        "mine@2": "Hluboký krystalový důl",
+        "mine@3": "Strojový krystalový důl",
+        "coal_mine": "Těžba zkamenělých hub",
+        "coal_mine@2": "Hluboká těžba hub",
+        "coal_mine@3": "Automatická těžba hub",
+        "temple": "Chrám dvou sluncí",
+        "park": "Fialový park",
+        "botanical_garden": "Pozemská zahrada",
+        "pyramid": "Krystalová pyramida",
+        "great_library": "Knihovna tří světů",
+        "castle": "Hrad na útesu",
+        "colossus": "Kolos Centauri",
+        "iron_tower": "Věž světla",
+        "stadium": "Aréna šestinožců",
+        "space_port": "Mezihvězdný maják",
+        "market": "Trh dvou světů"
+      },
+      "eras": {
+        "settlement": {
+          "name": "Probuzení",
+          "description": "Kolonisté se probudili z hibernace pod rudým sluncem. Les je fialový, vzduch voňavý a něco v křoví hraje na flétnu."
+        },
+        "antiquity": {
+          "name": "Osada pod rudým sluncem",
+          "description": "Cihly, chrámy dvou sluncí a akvadukty. Na jezerech se loví medúzy."
+        },
+        "middle_ages": {
+          "name": "Fialové městečko",
+          "description": "Krystalové doly, hutě a univerzity. Město roste mezi obřími houbami."
+        },
+        "renaissance": {
+          "name": "Proximská renesance",
+          "description": "Obchod, umění a věda. Šestinožci dávají vlnu a divadla hrají hry o třech světech."
+        },
+        "industrial": {
+          "name": "Industrie Centauri",
+          "description": "Uhlí ze zkamenělých hub, ocel a železnice přes fialové pláně."
+        },
+        "modern": {
+          "name": "Moderní Proxima",
+          "description": "Elektrárny, nemocnice a první mrakodrapy nad lesem."
+        },
+        "information": {
+          "name": "Síť tří světů",
+          "description": "Počítače a jaderná energie. Zprávy ze Země jdou čtyři roky — odpovídáme na ně stejně."
+        },
+        "future": {
+          "name": "Domov mezi hvězdami",
+          "description": "Fúze a umělá inteligence. Mezihvězdný maják oznámí Zemi, že jsme doma."
+        }
+      },
+      "events": {
+        "drought": {
+          "name": "Rudá erupce",
+          "description": "Rudé slunce vyvrhlo erupci — houbařské farmy vyrábějí méně potravin."
+        },
+        "epidemic": {
+          "name": "Mimozemská alergie",
+          "description": "Pyl fialových stromů nikomu nesvědčí. Část kolonistů odešla a nálada klesla."
+        },
+        "ancient_ruins": {
+          "name": "Ruiny původní civilizace",
+          "description": "Při stavbě se našly skutečné mimozemské ruiny. Tentokrát to opravdu není starý rover."
+        },
+        "caravan": {
+          "name": "Karavana šestinožců",
+          "description": "Obchodníci ze sousedního kontinentu nabízejí {amount} × {resource} za {cost} — poloviční cenu."
+        },
+        "bumper_harvest": {
+          "name": "Houbová sezóna",
+          "description": "Houby rostou jako houby — farmy vyrábějí více potravin."
+        }
+      }
     }
   }
 }

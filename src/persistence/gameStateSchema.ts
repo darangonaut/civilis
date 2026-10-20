@@ -36,6 +36,15 @@ export const gameStateSchema = z
       generation: z.number().int().positive(),
       legacyIds: z.array(z.string().min(1)),
       originCity: z.string().nullable(),
+      history: z.array(
+        z.strictObject({
+          city: z.string(),
+          planet: z.enum(PLANET_IDS),
+          days: nonNegativeInt,
+          score: z.number().int().nonnegative(),
+          population: nonNegativeInt,
+        }),
+      ),
     }),
     simulation: z.strictObject({
       day: nonNegativeInt,

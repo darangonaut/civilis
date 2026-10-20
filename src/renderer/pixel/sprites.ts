@@ -128,6 +128,7 @@ export function drawTerrain(
   planet: PlanetId = 'earth',
 ): PixelSprite {
   if (planet === 'mars') return drawMarsTerrain(terrain, variant);
+  if (planet === 'proxima') return drawProximaTerrain(terrain, variant);
   const seed = variant * 7919 + terrain.length * 104729;
   switch (terrain) {
     case 'grass': {
@@ -1786,6 +1787,11 @@ export function buildingSpriteKey(
       `mars~${earthSpriteKey(definitionId, level, completedTechnologyIds)}`
     );
   }
+  if (planet === 'proxima') {
+    return PROXIMA_PAINTERS[definitionId]
+      ? `proxima:${definitionId}@${level}`
+      : `proxima~${earthSpriteKey(definitionId, level, completedTechnologyIds)}`;
+  }
   return earthSpriteKey(definitionId, level, completedTechnologyIds);
 }
 
@@ -1803,6 +1809,9 @@ function earthSpriteKey(
 export function drawBuilding(key: string): PixelSprite {
   if (key.startsWith('mars:')) return drawMarsBuilding(key);
   if (key.startsWith('mars~')) return drawMarsRecolored(key.slice('mars~'.length));
+  if (key.startsWith('proxima:')) return drawProximaBuilding(key);
+  if (key.startsWith('proxima~'))
+    return recolor(drawBuilding(key.slice('proxima~'.length)), PROXIMA_RECOLOR);
   const wonder = WONDER_PAINTERS[key];
   if (wonder) {
     const { pc, cx, cy } = wonderCanvas();
@@ -2631,5 +2640,284 @@ function drawMarsBuilding(key: string): PixelSprite {
   const [id, levelText] = key.slice('mars:'.length).split('@');
   const { pc, cx, cy } = tileCanvas(BUILDING_TOP);
   MARS_PAINTERS[id!]!.painter(pc, cx, cy, Number(levelText ?? 1));
+  return finish(pc, cx, cy);
+}
+
+// --- Proxima b -------------------------------------------------------------------------
+
+/** Paleta Proximy b: fialový mach, hubové stromy, tyrkysové jazerá a kryštály. */
+const X = {
+  moss: 0x5b4a8a,
+  mossLight: 0x7d6bb0,
+  mossDark: 0x3d3266,
+  soil: 0x4a2f5a,
+  soilLight: 0x6b3f7a,
+  glow: 0x5ff2d8,
+  cap: 0xd2449a,
+  capLight: 0xff7ac2,
+  capDark: 0x8a2a6a,
+  stem: 0xe8d8c0,
+  lake: 0x2fa89a,
+  lakeLight: 0x7ff0d8,
+  lakeDeep: 0x1b6a6a,
+  crystal: 0x9ad8ff,
+  crystalDark: 0x4a7ab0,
+  rock: 0x5a6070,
+  rockDark: 0x3a3f4e,
+  hill: 0x6a4a9a,
+  hillLight: 0x8a6ac0,
+  hillDark: 0x4a3478,
+  wood: 0x8a4aa0,
+  woodShade: 0x6a3a80,
+  woodDark: 0x45265a,
+  wall: 0xe8dcf0,
+  wallShade: 0xbfaad6,
+  wallDark: 0x8f78ad,
+  roof: 0x2fa89a,
+  roofShade: 0x1b6a6a,
+  roofDark: 0x124a4a,
+} as const;
+
+export const PROXIMA_MINIMAP: Readonly<Record<TerrainType, string>> = {
+  grass: '#5b4a8a',
+  forest: '#d2449a',
+  fertile: '#4a2f5a',
+  rock: '#4a7ab0',
+  water: '#2fa89a',
+  hill: '#4a3478',
+};
+
+/** Hubový strom: svetlý kmeň a purpurový klobúk so svietiacimi bodkami. */
+const MUSHROOM_TREE = ['.ooooo.', 'oLCCCCo', 'oCgCCgo', 'ooDDDoo', '...s...', '...s...', '..sss..'];
+const MUSHROOM_PAL = { o: X.capDark, L: X.capLight, C: X.cap, D: X.capDark, g: X.glow, s: X.stem };
+const CRYSTAL = ['..o..', '.oLo.', '.oLo.', 'oLCDo', 'oCCDo', '.ooo.'];
+const CRYSTAL_PAL = { o: X.crystalDark, L: P.white, C: X.crystal, D: X.crystalDark };
+const PROXIMA_BOULDER_PAL = { o: X.rockDark, L: X.crystal, S: X.rock, D: X.rockDark };
+
+function mossTexture(seed: number) {
+  return (x: number, y: number): Rgb => {
+    const n = pixelNoise(x, y, seed);
+    if (n < 0.012) return X.glow;
+    if (n < 0.04) return X.mossLight;
+    if (n > 0.965) return X.mossDark;
+    return X.moss;
+  };
+}
+
+export function drawProximaTerrain(terrain: TerrainType, variant: number): PixelSprite {
+  const seed = variant * 7919 + terrain.length * 104729 + 57;
+  switch (terrain) {
+    case 'grass': {
+      const { pc, cx, cy } = tileCanvas(0);
+      pc.fillDiamond(cx, cy, HW, mossTexture(seed));
+      if (variant === 3) pc.set(cx - 6, cy, X.capLight);
+      return sprite(pc, cx, cy);
+    }
+    case 'forest': {
+      const { pc, cx, cy } = tileCanvas(9);
+      pc.fillDiamond(cx, cy, HW, dither([X.mossDark, X.moss], [0.85, 0.15], seed));
+      const spots: [number, number][] =
+        variant % 2 === 0
+          ? [
+              [-9, -2],
+              [3, -4],
+              [-3, 1],
+              [8, 0],
+            ]
+          : [
+              [-6, -3],
+              [5, -2],
+              [-10, 1],
+              [1, 2],
+            ];
+      for (const [dx, dy] of spots) pc.stamp(cx + dx - 3, cy + dy - 6, MUSHROOM_TREE, MUSHROOM_PAL);
+      return sprite(pc, cx, cy);
+    }
+    case 'fertile': {
+      const { pc, cx, cy } = tileCanvas(0);
+      pc.fillDiamond(cx, cy, HW, (x, y) => {
+        const furrow = (((x >> 1) + y) & 3) === 0;
+        if (furrow) return pixelNoise(x, y, seed) < 0.15 ? X.glow : X.soil;
+        return pixelNoise(x, y, seed) < 0.06 ? X.soilLight : X.soil;
+      });
+      return sprite(pc, cx, cy);
+    }
+    case 'rock': {
+      const { pc, cx, cy } = tileCanvas(6);
+      pc.fillDiamond(cx, cy, HW, dither([X.mossDark, X.rockDark], [0.7, 0.3], seed));
+      pc.stamp(cx - 9, cy - 3, BOULDER_BIG, PROXIMA_BOULDER_PAL);
+      pc.stamp(cx + 2, cy - 7, CRYSTAL, CRYSTAL_PAL);
+      pc.stamp(cx - 2, cy + 2, BOULDER, PROXIMA_BOULDER_PAL);
+      if (variant % 2) pc.stamp(cx + 7, cy - 3, CRYSTAL, CRYSTAL_PAL);
+      return sprite(pc, cx, cy);
+    }
+    case 'water': {
+      const { pc, cx, cy } = tileCanvas(0);
+      pc.fillDiamond(cx, cy, HW, X.lake);
+      const waves: [number, number][] =
+        variant % 2 === 0
+          ? [
+              [-8, -1],
+              [3, 2],
+            ]
+          : [
+              [-4, 2],
+              [5, -2],
+            ];
+      for (const [dx, dy] of waves) {
+        pc.fillRect(cx + dx, cy + dy, 3, 1, X.lakeLight);
+        pc.set(cx + dx + 3, cy + dy + 1, X.lakeLight);
+      }
+      if (variant === 1) pc.set(cx + 1, cy - 1, X.capLight);
+      return sprite(pc, cx, cy);
+    }
+    case 'hill': {
+      const { pc, cx, cy } = tileCanvas(5);
+      pc.fillDiamond(cx, cy, HW, dither([X.hill, X.hillDark], [0.93, 0.07], seed));
+      const mound: Point[] = [
+        [cx - 12, cy + 2],
+        [cx - 6, cy - 5],
+        [cx + 1, cy - 8],
+        [cx + 7, cy - 4],
+        [cx + 12, cy + 2],
+        [cx, cy + 6],
+      ];
+      pc.fillPolygon(mound, (x) => (x < cx + 1 ? X.hillLight : X.hill));
+      pc.fillPolygon(
+        [
+          [cx + 1, cy - 8],
+          [cx + 7, cy - 4],
+          [cx + 12, cy + 2],
+          [cx + 3, cy + 4],
+        ],
+        X.hillDark,
+      );
+      pc.set(cx - 3, cy - 3, X.glow);
+      return sprite(pc, cx, cy);
+    }
+  }
+}
+
+/** Pozemské budovy na Proxime: levanduľové steny, tyrkysové strechy, fialové drevo (bez kupol). */
+const PROXIMA_RECOLOR: ReadonlyMap<Rgb, Rgb> = new Map<Rgb, Rgb>([
+  [P.plaster, X.wall],
+  [P.plasterShade, X.wallShade],
+  [P.plasterDark, X.wallDark],
+  [P.wood, X.wood],
+  [P.woodShade, X.woodShade],
+  [P.woodDark, X.woodDark],
+  [P.roof, X.roof],
+  [P.roofShade, X.roofShade],
+  [P.roofDark, X.roofDark],
+  [P.grass, X.moss],
+  [P.grassLight, X.mossLight],
+  [P.grassDark, X.mossDark],
+  [P.leaf, X.cap],
+  [P.leafLight, X.capLight],
+  [P.leafDark, X.capDark],
+  [P.soilLight, X.soilLight],
+  [P.soilDark, X.soil],
+]);
+
+function recolor(sprite: PixelSprite, palette: ReadonlyMap<Rgb, Rgb>): PixelSprite {
+  const { canvas } = sprite;
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const color = canvas.get(x, y);
+      const mapped = color === null ? undefined : palette.get(color);
+      if (mapped !== undefined) canvas.set(x, y, mapped);
+    }
+  }
+  return sprite;
+}
+
+const PROXIMA_DETAIL_PAL = { ...DETAIL_PAL, f: X.woodDark, d: X.woodDark, D: X.wood };
+
+/** Malá chatka s tyrkysovou strechou (farmy, zberači). */
+function proximaHut(pc: PixelCanvas, cx: number, cy: number, hw: number, h: number): void {
+  isoBox(pc, cx, cy, hw, h, { top: X.wall, left: X.wall, right: X.wallShade });
+  hipRoof(pc, cx, cy, hw, h, Math.max(3, h - 2), X.roof, X.roofShade);
+  pc.stamp(...rightWall(cx, cy, hw, 2, Math.min(4, h)), ['dd', 'dD', 'dD'], PROXIMA_DETAIL_PAL);
+}
+
+type ProximaPainter = MarsPainter;
+
+const paintMushroomFarm: ProximaPainter = (pc, cx, cy, level) => {
+  pc.fillDiamond(cx, cy, HW - 1, (x, y) => (((x >> 1) + y) & 3 ? X.soil : X.soilLight));
+  const caps: [number, number][] = [
+    [-9, 0],
+    [-4, -3],
+    [2, 2],
+    [7, -1],
+    [-3, 3],
+  ];
+  for (const [dx, dy] of caps.slice(0, 3 + Math.min(level, 2))) {
+    pc.set(cx + dx, cy + dy, X.stem);
+    pc.fillRect(cx + dx - 1, cy + dy - 1, 3, 1, level >= 2 ? X.glow : X.capLight);
+  }
+  proximaHut(pc, cx + 2, cy - 4, 5, 5);
+  if (level >= 3) {
+    pc.fillRect(cx - 8, cy - 12, 1, 8, X.woodDark);
+    pc.set(cx - 8, cy - 13, X.glow);
+  }
+};
+
+const paintPurpleLumber: ProximaPainter = (pc, cx, cy, level) => {
+  proximaHut(pc, cx + 3, cy - 1, 8, 7);
+  const logs = ['.ooo.', 'oWwWo', 'oWwWo', '.ooo.'];
+  const pal = { o: X.woodDark, W: X.wood, w: X.capLight };
+  pc.stamp(cx - 13, cy - 1, logs, pal);
+  pc.stamp(cx - 9, cy + 2, logs, pal);
+  if (level >= 2) pc.stamp(cx - 6, cy - 3, logs, pal);
+  if (level >= 3) pc.stamp(cx + 6, cy - 22, MUSHROOM_TREE, MUSHROOM_PAL);
+};
+
+/** Šesťnožec: bledé chlpaté telo, šesť nôh a tykadlá. */
+const HEXAPOD = ['.a..a.', '.wwww.', 'wwwwww', 'k.k.k.', '.k.k.k'];
+const HEXAPOD_PAL = { w: X.wall, k: X.woodDark, a: X.capLight };
+
+const paintHexapodPasture: ProximaPainter = (pc, cx, cy, level) => {
+  pc.fillDiamond(cx, cy, HW - 1, mossTexture(91));
+  // Plot.
+  pc.fillRect(cx - 14, cy, 1, 3, X.woodDark);
+  pc.fillRect(cx + 13, cy, 1, 3, X.woodDark);
+  pc.fillRect(cx - 14, cy, 28, 1, X.wood);
+  const spots: [number, number][] = [
+    [-8, -4],
+    [2, -2],
+    [-3, 2],
+  ];
+  for (const [dx, dy] of spots.slice(0, 1 + Math.min(level, 2))) {
+    pc.stamp(cx + dx, cy + dy, HEXAPOD, HEXAPOD_PAL);
+  }
+  if (level >= 2) proximaHut(pc, cx + 8, cy - 3, 4, 4);
+};
+
+const paintJellyfishCatcher: ProximaPainter = (pc, cx, cy, level) => {
+  // Mólo nad jazerom a siete s medúzami.
+  pc.fillDiamond(cx, cy, HW - 1, X.lake);
+  isoBox(pc, cx - 3, cy + 1, 7, 2, { top: X.wood, left: X.woodShade, right: X.woodDark });
+  proximaHut(pc, cx - 3, cy - 1, 5, 5);
+  const jellies: [number, number][] = [
+    [6, -2],
+    [9, 2],
+    [3, 4],
+  ];
+  for (const [dx, dy] of jellies.slice(0, 1 + Math.min(level, 2))) {
+    pc.stamp(cx + dx, cy + dy, ['.cc.', 'cLLc', 'l.l.'], { c: X.cap, L: X.capLight, l: X.glow });
+  }
+};
+
+const PROXIMA_PAINTERS: Readonly<Record<string, ProximaPainter>> = {
+  farm: paintMushroomFarm,
+  lumberjack: paintPurpleLumber,
+  pasture: paintHexapodPasture,
+  fishery: paintJellyfishCatcher,
+};
+
+function drawProximaBuilding(key: string): PixelSprite {
+  const [id, levelText] = key.slice('proxima:'.length).split('@');
+  const { pc, cx, cy } = tileCanvas(BUILDING_TOP);
+  PROXIMA_PAINTERS[id!]!(pc, cx, cy, Number(levelText ?? 1));
   return finish(pc, cx, cy);
 }

@@ -8,6 +8,7 @@ import {
   cityScore,
   conditionProgress,
   currentMilestone,
+  nextPlanet,
   type ConditionProgress,
 } from '@/engine';
 import { useState } from 'react';
@@ -106,19 +107,31 @@ function MilestoneList() {
   const completedIds = useGameState((s) => s.milestones.completedIds);
   const current = useGameState((s) => currentMilestone(s, gameData));
   const openColony = useUiStore((s) => s.setColonyOpen);
+  const openVictory = useUiStore((s) => s.setVictoryOpen);
+  const hasNext = useGameState((s) => nextPlanet(s, gameData) !== null);
+  const hasHistory = useGameState((s) => s.colony.history.length > 0);
 
   return (
     <>
       {!current && (
         <div className="all-done">
           <p>{t('milestones.allDone')}</p>
-          {gameData.colony && (
+          {gameData.colony && hasNext && (
             <button
               className="primary"
               data-testid="milestones-colony"
               onClick={() => openColony(true)}
             >
               🚀 {t('colony.button')}
+            </button>
+          )}
+          {!hasNext && hasHistory && (
+            <button
+              className="primary"
+              data-testid="milestones-saga"
+              onClick={() => openVictory(true)}
+            >
+              ★ {t('saga.chronicle')}
             </button>
           )}
         </div>

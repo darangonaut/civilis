@@ -64,7 +64,12 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
   const start = data.balance.startingState;
   const world = generateWorld(seed, width, height, data.planet);
   const buildings = placeStartingBuildings(world, data);
-  const colony: ColonyState = options.colony ?? { generation: 1, legacyIds: [], originCity: null };
+  const colony: ColonyState = options.colony ?? {
+    generation: 1,
+    legacyIds: [],
+    originCity: null,
+    history: [],
+  };
   const legacies = activeLegacies({ colony }, data);
   const resources = { ...start.resources };
   let population = start.population;

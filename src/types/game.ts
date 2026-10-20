@@ -8,7 +8,7 @@ import type { Position, World } from './world';
 export const DIFFICULTY_IDS = ['easy', 'normal', 'hard'] as const;
 export type DifficultyId = (typeof DIFFICULTY_IDS)[number];
 
-export const PLANET_IDS = ['earth', 'mars'] as const;
+export const PLANET_IDS = ['earth', 'mars', 'proxima'] as const;
 export type PlanetId = (typeof PLANET_IDS)[number];
 
 /** Kolónia: koľké mesto v poradí a výhody zdedené z predošlých miest (schéma v10). */
@@ -17,6 +17,18 @@ export interface ColonyState {
   legacyIds: string[];
   /** Názov mesta, z ktorého kolonisti prileteli. */
   originCity: string | null;
+  /** Dokončené mestá ságy v poradí (schéma v11). */
+  history: CityRecord[];
+}
+
+/** Záznam dokončeného mesta pre záverečnú kroniku ságy. */
+export interface CityRecord {
+  city: string;
+  planet: PlanetId;
+  /** Deň dohrania (alebo odletu, ak nebol zaznamenaný). */
+  days: number;
+  score: number;
+  population: number;
 }
 
 export interface HappinessFactors {

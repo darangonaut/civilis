@@ -3,7 +3,13 @@ import { createNewGame } from '@/engine';
 import { AUTOSAVE_SLOT_ID } from '@/persistence/db';
 import { SaveService } from '@/persistence/saveService';
 import { takeUnloadSnapshot } from '@/persistence/unloadSnapshot';
-import type { ColonyState, DifficultyId, GameState, PlanetId } from '@/types';
+import {
+  PLANET_IDS,
+  type ColonyState,
+  type DifficultyId,
+  type GameState,
+  type PlanetId,
+} from '@/types';
 import { GameController } from './GameController';
 import { createGameId } from './ids';
 
@@ -15,8 +21,10 @@ function seedFromUrl(): number | null {
   return Number.isInteger(seed) ? seed : null;
 }
 
-/** `?planet=mars` založí novú hru rovno na Marse (testovanie). */
-const urlPlanet: PlanetId = params.get('planet') === 'mars' ? 'mars' : 'earth';
+/** `?planet=mars` / `?planet=proxima` založí novú hru rovno na planéte (testovanie). */
+const urlPlanet: PlanetId =
+  ((PLANET_IDS as readonly string[]).find((id) => id === params.get('planet')) as PlanetId) ??
+  'earth';
 
 export function randomSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;

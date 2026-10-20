@@ -78,6 +78,9 @@ describe('sprity budov', () => {
         const mars = buildingSpriteKey(b.id, level, [], 'mars');
         expect(mars, b.id).toMatch(/^mars[:~]/);
         keys.add(mars);
+        const proxima = buildingSpriteKey(b.id, level, [], 'proxima');
+        expect(proxima, b.id).toMatch(/^proxima[:~]/);
+        keys.add(proxima);
       }
     }
     for (const key of keys) expect(isFallback(key), key).toBe(false);
