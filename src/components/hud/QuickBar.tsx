@@ -5,6 +5,7 @@ import { useCompact } from '@/app/useCompact';
 import { problemBuildingCount } from '@/app/problems';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
+import { scaleAmount } from '@/engine';
 import { useUiStore, type PanelId } from '@/stores/uiStore';
 import { Icon, type IconName } from './Icon';
 import { LayerControl } from './LayerControl';
@@ -31,7 +32,12 @@ export function QuickBar() {
       ? gameData.technologiesById.get(s.research.activeTechnologyId)
       : undefined;
     return tech
-      ? { name: techName(tech.id), ratio: s.research.investedKnowledge / tech.cost }
+      ? {
+          name: techName(tech.id),
+          ratio:
+            s.research.investedKnowledge /
+            scaleAmount(tech.cost, gameData.balance.difficulties[s.difficulty].researchCost),
+        }
       : null;
   });
 

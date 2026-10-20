@@ -81,7 +81,11 @@ export function validatePlacement(
     }
   }
   const resources = state.city.economy.resources;
-  const cost = buildCostAtLevel(definition, level);
+  const cost = buildCostAtLevel(
+    definition,
+    level,
+    data.balance.difficulties[state.difficulty].constructionCost,
+  );
   if (RESOURCE_IDS.some((id) => (cost[id] ?? 0) > resources[id])) {
     return fail('insufficient_resources');
   }
@@ -110,7 +114,11 @@ function placeBuilding(
 
   const definition = data.buildingsById.get(buildingId)!;
   const resources = state.city.economy.resources;
-  const cost = buildCostAtLevel(definition, level);
+  const cost = buildCostAtLevel(
+    definition,
+    level,
+    data.balance.difficulties[state.difficulty].constructionCost,
+  );
   for (const id of RESOURCE_IDS) resources[id] -= cost[id] ?? 0;
 
   const instance = {
@@ -147,7 +155,13 @@ function demolishBuilding(state: GameState, data: GameData, instanceId: string):
   }
   // Recyklácia: časť investovaných surovín sa vráti (do kapacity skladu, vedomosti bez limitu).
   if (definition) {
-    const refund = demolishRefund(definition, instance.level, data.balance.demolishRefund);
+    const difficulty = data.balance.difficulties[state.difficulty];
+    const refund = demolishRefund(
+      definition,
+      instance.level,
+      difficulty.constructionCost,
+      data.balance.demolishRefund * difficulty.demolishRefund,
+    );
     const resources = state.city.economy.resources;
     const capacity = state.city.economy.storageCapacity;
     for (const id of RESOURCE_IDS) {

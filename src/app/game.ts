@@ -3,7 +3,7 @@ import { createNewGame } from '@/engine';
 import { AUTOSAVE_SLOT_ID } from '@/persistence/db';
 import { SaveService } from '@/persistence/saveService';
 import { takeUnloadSnapshot } from '@/persistence/unloadSnapshot';
-import type { GameState } from '@/types';
+import type { DifficultyId, GameState } from '@/types';
 import { GameController } from './GameController';
 import { createGameId } from './ids';
 
@@ -19,9 +19,13 @@ function randomSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;
 }
 
-export function createFreshGame(seed: number = randomSeed()): GameState {
+export function createFreshGame(
+  seed: number = randomSeed(),
+  difficulty: DifficultyId = 'normal',
+): GameState {
   return createNewGame(gameData, {
     seed,
+    difficulty,
     gameId: createGameId(),
     now: new Date().toISOString(),
   });

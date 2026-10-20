@@ -29,6 +29,8 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v8 → v9: obtiažnosť; staršie hry sú normálne. */
+  8: (raw) => ({ difficulty: 'normal', ...raw }),
   /** v7 → v8: zložky spokojnosti tovar a prostredie (potreby obyvateľov, znečistenie). */
   7: (raw) => {
     const city = raw.city as RawCity | undefined;

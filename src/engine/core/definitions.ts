@@ -236,6 +236,16 @@ export const eventDefinitionSchema = z
     message: 'udalosť s voľbou musí mať `choices`, ostatné `effects`',
   }) satisfies z.ZodType<EventDefinition>;
 
+/** Preset obtiažnosti: násobiče herných čísel (1 = bez zmeny). */
+const difficultySchema = z.strictObject({
+  constructionCost: z.number().positive(),
+  maintenance: nonNegative,
+  researchCost: z.number().positive(),
+  foodPerCapita: nonNegative,
+  baseProduction: nonNegative,
+  demolishRefund: nonNegative,
+});
+
 export const balanceSchema = z.strictObject({
   startingState: z.strictObject({
     population: positiveInt,
@@ -255,6 +265,12 @@ export const balanceSchema = z.strictObject({
   demolishRefund: z.number().min(0).max(1),
   /** Základný zber bez budov — zabraňuje neobnoviteľnému stavu (žiadne drevo ani kameň). */
   baseProduction: partialResourcesSchema,
+  /** Presety obtiažnosti (Ľahká / Normálna / Ťažká). */
+  difficulties: z.strictObject({
+    easy: difficultySchema,
+    normal: difficultySchema,
+    hard: difficultySchema,
+  }),
   noToolsEfficiency: z.number().min(0).max(1),
   noFundsEfficiency: z.number().min(0).max(1),
   happinessWeights: z.strictObject({
@@ -561,6 +577,10 @@ export function loadGameData(raw: RawGameData): GameData {
   }
   if (balance.data.events.minInterval > balance.data.events.maxInterval) {
     issues.push('balance.events: minInterval nesmie byť väčší ako maxInterval');
+  }
+  for (const [id, preset] of Object.entries(balance.data.difficulties)) {
+    if (balance.data.demolishRefund * preset.demolishRefund > 1)
+      issues.push(`balance.difficulties.${id}: vrátenie pri zbúraní nesmie presiahnuť 100 %`);
   }
 
   if (issues.length > 0) throw new GameDataError(issues);
