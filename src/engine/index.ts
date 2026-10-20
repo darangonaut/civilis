@@ -10,10 +10,23 @@ export {
   requiredDays,
 } from './milestones/milestones';
 export { targetHappiness } from './population/population';
+export {
+  activeLegacies,
+  availableLegacies,
+  colonyLaunchBlock,
+  difficultyOf,
+  type ColonyLaunchBlock,
+} from './core/colony';
 export { createNewGame, type NewGameOptions } from './core/newGame';
 export { validatePlacement } from './core/commands';
 export { COMMAND_FAILURE_REASONS, type CommandFailureReason } from './core/commandReasons';
-export { loadGameData, GameDataError, type GameData } from './core/definitions';
+export {
+  loadGameData,
+  GameDataError,
+  type GameData,
+  type LegacyDefinition,
+  type PlanetDefinition,
+} from './core/definitions';
 export * from './core/constants';
 export { getTile, isInBounds, tileIndex, footprint } from './world/grid';
 export { getStartCenter } from './world/generateWorld';

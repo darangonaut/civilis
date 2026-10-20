@@ -5,7 +5,7 @@ import { controller } from '@/app/game';
 import { commandReasonLabel, effectLabel, t } from '@/app/i18n';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { currentEraIndex, scaleAmount, validateResearch } from '@/engine';
+import { currentEraIndex, difficultyOf, scaleAmount, validateResearch } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import type { ResearchState, TechnologyDefinition } from '@/types';
 import { BuildingIcon } from '../BuildingIcon';
@@ -87,9 +87,7 @@ export function ResearchPanel() {
   const knowledge = useGameState((s) => s.city.economy.resources.knowledge);
   const rate = useGameState((s) => s.city.economy.dailyProduction.knowledge ?? 0);
   const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
-  const researchFactor = useGameState(
-    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
-  );
+  const researchFactor = useGameState((s) => difficultyOf(s, gameData).researchCost);
   const [tab, setTab] = useState(eraIndex);
   const era = gameData.eras[Math.min(tab, eraIndex)]!;
   const active = research.activeTechnologyId
@@ -290,9 +288,7 @@ function TechNode({
   onSelect: (id: string) => void;
 }) {
   const start = useStartResearch();
-  const researchFactor = useGameState(
-    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
-  );
+  const researchFactor = useGameState((s) => difficultyOf(s, gameData).researchCost);
   const { tech } = node;
   const queueIndex = research.queue.indexOf(tech.id);
   const icons = unlocks.get(tech.id) ?? [];
@@ -363,9 +359,7 @@ function TechNode({
 function TechDetail({ tech, research }: { tech: TechnologyDefinition; research: ResearchState }) {
   const start = useStartResearch();
   const showNotice = useUiStore((s) => s.showNotice);
-  const researchFactor = useGameState(
-    (s) => gameData.balance.difficulties[s.difficulty].researchCost,
-  );
+  const researchFactor = useGameState((s) => difficultyOf(s, gameData).researchCost);
   const status = statusOf(research, tech);
   const icons = unlocks.get(tech.id) ?? [];
   const queued = research.queue.includes(tech.id);

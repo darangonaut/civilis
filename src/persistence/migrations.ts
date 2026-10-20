@@ -29,6 +29,12 @@ export const MIGRATIONS: Readonly<Record<number, Migration>> = {
       },
     };
   },
+  /** v9 → v10: planéta a kolónia; staršie hry sú prvé mesto na Zemi. */
+  9: (raw) => ({
+    planet: 'earth',
+    colony: { generation: 1, legacyIds: [], originCity: null },
+    ...raw,
+  }),
   /** v8 → v9: obtiažnosť; staršie hry sú normálne. */
   8: (raw) => ({ difficulty: 'normal', ...raw }),
   /** v7 → v8: zložky spokojnosti tovar a prostredie (potreby obyvateľov, znečistenie). */

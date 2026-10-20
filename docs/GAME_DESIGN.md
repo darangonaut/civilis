@@ -240,3 +240,20 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
 - Reakcie: prvá budova nového typu (okrem bežných), div sveta, míľnik, éra, polovica objavov,
   pokles domov, náhodné udalosti — najviac jedna reakcia denne.
 - Je to iba prezentačná vrstva (náhoda v UI, nie v engine) — príspevky sa neukladajú.
+
+## Kolónia na Marse (2026-10-20, na želanie)
+
+- Po dohraní (všetky míľniky, postavený vesmírny prístav a 500 železa, 400 elektroniky,
+  400 nástrojov, 300 jedla) sa dá vyslať **kolonizačná loď** — z obrazovky víťazstva alebo
+  z panela Míľniky. Terajšie mesto sa uloží do prvej voľnej pozície.
+- Nové mesto začína na Marse od prvej éry: loď pri pristátí havarovala a databanky sa stratili
+  (príbeh, prečo sa začína znova). Kolonisti si zachránia jednu **výhodu** (dedičstvo); ďalšie
+  mesto si vyberá ďalšiu a zdedené zostávajú: skúsení osadníci (+10 obyvateľov, +60 jedla),
+  databanka (výskum −20 %), nákladný priestor (suroviny a 500 peňazí), inžinieri (stavby −10 %),
+  úsporná správa (údržba −15 %).
+- Mars: červený piesok bez úrodnej pôdy, ľadové polia (namiesto vody), trosky predošlých misií
+  (namiesto lesa, šrot = drevo), krátery (kopce), viac skál. Farma je skleník (piesok, plná účinnosť,
+  drahší o kameň), drevorubač šrotovisko, studňa ľadový vrt, rybárska chata riasová farma,
+  pastvina bioreaktor, domy kupoly; éry, udalosti (prachová búrka, únik kyslíka, záhadný
+  artefakt…), divy a Hlas ulice majú marťanskú podobu. Štart s viac kameňom a nástrojmi.
+- Rovnaké ID budov ako na Zemi, takže míľniky, technológie aj bot platia bez zmeny.

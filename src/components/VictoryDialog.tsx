@@ -10,6 +10,7 @@ import { cityScore } from '@/engine';
 export function VictoryDialog() {
   const open = useUiStore((s) => s.victoryOpen);
   const setOpen = useUiStore((s) => s.setVictoryOpen);
+  const openColony = useUiStore((s) => s.setColonyOpen);
   const day = useGameState((s) => s.simulation.day);
   const population = useGameState((s) => s.city.population.total);
   const finishedDay = useGameState((s) => s.achievements.finishedDay);
@@ -49,9 +50,23 @@ export function VictoryDialog() {
           : `${t('topbar.day')} ${day}`}{' '}
         · {t('topbar.population')} {population}
       </p>
-      <button className="primary" onClick={continuePlaying}>
-        {t('victory.continue')}
-      </button>
+      <div className="event-choices">
+        {gameData.colony && (
+          <button
+            className="btn"
+            data-testid="victory-colony"
+            onClick={() => {
+              setOpen(false);
+              openColony(true);
+            }}
+          >
+            {t('colony.button')}
+          </button>
+        )}
+        <button className="primary" onClick={continuePlaying}>
+          {t('victory.continue')}
+        </button>
+      </div>
     </dialog>
   );
 }

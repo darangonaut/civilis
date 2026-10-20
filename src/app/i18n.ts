@@ -6,6 +6,7 @@ import {
   type TechnologyEffect,
 } from '@/types';
 
+import { gameData } from '@/data';
 import { useLanguageStore, type Language } from '@/stores/languageStore';
 import { cs } from './locales/cs';
 import { en } from './locales/en';
@@ -29,7 +30,12 @@ export const currentLanguage = (): Language => useLanguageStore.getState().langu
 
 /** Preloží kľúč do aktuálneho jazyka; `{názov}` v texte nahradí hodnotou z `params`. */
 export function t(key: TranslationKey, params?: Record<string, string | number>): string {
-  const text: string = DICTIONARIES[currentLanguage()][key];
+  const dictionary = DICTIONARIES[currentLanguage()];
+  const planet = gameData.planet.id;
+  // Kolónia môže mať vlastný text (`mars:resource.wood` = „Šrot“).
+  const text: string =
+    (planet !== 'earth' && (dictionary as Record<string, string>)[`${planet}:${key}`]) ||
+    dictionary[key];
   return params
     ? text.replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? `{${name}}`))
     : text;

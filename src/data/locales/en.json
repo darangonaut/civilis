@@ -319,5 +319,148 @@
       "name": "Festival",
       "description": "The residents would like to hold a festival. It costs {cost}, but it lifts the mood for a month."
     }
+  },
+  "legacies": {
+    "settlers": {
+      "name": "Experienced Settlers",
+      "description": "The colony starts with 10 extra residents and more food."
+    },
+    "databank": {
+      "name": "Rescued Databank",
+      "description": "Research is 20% cheaper."
+    },
+    "cargo": {
+      "name": "Full Cargo Hold",
+      "description": "More resources and money at the start."
+    },
+    "engineers": {
+      "name": "Ship Engineers",
+      "description": "Buildings and upgrades are 10% cheaper."
+    },
+    "thrift": {
+      "name": "Frugal Administration",
+      "description": "Building upkeep is 15% lower."
+    }
+  },
+  "planets": {
+    "mars": {
+      "buildings": {
+        "house": "Habitat Dome",
+        "house@2": "Regolith Dome",
+        "house@3": "Twin Dome",
+        "house@4": "Crater Villa",
+        "house@5": "Terraced Dome",
+        "house@6": "Dome Palace",
+        "house@7": "Habitat Block",
+        "house@8": "Martian Skyscraper",
+        "house@9": "Smart Dome",
+        "house@10": "Olympus Arcology",
+        "bridge": "Ice Walkway",
+        "lumberjack": "Scrapyard",
+        "lumberjack@2": "Recycling Line",
+        "lumberjack@3": "Scrap Combine",
+        "farm": "Greenhouse",
+        "farm@2": "Hydroponic Greenhouse",
+        "farm@3": "Automated Greenhouse",
+        "quarry": "Regolith Quarry",
+        "quarry@2": "Large Regolith Quarry",
+        "quarry@3": "Robotic Quarry",
+        "well": "Ice Drill",
+        "warehouse": "Supply Module",
+        "warehouse@2": "Cargo Hangar",
+        "fishery": "Algae Farm",
+        "fishery@2": "Algae Tanks",
+        "fishery@3": "Algae Combine",
+        "pasture": "Bioreactor",
+        "pasture@2": "Large Bioreactor",
+        "pasture@3": "Gene Station",
+        "harbor": "Ice Terminal",
+        "mine": "Crater Mine",
+        "mine@2": "Deep Crater Mine",
+        "mine@3": "Robotic Mine",
+        "temple": "Earth Memorial",
+        "park": "Garden Dome",
+        "fountain": "Ice Fountain",
+        "pyramid": "Regolith Pyramid",
+        "great_library": "Archive of Earth",
+        "castle": "Fortress Phobos",
+        "colossus": "Colossus of Olympus",
+        "iron_tower": "Valles Marineris Antenna",
+        "stadium": "Low-Gravity Stadium",
+        "space_port": "Interplanetary Spaceport"
+      },
+      "eras": {
+        "settlement": {
+          "name": "Crash Camp",
+          "description": "The ship crashed on landing and the databanks are gone. Build the first self-sufficient base from wreckage and ice."
+        },
+        "antiquity": {
+          "name": "First Base",
+          "description": "Regolith bricks, the first memorials and water from ice. Algae farms grow on the ice fields."
+        },
+        "middle_ages": {
+          "name": "Dome Town",
+          "description": "Crater mines, smelters and universities. The colonists build their own cathedral — under a dome."
+        },
+        "renaissance": {
+          "name": "Martian Renaissance",
+          "description": "Trade, art and science. Bioreactors make cloth and theaters stage plays about old Earth."
+        },
+        "industrial": {
+          "name": "Red Industry",
+          "description": "Coal from the depths, steel and railways across the desert. Mars becomes an industrial planet."
+        },
+        "modern": {
+          "name": "Modern Mars",
+          "description": "Power plants, hospitals and the first Martian skyscrapers."
+        },
+        "information": {
+          "name": "Interplanetary Network",
+          "description": "Computers, nuclear power and news from Earth with a 20-minute delay."
+        },
+        "future": {
+          "name": "Terraforming",
+          "description": "Fusion and artificial intelligence. The interplanetary spaceport will send colonists even further."
+        }
+      },
+      "events": {
+        "drought": {
+          "name": "Dust Storm",
+          "description": "Dust has covered the sun — greenhouses produce less food."
+        },
+        "epidemic": {
+          "name": "Martian Flu",
+          "description": "A virus spreads through the domes. Some colonists flew back and the mood dropped."
+        },
+        "fire": {
+          "name": "Oxygen Leak",
+          "description": "Oxygen leaked in {building} and caught fire. Repair it now, or wait for the colonists to fix it themselves?"
+        },
+        "bumper_harvest": {
+          "name": "Record Harvest",
+          "description": "Clear skies without dust — greenhouses produce more food."
+        },
+        "ancient_ruins": {
+          "name": "Mysterious Artifact",
+          "description": "Builders found a strange metal object. It turned out to be an old rover — still, its memory held valuable data."
+        },
+        "patron": {
+          "name": "Billionaire from Earth",
+          "description": "An Earth billionaire sent money in exchange for a photo with the colony."
+        },
+        "caravan": {
+          "name": "Trade Ship",
+          "description": "A ship from Earth offers {amount} × {resource} for {cost} — half price."
+        },
+        "immigrants": {
+          "name": "New Colonist Ship",
+          "description": "A ship with {amount} colonists has landed. Accept them? It will take a while to get used to the low gravity."
+        },
+        "festival": {
+          "name": "Landing Day",
+          "description": "The colonists would like to celebrate the landing anniversary. It costs {cost}, but improves the mood for a month."
+        }
+      }
+    }
   }
 }

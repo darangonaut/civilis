@@ -1,4 +1,4 @@
-import type { ResourceId, TerrainType } from '@/types';
+import type { PlanetId, ResourceId, TerrainType } from '@/types';
 import { PixelCanvas, pixelNoise, shade, type Point, type Rgb } from './PixelCanvas';
 
 /** Rozmery pixelového políčka (logické pixely). */
@@ -122,7 +122,12 @@ const LOGS_PAL = { o: P.woodDark, W: P.wood, w: P.soilLight };
 
 // --- Terén ------------------------------------------------------------------------------
 
-export function drawTerrain(terrain: TerrainType, variant: number): PixelSprite {
+export function drawTerrain(
+  terrain: TerrainType,
+  variant: number,
+  planet: PlanetId = 'earth',
+): PixelSprite {
+  if (planet === 'mars') return drawMarsTerrain(terrain, variant);
   const seed = variant * 7919 + terrain.length * 104729;
   switch (terrain) {
     case 'grass': {
@@ -1773,7 +1778,12 @@ export function buildingSpriteKey(
   definitionId: string,
   level: number,
   completedTechnologyIds: readonly string[],
+  planet: PlanetId = 'earth',
 ): string {
+  if (planet === 'mars') {
+    const mars = marsSpriteKey(definitionId, level);
+    if (mars) return mars;
+  }
   if (level > 1 && PAINTERS[`${definitionId}@${level}`]) return `${definitionId}@${level}`;
   const tech = TECH_LOOKS[definitionId];
   if (tech && completedTechnologyIds.includes(tech)) return `${definitionId}+`;
@@ -1781,6 +1791,7 @@ export function buildingSpriteKey(
 }
 
 export function drawBuilding(key: string): PixelSprite {
+  if (key.startsWith('mars:')) return drawMarsBuilding(key);
   const wonder = WONDER_PAINTERS[key];
   if (wonder) {
     const { pc, cx, cy } = wonderCanvas();
@@ -2136,3 +2147,334 @@ export function drawPuff(color: Rgb): PixelCanvas {
 export const SMOKE_COLOR = 0xe4e9f0;
 export const DUST_COLOR = P.soilLight;
 export const WATER_KEY_COUNT = 4;
+
+// --- Mars -------------------------------------------------------------------------------
+
+/** Paleta Marsu: červený piesok, čadič, ľad a kov z trosiek. */
+const M = {
+  sand: 0xc4653a,
+  sandLight: 0xe08a55,
+  sandDark: 0x9a4a2c,
+  sandDeep: 0x6e3322,
+  ice: 0xdcecf5,
+  iceLight: 0xffffff,
+  iceShade: 0x9fc3d9,
+  iceDeep: 0x6f9fc0,
+  basalt: 0x5a3b35,
+  basaltLight: 0x8a5a4a,
+  basaltDark: 0x3b2421,
+  metal: 0x9aa3ad,
+  metalLight: 0xd0d6dc,
+  metalDark: 0x5d6670,
+  panel: 0x2c4a7a,
+  glass: 0x9fd8e8,
+  glassShade: 0x5fa8c4,
+  algae: 0x4caf50,
+  algaeDark: 0x2e7d32,
+  hazard: 0xfeae34,
+} as const;
+
+/** Farby minimapy podľa planéty. */
+export const MARS_MINIMAP: Readonly<Record<TerrainType, string>> = {
+  grass: '#c4653a',
+  forest: '#5d6670',
+  fertile: '#9a4a2c',
+  rock: '#3b2421',
+  water: '#dcecf5',
+  hill: '#7a3a22',
+};
+
+const MARS_BOULDER_PAL = { o: M.basaltDark, L: M.basaltLight, S: M.basalt, D: M.basaltDark };
+
+/** Trosky predošlých misií: ohnutý panel, nádrž, kus krídla. */
+const DEBRIS: readonly { rows: string[]; pal: Record<string, Rgb> }[] = [
+  { rows: ['.oo..', 'oPPo.', 'oPPPo', '.oPPo', '..oo.'], pal: { o: M.metalDark, P: M.panel } },
+  {
+    rows: ['.ooo.', 'oLMMo', 'oLMDo', '.ooo.'],
+    pal: { o: M.metalDark, L: M.metalLight, M: M.metal, D: M.metalDark },
+  },
+  { rows: ['o....', 'oMo..', 'oMMo.', 'oMMMo', 'ooooo'], pal: { o: M.metalDark, M: M.metal } },
+];
+
+function sandTexture(seed: number, base: Rgb = M.sand) {
+  return (x: number, y: number): Rgb => {
+    const n = pixelNoise(x, y, seed);
+    if (n < 0.04) return M.sandLight;
+    if (n > 0.95) return M.sandDark;
+    return base;
+  };
+}
+
+export function drawMarsTerrain(terrain: TerrainType, variant: number): PixelSprite {
+  const seed = variant * 7919 + terrain.length * 104729 + 31;
+  switch (terrain) {
+    case 'grass':
+    case 'fertile': {
+      const { pc, cx, cy } = tileCanvas(0);
+      pc.fillDiamond(cx, cy, HW, sandTexture(seed, terrain === 'fertile' ? M.sandDark : M.sand));
+      if (variant === 2) pc.stamp(cx + 3, cy - 1, ['.o.', 'oSo'], MARS_BOULDER_PAL);
+      return sprite(pc, cx, cy);
+    }
+    case 'forest': {
+      const { pc, cx, cy } = tileCanvas(5);
+      pc.fillDiamond(cx, cy, HW, dither([M.sandDark, M.sand], [0.35, 0.65], seed));
+      const spots: [number, number][] =
+        variant % 2 === 0
+          ? [
+              [-9, -3],
+              [2, -4],
+              [-2, 1],
+            ]
+          : [
+              [-6, -2],
+              [5, -1],
+              [-11, 1],
+            ];
+      spots.forEach(([dx, dy], i) => {
+        const piece = DEBRIS[(variant + i) % DEBRIS.length]!;
+        pc.stamp(cx + dx, cy + dy - 3, piece.rows, piece.pal);
+      });
+      return sprite(pc, cx, cy);
+    }
+    case 'rock': {
+      const { pc, cx, cy } = tileCanvas(2);
+      pc.fillDiamond(cx, cy, HW, dither([M.sandDark, M.sandDeep], [0.8, 0.2], seed));
+      pc.stamp(cx - 9, cy - 3, BOULDER_BIG, MARS_BOULDER_PAL);
+      pc.stamp(cx + 3, cy - 1, variant % 2 ? BOULDER_BIG : BOULDER, MARS_BOULDER_PAL);
+      pc.stamp(cx - 2, cy + 3, BOULDER, MARS_BOULDER_PAL);
+      return sprite(pc, cx, cy);
+    }
+    case 'water': {
+      // Ľad: praskliny a trblietky (varianty striedajú trblietky = jemná animácia).
+      const { pc, cx, cy } = tileCanvas(0);
+      pc.fillDiamond(cx, cy, HW, (x, y) => (pixelNoise(x, y, 913) < 0.06 ? M.iceShade : M.ice));
+      pc.fillRect(cx - 8, cy - 1, 4, 1, M.iceDeep);
+      pc.set(cx - 4, cy, M.iceDeep);
+      pc.fillRect(cx - 3, cy + 1, 3, 1, M.iceDeep);
+      pc.fillRect(cx + 4, cy - 3, 3, 1, M.iceDeep);
+      pc.set(cx + 7, cy - 2, M.iceDeep);
+      const glints: [number, number][] = [
+        [-6, 2],
+        [5, 1],
+        [0, -3],
+        [9, 0],
+      ];
+      const [gx, gy] = glints[variant % glints.length]!;
+      pc.set(cx + gx, cy + gy, M.iceLight);
+      pc.set(cx + gx + 1, cy + gy, M.iceLight);
+      return sprite(pc, cx, cy);
+    }
+    case 'hill': {
+      // Okraj krátera: valy piesku s tmavou priehlbinou.
+      const { pc, cx, cy } = tileCanvas(5);
+      pc.fillDiamond(cx, cy, HW, dither([M.sand, M.sandDark], [0.9, 0.1], seed));
+      const mound: Point[] = [
+        [cx - 12, cy + 2],
+        [cx - 7, cy - 5],
+        [cx, cy - 8],
+        [cx + 7, cy - 5],
+        [cx + 12, cy + 2],
+        [cx, cy + 6],
+      ];
+      pc.fillPolygon(mound, (x) => (x < cx ? M.sandLight : M.sandDark));
+      pc.fillDiamond(cx, cy - 2, 6, M.sandDeep);
+      pc.fillDiamond(cx + 1, cy - 1, 4, M.basaltDark);
+      return sprite(pc, cx, cy);
+    }
+  }
+}
+
+/** Polguľová kupola so stredom základne (cx, cy) a polomerom r. */
+function dome(pc: PixelCanvas, cx: number, cy: number, r: number, light: Rgb, dark: Rgb): void {
+  const ry = Math.round(r * 1.05);
+  for (let y = -ry; y <= 0; y++) {
+    const half = Math.floor(r * Math.sqrt(1 - (y / ry) ** 2));
+    for (let x = -half; x <= half; x++) {
+      pc.set(cx + x, cy + y, x < -half / 3 ? light : x > half / 2 ? dark : shade(light, 0.92));
+    }
+  }
+  pc.set(cx - Math.round(r / 2), cy - Math.round(ry * 0.6), P.white);
+}
+
+/** Pretlaková brána (vstup) na zemi pred kupolou. */
+function airlock(pc: PixelCanvas, x: number, y: number): void {
+  pc.stamp(x, y, ['oooo', 'oddo', 'oDdo'], { o: M.metalDark, d: P.woodDark, D: M.hazard });
+}
+
+type MarsPainter = (pc: PixelCanvas, cx: number, cy: number, level: number) => void;
+
+const paintHabitat: MarsPainter = (pc, cx, cy, level) => {
+  isoBox(pc, cx, cy, 11, 2, { top: M.metal, left: M.metal, right: M.metalDark });
+  if (level >= 3) {
+    dome(pc, cx - 5, cy - 2, 7, M.sandLight, M.sandDark);
+    dome(pc, cx + 5, cy, 7, M.sandLight, M.sandDark);
+    pc.stamp(cx - 7, cy - 6, WINDOW, DETAIL_PAL);
+    pc.stamp(cx + 4, cy - 4, WINDOW, DETAIL_PAL);
+  } else {
+    const r = level >= 2 ? 11 : 10;
+    dome(pc, cx, cy, r, level >= 2 ? M.sandLight : M.metalLight, level >= 2 ? M.sandDark : M.metal);
+    pc.stamp(cx - 5, cy - 6, WINDOW, DETAIL_PAL);
+    if (level >= 2) pc.stamp(cx + 2, cy - 7, WINDOW, DETAIL_PAL);
+  }
+  if (level >= 4) {
+    // Kráterová vila: presklená nadstavba so zeleňou.
+    dome(pc, cx, cy - 9, 5, M.glass, M.glassShade);
+    pc.set(cx - 1, cy - 11, M.algae);
+    pc.set(cx + 1, cy - 10, M.algaeDark);
+  }
+  airlock(pc, cx + 3, cy + 1);
+  pc.fillRect(cx - 9, cy - 13 - (level >= 2 ? 2 : 0), 1, 6, M.metalDark);
+  pc.set(cx - 9, cy - 14 - (level >= 2 ? 2 : 0), P.roof);
+};
+
+const paintGreenhouse: MarsPainter = (pc, cx, cy, level) => {
+  const hw = 12;
+  const h = 6 + Math.min(level, 3);
+  isoBox(pc, cx, cy, hw, h, { top: M.glass, left: M.glass, right: M.glassShade });
+  // Rady rastlín za sklom a rámy.
+  for (let dx = 2; dx < hw; dx += 3) {
+    const [lx, ly] = leftWall(cx, cy, hw, dx, 1);
+    pc.fillRect(lx, ly - 2, 2, 2, M.algae);
+    pc.fillRect(lx, ly - h, 1, h, M.metal);
+    const [rx, ry] = rightWall(cx, cy, hw, dx, 1);
+    pc.fillRect(rx, ry - 2, 2, 2, M.algaeDark);
+    pc.fillRect(rx, ry - h, 1, h, M.metalDark);
+  }
+  pc.fillDiamond(cx, cy - h, hw - 3, (x, y) => (((x >> 1) + y) & 3 ? M.glass : M.algae));
+  if (level >= 3) {
+    pc.set(cx - 4, cy - h - 1, P.glow);
+    pc.set(cx + 4, cy - h - 1, P.glow);
+  }
+};
+
+const paintScrapyard: MarsPainter = (pc, cx, cy, level) => {
+  pc.fillDiamond(cx, cy, 12, dither([M.sandDark, M.sandDeep], [0.6, 0.4], 3));
+  DEBRIS.forEach((piece, i) =>
+    pc.stamp(cx - 12 + i * 5, cy - 4 + (i % 2) * 3, piece.rows, piece.pal),
+  );
+  isoBox(pc, cx + 5, cy - 1, 6, level >= 2 ? 8 : 6, {
+    top: M.metal,
+    left: M.metal,
+    right: M.metalDark,
+  });
+  pc.stamp(...rightWall(cx + 5, cy - 1, 6, 2, 4), DOOR, DETAIL_PAL);
+  // Žeriav s magnetom.
+  const top = cy - 24;
+  pc.fillRect(cx - 2, top, 1, 20, M.hazard);
+  pc.fillRect(cx - 2, top, 10, 1, M.hazard);
+  pc.fillRect(cx + 7, top + 1, 1, 4, M.metalDark);
+  pc.fillRect(cx + 6, top + 5, 3, 2, M.metalDark);
+  if (level >= 3) pc.stamp(cx - 12, cy + 1, DEBRIS[1]!.rows, DEBRIS[1]!.pal);
+};
+
+const paintIceDrill: MarsPainter = (pc, cx, cy) => {
+  pc.fillDiamond(cx, cy, 9, M.sandDark);
+  // Trojnožka vrtnej veže.
+  const top = cy - 26;
+  pc.fillPolygon(
+    [
+      [cx - 7, cy + 1],
+      [cx - 5, cy + 1],
+      [cx, top + 2],
+      [cx - 1, top],
+    ],
+    M.metal,
+  );
+  pc.fillPolygon(
+    [
+      [cx + 5, cy + 1],
+      [cx + 7, cy + 1],
+      [cx + 1, top],
+      [cx, top + 2],
+    ],
+    M.metalDark,
+  );
+  pc.fillRect(cx - 4, top + 10, 9, 1, M.hazard);
+  pc.fillRect(cx, top, 1, 30, M.metalLight);
+  // Nádrž s vodou a potrubie.
+  isoBox(pc, cx + 8, cy + 1, 4, 6, { top: M.ice, left: M.iceShade, right: M.iceDeep });
+  pc.fillRect(cx + 1, cy - 2, 5, 1, M.metalDark);
+};
+
+const paintAlgaeFarm: MarsPainter = (pc, cx, cy, level) => {
+  pc.fillDiamond(cx, cy, HW - 1, M.iceShade);
+  const tanks: [number, number][] =
+    level >= 2
+      ? [
+          [-7, -1],
+          [0, -4],
+          [7, 0],
+          [0, 3],
+        ]
+      : [
+          [-5, -1],
+          [5, 1],
+        ];
+  for (const [ox, oy] of tanks) {
+    isoBox(pc, cx + ox, cy + oy, 4, 4, { top: M.algae, left: M.metal, right: M.metalDark });
+    pc.set(cx + ox - 1, cy + oy - 4, M.algaeDark);
+  }
+  if (level >= 3) {
+    pc.fillRect(cx - 1, cy - 16, 1, 10, M.metalDark);
+    pc.set(cx - 1, cy - 17, P.glow);
+  }
+};
+
+const paintSupplyModule: MarsPainter = (pc, cx, cy, level) => {
+  const hw = level >= 2 ? 14 : 12;
+  const h = level >= 2 ? 12 : 9;
+  isoBox(pc, cx, cy, hw, h, { top: M.metalLight, left: M.metal, right: M.metalDark });
+  for (let dx = 2; dx < hw; dx += 4) {
+    const [x, y] = leftWall(cx, cy, hw, dx, h);
+    pc.fillRect(x, y + 2, 2, 1, M.hazard);
+  }
+  if (level >= 2) dome(pc, cx, cy - h, 9, M.metalLight, M.metal);
+  const [dx, dy] = rightWall(cx, cy, hw, 4, 7);
+  pc.stamp(dx, dy, ['dddd', 'dDDd', 'dDDd', 'dDDd', 'dDDd', 'dDDd', 'dDDd'], {
+    d: M.metalDark,
+    D: M.hazard,
+  });
+  // Anténa s parabolou.
+  pc.fillRect(cx - 6, cy - h - 10, 1, 8, M.metalDark);
+  pc.stamp(cx - 9, cy - h - 13, ['o...o', '.ooo.'], { o: M.metalLight });
+};
+
+const paintBioreactor: MarsPainter = (pc, cx, cy, level) => {
+  pc.fillDiamond(cx, cy, 12, M.sandDark);
+  const tanks: [number, number, number][] = [
+    [-6, -1, 12],
+    [4, 1, 9],
+    ...(level >= 2 ? ([[-1, 4, 7]] as [number, number, number][]) : []),
+  ];
+  for (const [ox, oy, h] of tanks) {
+    isoBox(pc, cx + ox, cy + oy, 4, h, { top: M.metalLight, left: M.glass, right: M.glassShade });
+    pc.fillRect(cx + ox - 3, cy + oy - h + 4, 2, h - 4, M.algae);
+  }
+  pc.fillRect(cx - 4, cy - 9, 8, 1, M.metalDark);
+  if (level >= 3) pc.set(cx + 4, cy - 10, P.glow);
+};
+
+/** Budovy s vlastným marťanským vzhľadom; najvyššia úroveň, po ktorú platí (domy). */
+const MARS_PAINTERS: Readonly<Record<string, { painter: MarsPainter; maxLevel?: number }>> = {
+  house: { painter: paintHabitat, maxLevel: 4 },
+  farm: { painter: paintGreenhouse },
+  lumberjack: { painter: paintScrapyard },
+  well: { painter: paintIceDrill },
+  fishery: { painter: paintAlgaeFarm },
+  warehouse: { painter: paintSupplyModule },
+  pasture: { painter: paintBioreactor },
+};
+
+/** Kľúč marťanského sprite-u (`mars:farm@2`) alebo null, ak budova vyzerá ako na Zemi. */
+function marsSpriteKey(definitionId: string, level: number): string | null {
+  const entry = MARS_PAINTERS[definitionId];
+  if (!entry || level > (entry.maxLevel ?? Infinity)) return null;
+  return `mars:${definitionId}@${level}`;
+}
+
+function drawMarsBuilding(key: string): PixelSprite {
+  const [id, levelText] = key.slice('mars:'.length).split('@');
+  const { pc, cx, cy } = tileCanvas(BUILDING_TOP);
+  MARS_PAINTERS[id!]!.painter(pc, cx, cy, Number(levelText ?? 1));
+  return finish(pc, cx, cy);
+}

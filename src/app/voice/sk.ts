@@ -12,6 +12,20 @@ export const sk: VoiceTexts = {
     holonet: 'Holonet',
   },
   topics: {
+    mars: [
+      'Mama sa pýta, či mám dosť svetrov. Mami, je tu −60 °C. Nie.',
+      'Správa zo Zeme prišla s 20-minútovým oneskorením. Bol to spam.',
+      'Pri nízkej gravitácii skáčem trikrát vyššie. Strop kupoly som si ešte nevšimol.',
+      'Na Zemi som sa sťažoval na dážď. Odvolávam.',
+      'Našli sme starý rover. Stále fotí kamene. Rešpekt.',
+      'Západ slnka je tu modrý. Aspoň niečo, čo nie je červené.',
+      'V skleníku dozrela prvá paradajka. Mestská rada ju zatiaľ nesmie zjesť — je to pamiatka.',
+      'Kolega tvrdí, že prach v kupole je „útulný“. Kolega je už tri dni v karanténe.',
+    ],
+    dustStorm: [
+      'Prachová búrka. Utrel som okno a za ním bol ďalší prach.',
+      'Skleníky nevidia slnko, ja nevidím suseda. Niektoré veci sú výhoda.',
+    ],
     hunger: [
       'Na večeru zase len voda a nádej. Starosta, kde sú farmy?',
       'Videl som myš, ako si balí kufor. Ani ona tu už nenájde nič na jedenie.',
@@ -157,6 +171,8 @@ export const sk: VoiceTexts = {
     ],
   ],
   hashtags: {
+    mars: '#mars',
+    dustStorm: '#prach',
     hunger: '#hlad',
     housing: '#bývanie',
     water: '#voda',

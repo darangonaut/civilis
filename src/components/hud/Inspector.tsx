@@ -11,6 +11,7 @@ import {
   isPolluted,
   maxLevel,
   upgradeRequirements,
+  difficultyOf,
 } from '@/engine';
 import { buildingSpriteKey, TECH_LOOKS } from '@/renderer/pixel/sprites';
 import { useUiStore } from '@/stores/uiStore';
@@ -40,7 +41,9 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
   const status = useGameState(() => controller.analysis.statuses.get(instance.id));
   const occupancy = useGameState(() => controller.activity.occupancy.get(instance.id));
   const completedTech = useGameState((s) => s.research.completedTechnologyIds);
-  const difficulty = useGameState((s) => gameData.balance.difficulties[s.difficulty]);
+  const planet = useGameState((s) => s.planet);
+  const costFactor = useGameState((s) => difficultyOf(s, gameData).constructionCost);
+  const refundFactor = useGameState((s) => difficultyOf(s, gameData).demolishRefund);
 
   const base = gameData.buildingsById.get(instance.definitionId)!;
   const definition = effectiveDefinition(base, instance.level);
@@ -49,8 +52,8 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
   const refund = demolishRefund(
     base,
     instance.level,
-    difficulty.constructionCost,
-    gameData.balance.demolishRefund * difficulty.demolishRefund,
+    costFactor,
+    gameData.balance.demolishRefund * refundFactor,
   );
   const lookTechId = TECH_LOOKS[instance.definitionId];
   const lookTech =
@@ -81,7 +84,12 @@ function InspectorCard({ instance }: { instance: BuildingInstance }) {
       <div className="inspector-head">
         <div className="inspector-icon">
           <BuildingIcon
-            spriteKey={buildingSpriteKey(instance.definitionId, instance.level, completedTech)}
+            spriteKey={buildingSpriteKey(
+              instance.definitionId,
+              instance.level,
+              completedTech,
+              planet,
+            )}
           />
         </div>
         <div className="inspector-title">

@@ -1,4 +1,5 @@
 import type { Position, TerrainType, Tile, World } from '@/types';
+import type { PlanetDefinition } from '../core/definitions';
 import { createRng, hash2, randomInt } from '../core/random';
 import { getTile, isInBounds, tileIndex } from './grid';
 
@@ -6,11 +7,10 @@ import { getTile, isInBounds, tileIndex } from './grid';
 export const START_AREA_SIZE = 12;
 /** Do akej Chebyševovej vzdialenosti od stredu musia byť dostupné suroviny. */
 export const START_RESOURCE_RADIUS = 10;
-/** Minimálny počet políčok daného terénu v okolí štartu. */
-export const START_RESOURCE_MINIMUM: Partial<Record<TerrainType, number>> = {
-  forest: 8,
-  rock: 4,
-  fertile: 8,
+/** Prahy terénu a minimum surovín pri štarte (planéta Zem). */
+export const EARTH_TERRAIN: Pick<PlanetDefinition, 'terrain' | 'startMinimum'> = {
+  terrain: { water: 0.12, hill: 0.93, rock: 0.9, forest: 0.72, fertile: 0.52 },
+  startMinimum: { forest: 8, rock: 4, fertile: 8 },
 };
 
 const UNBUILDABLE: ReadonlySet<TerrainType> = new Set(['water', 'hill']);
@@ -73,12 +73,17 @@ function sampleField(width: number, height: number, seed: number, scale: number)
   return toPercentiles(field);
 }
 
-function classify(elevation: number, moisture: number, rockiness: number): TerrainType {
-  if (elevation < 0.12) return 'water';
-  if (elevation > 0.93) return 'hill';
-  if (rockiness > 0.9) return 'rock';
-  if (moisture > 0.72) return 'forest';
-  if (moisture > 0.52) return 'fertile';
+function classify(
+  t: PlanetDefinition['terrain'],
+  elevation: number,
+  moisture: number,
+  rockiness: number,
+): TerrainType {
+  if (elevation < t.water) return 'water';
+  if (elevation > t.hill) return 'hill';
+  if (rockiness > t.rock) return 'rock';
+  if (moisture > t.forest) return 'forest';
+  if (t.fertile !== null && moisture > t.fertile) return 'fertile';
   return 'grass';
 }
 
@@ -142,7 +147,11 @@ export function countTerrainNear(
  * a v jej okolí dostatok lesa, kameňa a úrodnej pôdy. Chýbajúce suroviny sa doplnia
  * malými plochami na okraji oblasti.
  */
-function prepareStartArea(world: World, rng: () => number): void {
+function prepareStartArea(
+  world: World,
+  rng: () => number,
+  startMinimum: PlanetDefinition['startMinimum'],
+): void {
   const origin = getStartAreaOrigin(world);
   const center = getStartCenter(world);
 
@@ -159,7 +168,7 @@ function prepareStartArea(world: World, rng: () => number): void {
     [sides[i], sides[j]] = [sides[j]!, sides[i]!];
   }
 
-  const required = Object.entries(START_RESOURCE_MINIMUM) as [TerrainType, number][];
+  const required = Object.entries(startMinimum) as [TerrainType, number][];
   required.forEach(([terrain, minimum], i) => {
     if (countTerrainNear(world, center, START_RESOURCE_RADIUS, terrain) >= minimum) return;
     const side = sides[i]!;
@@ -182,18 +191,23 @@ function prepareStartArea(world: World, rng: () => number): void {
 }
 
 /** Vygeneruje deterministickú mapu zo seedu. */
-export function generateWorld(seed: number, width: number, height: number): World {
+export function generateWorld(
+  seed: number,
+  width: number,
+  height: number,
+  planet: Pick<PlanetDefinition, 'terrain' | 'startMinimum'> = EARTH_TERRAIN,
+): World {
   const elevation = sampleField(width, height, seed, 18);
   const moisture = sampleField(width, height, seed ^ 0x5bd1e995, 10);
   const rockiness = sampleField(width, height, seed ^ 0x1b873593, 6);
 
   const tiles: Tile[] = new Array<Tile>(width * height);
   for (let i = 0; i < tiles.length; i++) {
-    const terrain = classify(elevation[i]!, moisture[i]!, rockiness[i]!);
+    const terrain = classify(planet.terrain, elevation[i]!, moisture[i]!, rockiness[i]!);
     tiles[i] = makeTile(terrain, fertilityFor(terrain, moisture[i]!));
   }
 
   const world: World = { seed, width, height, tiles };
-  prepareStartArea(world, createRng(seed ^ 0x9e3779b9));
+  prepareStartArea(world, createRng(seed ^ 0x9e3779b9), planet.startMinimum);
   return world;
 }

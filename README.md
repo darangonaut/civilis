@@ -39,6 +39,8 @@ Náhľad buildu: `npm run preview`.
 7. **Míľniky a éry.** Vľavo hore je aktuálny cieľ s priebehom podmienok. Splnením éry sa odomknú nové
    technológie, budovy a suroviny (tehly, železo, látky, uhlie, elektrina, elektronika). Po poslednom
    míľniku „Ku hviezdam“ hra pokračuje ako sandbox.
+8. **Kolónia na Marse.** Po dohraní vyšli z vesmírneho prístavu kolonizačnú loď: nové mesto začne
+   na Marse (skleníky, ľadové vrty, šrot z trosiek, kupoly) so zdedenou výhodou z predošlého mesta.
 
 Stavať sa dá aj ťahaním: cesta sa natiahne ako čiara, ostatné budovy vyplnia obdĺžnik. Susedné farmy
 (aj drevorubači, lomy, bane) tvoria blok, ktorý stačí napojiť na cestu v jednom bode. Zbúranie vráti
@@ -72,7 +74,8 @@ legenda značiek je v Nastaveniach.
 Na mobile sa dá hra pridať na plochu („Pridať na plochu“) a spúšťa sa potom na celú obrazovku.
 
 Hra sa ukladá automaticky (každých 30 dní a pri zatvorení stránky); v paneli Uložiť sú 3 pozície,
-export a import JSON. Konkrétnu mapu otvoríš cez `?seed=123`, novú hru cez `?new`.
+export a import JSON. Konkrétnu mapu otvoríš cez `?seed=123`, novú hru cez `?new`, novú hru
+na Marse cez `?planet=mars`.
 
 ### Jazyky
 
@@ -87,7 +90,7 @@ míľnikov a ér v `src/data/locales/` (slovenčina je priamo v herných dátach
 | `npm run typecheck`               | TypeScript                                                              |
 | `npm run lint` / `npm run format` | ESLint / Prettier                                                       |
 | `npm test`                        | unit + integration (Vitest), vrátane rýchleho testu hrateľnosti (3 éry) |
-| `npm run test:full`               | test hrateľnosti celej hry (8 ér, ~2,5 min)                             |
+| `npm run test:full`               | test hrateľnosti celej hry (8 ér na Zemi aj na Marse, ~3 min)           |
 | `npm run test:e2e`                | E2E (Playwright, Chromium + Firefox; `PW_WEBKIT=1` aj WebKit)           |
 
 Pred prvým E2E: `npx playwright install chromium firefox`.

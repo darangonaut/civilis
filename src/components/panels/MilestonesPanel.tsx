@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { RESOURCE_IDS, type MilestoneCondition, type MilestoneDefinition } from '@/types';
 import { conditionLabel } from '@/app/conditions';
+import { useUiStore } from '@/stores/uiStore';
 import { PanelFrame } from './PanelFrame';
 import { Progress } from './Progress';
 
@@ -104,10 +105,24 @@ function AchievementList() {
 function MilestoneList() {
   const completedIds = useGameState((s) => s.milestones.completedIds);
   const current = useGameState((s) => currentMilestone(s, gameData));
+  const openColony = useUiStore((s) => s.setColonyOpen);
 
   return (
     <>
-      {!current && <p className="all-done">{t('milestones.allDone')}</p>}
+      {!current && (
+        <div className="all-done">
+          <p>{t('milestones.allDone')}</p>
+          {gameData.colony && (
+            <button
+              className="primary"
+              data-testid="milestones-colony"
+              onClick={() => openColony(true)}
+            >
+              🚀 {t('colony.button')}
+            </button>
+          )}
+        </div>
+      )}
       {gameData.eras.map((era) => (
         <section key={era.id} className="era-group" data-era-id={era.id}>
           <h3>{eraName(era.id)}</h3>

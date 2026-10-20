@@ -1,5 +1,5 @@
 import { Texture } from 'pixi.js';
-import { TERRAIN_TYPES, type TerrainType } from '@/types';
+import { TERRAIN_TYPES, type PlanetId, type TerrainType } from '@/types';
 import {
   drawBuilding,
   drawMarker,
@@ -29,7 +29,8 @@ function toTexture(sprite: PixelSprite): AnchoredTexture {
 }
 
 export interface TextureAtlas {
-  terrain: Record<TerrainType, AnchoredTexture[]>;
+  /** Textúry terénu planéty (vytvoria sa pri prvom použití). */
+  terrain(planet: PlanetId): Record<TerrainType, AnchoredTexture[]>;
   /** Textúra podľa kľúča sprite-u (`buildingSpriteKey`). */
   building(key: string): AnchoredTexture;
   outline: AnchoredTexture;
@@ -43,14 +44,22 @@ export const TERRAIN_VARIANTS = 4;
 
 /** Vytvorí zdieľané textúry raz pre celú mapu (každý typ terénu a budovy = jedna textúra). */
 export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas {
-  const terrain = Object.fromEntries(
-    TERRAIN_TYPES.map((type) => [
-      type,
-      Array.from({ length: TERRAIN_VARIANTS }, (_, variant) =>
-        toTexture(drawTerrain(type, variant)),
-      ),
-    ]),
-  ) as Record<TerrainType, AnchoredTexture[]>;
+  const terrains = new Map<PlanetId, Record<TerrainType, AnchoredTexture[]>>();
+  const terrain = (planet: PlanetId) => {
+    let textures = terrains.get(planet);
+    if (!textures) {
+      textures = Object.fromEntries(
+        TERRAIN_TYPES.map((type) => [
+          type,
+          Array.from({ length: TERRAIN_VARIANTS }, (_, variant) =>
+            toTexture(drawTerrain(type, variant, planet)),
+          ),
+        ]),
+      ) as Record<TerrainType, AnchoredTexture[]>;
+      terrains.set(planet, textures);
+    }
+    return textures;
+  };
 
   const buildings = new Map<string, AnchoredTexture>();
   const building = (key: string): AnchoredTexture => {
@@ -82,7 +91,7 @@ export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas
     setSmoothing(smooth: boolean) {
       const mode = smooth ? 'linear' : 'nearest';
       const all = [
-        ...Object.values(terrain).flat(),
+        ...[...terrains.values()].flatMap((t) => Object.values(t).flat()),
         ...buildings.values(),
         ...markers.values(),
         outline,
@@ -91,8 +100,10 @@ export function createTextureAtlas(buildingIds: readonly string[]): TextureAtlas
         if (entry.texture.source.scaleMode !== mode) entry.texture.source.scaleMode = mode;
     },
     destroy() {
-      for (const variants of Object.values(terrain))
-        variants.forEach((t) => t.texture.destroy(true));
+      for (const textures of terrains.values())
+        Object.values(textures)
+          .flat()
+          .forEach((t) => t.texture.destroy(true));
       buildings.forEach((t) => t.texture.destroy(true));
       outline.texture.destroy(true);
       markers.forEach((t) => t.texture.destroy(true));

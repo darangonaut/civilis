@@ -283,3 +283,46 @@ test('hlas ulice: obyvatelia komentujú stav mesta', async ({ page }) => {
   // Text príspevku nemá nevyplnené zástupné symboly.
   await expect(voice).not.toContainText('{');
 });
+
+test('kolonizačná loď: po dohraní odletí na Mars so zdedenou výhodou', async ({ page }) => {
+  await openGame(page);
+  await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const s = hook.getState();
+    const w = s.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    let spot = null;
+    for (let d = 2; d < 10 && !spot; d++)
+      for (let x = w.x - d; x <= w.x + d && !spot; x++)
+        if (hook.canPlace('house', { x, y: w.y - d })) spot = { x, y: w.y - d };
+    hook.grantForTest({
+      finished: true,
+      buildings: [{ definitionId: 'space_port', position: spot! }],
+      resources: { iron: 500, electronics: 400, tools: 400, food: 300 },
+    });
+  });
+  await page.getByTestId('open-milestones').click();
+  await page.getByTestId('milestones-colony').click();
+  const dialog = page.getByTestId('colony-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('Mars');
+  await expect(dialog).toContainText('pozície Pozícia 1');
+  const launch = page.getByTestId('colony-launch');
+  await expect(launch).toBeDisabled();
+  await page.getByTestId('legacy-cargo').click();
+  await launch.click();
+
+  await expect(page.getByTestId('new-era')).toContainText('Havarijný tábor');
+  const colony = await page.evaluate(() => {
+    const s = window.__civilis!.getState();
+    return { planet: s.planet, colony: s.colony, bricks: s.city.economy.resources.bricks };
+  });
+  expect(colony.planet).toBe('mars');
+  expect(colony.colony).toMatchObject({ generation: 2, legacyIds: ['cargo'] });
+  expect(colony.bricks).toBe(40);
+  await page.getByTestId('new-era').getByRole('button').click();
+  await expect(page.getByTestId('resource-wood')).toHaveAttribute('title', /Šrot/);
+
+  // Pôvodné mesto zostalo uložené v prvej pozícii.
+  await page.getByTestId('open-saves').click();
+  await expect(page.getByTestId('slot-load').first()).toBeEnabled();
+});

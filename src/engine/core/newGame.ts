@@ -1,4 +1,12 @@
-import type { BuildingInstance, DifficultyId, GameState, Position, World } from '@/types';
+import type {
+  BuildingInstance,
+  ColonyState,
+  DifficultyId,
+  GameState,
+  Position,
+  World,
+} from '@/types';
+import { activeLegacies } from './colony';
 import { generateWorld, getStartCenter } from '../world/generateWorld';
 import { footprint, tileIndex } from '../world/grid';
 import { DEFAULT_BUILDING_PRIORITY, SCHEMA_VERSION } from './constants';
@@ -14,6 +22,8 @@ export interface NewGameOptions {
   now: string;
   cityName?: string;
   difficulty?: DifficultyId;
+  /** Kolónia (planéta sa berie z `data.planet`); bez nej je to prvé mesto. */
+  colony?: ColonyState;
 }
 
 /** Rozloženie počiatočnej osady relatívne k stredu štartovacej oblasti. */
@@ -52,8 +62,20 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
   const seed = normalizeSeed(options.seed);
   const { width, height } = data.balance.mapSize;
   const start = data.balance.startingState;
-  const world = generateWorld(seed, width, height);
+  const world = generateWorld(seed, width, height, data.planet);
   const buildings = placeStartingBuildings(world, data);
+  const colony: ColonyState = options.colony ?? { generation: 1, legacyIds: [], originCity: null };
+  const legacies = activeLegacies({ colony }, data);
+  const resources = { ...start.resources };
+  let population = start.population;
+  let money = start.money;
+  for (const legacy of legacies) {
+    population += legacy.startPopulation ?? 0;
+    money += legacy.startMoney ?? 0;
+    for (const [resource, amount] of Object.entries(legacy.startResources ?? {})) {
+      resources[resource as keyof typeof resources] += amount;
+    }
+  }
 
   const state: GameState = {
     schemaVersion: SCHEMA_VERSION,
@@ -61,14 +83,16 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
     createdAt: options.now,
     lastSavedAt: options.now,
     difficulty: options.difficulty ?? 'normal',
+    planet: data.planet.id,
+    colony,
     simulation: { day: 0, speed: 1, seed },
     world,
     city: {
       name: options.cityName ?? 'Civilis',
       population: {
-        total: start.population,
+        total: population,
         housingCapacity: 0,
-        availableWorkers: Math.floor(start.population * data.balance.workforceShare),
+        availableWorkers: Math.floor(population * data.balance.workforceShare),
         employedWorkers: 0,
         happiness: start.happiness,
         happinessFactors: {
@@ -83,8 +107,8 @@ export function createNewGame(data: GameData, options: NewGameOptions): GameStat
         growthProgress: 0,
       },
       economy: {
-        resources: { ...start.resources },
-        money: start.money,
+        resources,
+        money,
         storageCapacity: 0,
         dailyIncome: 0,
         dailyExpenses: 0,

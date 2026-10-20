@@ -1,3 +1,4 @@
+import { difficultyOf } from '../core/colony';
 import type { GameState, ResourceId, TechnologyEffect } from '@/types';
 import type { GameData } from '../core/definitions';
 import { eventProductionBonus } from '../events/randomEvents';
@@ -54,7 +55,7 @@ export function maintenanceMultiplier(state: Readonly<GameState>, data: GameData
   for (const effect of activeEffects(state, data)) {
     if (effect.type === 'maintenance_multiplier') bonus += effect.multiplier - 1;
   }
-  return Math.max(0, 1 + bonus) * data.balance.difficulties[state.difficulty].maintenance;
+  return Math.max(0, 1 + bonus) * difficultyOf(state, data).maintenance;
 }
 
 /** Násobič príjmu peňazí (aditívne). */

@@ -5,6 +5,7 @@ import { sk } from '@/app/locales/sk';
 import { gameData } from '@/data';
 import csNames from '@/data/locales/cs.json';
 import enNames from '@/data/locales/en.json';
+import planets from '@/data/planets.json';
 
 const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 
@@ -47,6 +48,42 @@ describe('preklady', () => {
     for (const era of gameData.eras) {
       expect(names.eras).toHaveProperty([era.id, 'name']);
       expect(names.eras).toHaveProperty([era.id, 'description']);
+    }
+  });
+
+  it.each([
+    ['cs', csNames],
+    ['en', enNames],
+  ])('názvy kolónie (%s): všetko, čo Mars premenúva, a všetky dedičstvá', (_, names) => {
+    for (const planet of planets.planets) {
+      const overrides = 'overrides' in planet ? planet.overrides : undefined;
+      if (!overrides) continue;
+      const translated = (names.planets as Record<string, typeof names.planets.mars>)[planet.id]!;
+      for (const [id, override] of Object.entries(overrides.buildings)) {
+        if ('name' in override) expect(translated.buildings, id).toHaveProperty([id]);
+        ('levels' in override ? override.levels : []).forEach((_, i) =>
+          expect(translated.buildings).toHaveProperty([`${id}@${i + 2}`]),
+        );
+      }
+      for (const id of Object.keys(overrides.eras)) {
+        expect(translated.eras).toHaveProperty([id, 'name']);
+        expect(translated.eras).toHaveProperty([id, 'description']);
+      }
+      for (const [id, event] of Object.entries(overrides.events)) {
+        const text = translated.events[id as keyof typeof translated.events];
+        expect(text, id).toBeDefined();
+        expect(placeholders(text.description), id).toEqual(placeholders(event.description));
+      }
+    }
+    for (const legacy of gameData.legacies) {
+      expect(names.legacies).toHaveProperty([legacy.id, 'name']);
+      expect(names.legacies).toHaveProperty([legacy.id, 'description']);
+    }
+  });
+
+  it('texty planéty (mars:…) existujú len ako úprava existujúceho kľúča', () => {
+    for (const key of Object.keys(sk).filter((k) => k.startsWith('mars:'))) {
+      expect(sk, key).toHaveProperty([key.slice('mars:'.length)]);
     }
   });
 });

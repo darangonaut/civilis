@@ -180,14 +180,16 @@ function stateTopic(lastTopic: VoiceTopic | null): void {
   add('noParks', f.leisure === 0 && population.total > 150 ? 2 : 0, () => post('noParks', 'angry'));
   add('parks', f.leisure > 60 ? 1 : 0, () => post('parks', 'happy'));
   add('happy', population.happiness >= 85 ? 3 : 0, () => post('happy', 'happy'));
-  add('flavor', 2, () => post('flavor', 'neutral'));
+  // Na Marse namiesto vtipov z pozemských dôb komentujú život na červenej planéte.
+  const flavor: VoiceTopic = gameData.planet.id === 'mars' ? 'mars' : 'flavor';
+  add(flavor, 2, () => post(flavor, 'neutral'));
 
   const total = options.reduce((sum, o) => sum + o.weight, 0);
   let pick = Math.random() * total;
   const chosen = options.find((o) => (pick -= o.weight) < 0) ?? options.at(-1);
   // Nič iné na komentovanie: aspoň iný vtip z doby (varianty sa neopakujú).
   if (chosen) chosen.run();
-  else post('flavor', 'neutral');
+  else post(flavor, 'neutral');
 }
 
 /** Reakcie na udalosti zo simulácie (najviac jedna denne). */
@@ -226,6 +228,11 @@ function reaction(event: GameEvent): boolean {
           building.id,
         );
         return true;
+      }
+      if (gameData.planet.id === 'mars') {
+        // Púštne vtipy (ťavy, dážď) na Marse nesedia.
+        topics.drought = ['dustStorm', 'angry'];
+        delete topics.caravan;
       }
       const entry = topics[event.eventId];
       if (!entry) return false;

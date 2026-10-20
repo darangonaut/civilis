@@ -1,9 +1,9 @@
-import { gameData } from '@/data';
+import { dataForPlanet, setActivePlanet } from '@/data';
 import { createNewGame } from '@/engine';
 import { AUTOSAVE_SLOT_ID } from '@/persistence/db';
 import { SaveService } from '@/persistence/saveService';
 import { takeUnloadSnapshot } from '@/persistence/unloadSnapshot';
-import type { DifficultyId, GameState } from '@/types';
+import type { ColonyState, DifficultyId, GameState, PlanetId } from '@/types';
 import { GameController } from './GameController';
 import { createGameId } from './ids';
 
@@ -15,17 +15,23 @@ function seedFromUrl(): number | null {
   return Number.isInteger(seed) ? seed : null;
 }
 
-function randomSeed(): number {
+/** `?planet=mars` založí novú hru rovno na Marse (testovanie). */
+const urlPlanet: PlanetId = params.get('planet') === 'mars' ? 'mars' : 'earth';
+
+export function randomSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;
 }
 
 export function createFreshGame(
   seed: number = randomSeed(),
   difficulty: DifficultyId = 'normal',
+  planet: PlanetId = 'earth',
+  colony?: ColonyState,
 ): GameState {
-  return createNewGame(gameData, {
+  return createNewGame(dataForPlanet(planet), {
     seed,
     difficulty,
+    colony,
     gameId: createGameId(),
     now: new Date().toISOString(),
   });
@@ -39,11 +45,12 @@ function applyUrlOverrides(state: GameState): GameState {
 
 /** Aktuálna hra. Pri štarte ju `initializeGame` nahradí automatickým uložením, ak existuje. */
 export const controller = new GameController(
-  gameData,
-  applyUrlOverrides(createFreshGame(seedFromUrl() ?? undefined)),
+  setActivePlanet(urlPlanet),
+  applyUrlOverrides(createFreshGame(seedFromUrl() ?? undefined, undefined, urlPlanet)),
+  setActivePlanet,
 );
 
-export const saveService = new SaveService(gameData);
+export const saveService = new SaveService(dataForPlanet('earth'));
 
 export type InitResult = 'new' | 'restored' | 'restore_failed';
 
@@ -52,7 +59,7 @@ export type InitResult = 'new' | 'restored' | 'restore_failed';
  * Parameter `?seed=N` alebo `?new` vždy založí novú hru.
  */
 export async function initializeGame(): Promise<InitResult> {
-  if (seedFromUrl() !== null || params.has('new')) return 'new';
+  if (seedFromUrl() !== null || params.has('new') || params.has('planet')) return 'new';
   try {
     const snapshot = takeUnloadSnapshot();
     if (snapshot !== null) {

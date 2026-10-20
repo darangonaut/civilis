@@ -3,6 +3,7 @@ import balance from '@/data/balance.json';
 import buildings from '@/data/buildings.json';
 import eras from '@/data/eras.json';
 import milestones from '@/data/milestones.json';
+import planets from '@/data/planets.json';
 import technologies from '@/data/technologies.json';
 
 /** Skutočné herné dáta zo `src/data`. */
@@ -21,3 +22,17 @@ export const economyTestData = loadGameData({
 });
 
 export const def = (id: string) => economyTestData.buildingsById.get(id)!;
+
+/** Skutočné dáta vrátane planét: Zem a kolónia na Marse. */
+export const earthTestData = loadGameData({
+  eras,
+  buildings,
+  technologies,
+  milestones,
+  balance,
+  planets,
+});
+export const marsTestData = loadGameData(
+  { eras, buildings, technologies, milestones, balance, planets },
+  'mars',
+);

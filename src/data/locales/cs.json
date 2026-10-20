@@ -319,5 +319,148 @@
       "name": "Slavnost",
       "description": "Obyvatelé by rádi uspořádali slavnost. Stojí {cost}, ale měsíc zlepší náladu."
     }
+  },
+  "legacies": {
+    "settlers": {
+      "name": "Zkušení osadníci",
+      "description": "Kolonie začne s 10 obyvateli navíc a většími zásobami jídla."
+    },
+    "databank": {
+      "name": "Zachráněná databanka",
+      "description": "Výzkum je o 20 % levnější."
+    },
+    "cargo": {
+      "name": "Plný nákladový prostor",
+      "description": "Více surovin a peněz na začátek."
+    },
+    "engineers": {
+      "name": "Inženýři z lodi",
+      "description": "Stavby a vylepšení jsou o 10 % levnější."
+    },
+    "thrift": {
+      "name": "Úsporná správa",
+      "description": "Údržba budov je o 15 % nižší."
+    }
+  },
+  "planets": {
+    "mars": {
+      "buildings": {
+        "house": "Obytná kupole",
+        "house@2": "Regolitová kupole",
+        "house@3": "Dvojkupole",
+        "house@4": "Kráterová vila",
+        "house@5": "Terasová kupole",
+        "house@6": "Kupolový palác",
+        "house@7": "Obytný blok",
+        "house@8": "Marťanský mrakodrap",
+        "house@9": "Chytrá kupole",
+        "house@10": "Arkologie Olympus",
+        "bridge": "Lávka přes led",
+        "lumberjack": "Šrotiště",
+        "lumberjack@2": "Recyklační linka",
+        "lumberjack@3": "Šrotový kombinát",
+        "farm": "Skleník",
+        "farm@2": "Hydroponický skleník",
+        "farm@3": "Automatický skleník",
+        "quarry": "Regolitový lom",
+        "quarry@2": "Velký regolitový lom",
+        "quarry@3": "Robotický lom",
+        "well": "Ledový vrt",
+        "warehouse": "Zásobovací modul",
+        "warehouse@2": "Nákladní hangár",
+        "fishery": "Řasová farma",
+        "fishery@2": "Řasové nádrže",
+        "fishery@3": "Řasový kombinát",
+        "pasture": "Bioreaktor",
+        "pasture@2": "Velký bioreaktor",
+        "pasture@3": "Genetická stanice",
+        "harbor": "Ledový terminál",
+        "mine": "Kráterový důl",
+        "mine@2": "Hluboký kráterový důl",
+        "mine@3": "Robotický důl",
+        "temple": "Památník Země",
+        "park": "Zahradní kupole",
+        "fountain": "Ledová fontána",
+        "pyramid": "Regolitová pyramida",
+        "great_library": "Archiv Země",
+        "castle": "Pevnost Phobos",
+        "colossus": "Kolos z Olympu",
+        "iron_tower": "Anténa Valles Marineris",
+        "stadium": "Nízkogravitační stadion",
+        "space_port": "Meziplanetární přístav"
+      },
+      "eras": {
+        "settlement": {
+          "name": "Havarijní tábor",
+          "description": "Loď při přistání havarovala a databanky jsou pryč. Z trosek a ledu postav první soběstačnou základnu."
+        },
+        "antiquity": {
+          "name": "První základna",
+          "description": "Cihly z regolitu, první památníky a vodovody z ledu. Řasové farmy rostou na ledových polích."
+        },
+        "middle_ages": {
+          "name": "Kupolové městečko",
+          "description": "Doly v kráterech, hutě a univerzity. Kolonisté si staví vlastní katedrálu — pod kupolí."
+        },
+        "renaissance": {
+          "name": "Marťanská renesance",
+          "description": "Obchod, umění a věda. Bioreaktory dávají látky a divadla hrají hry o staré Zemi."
+        },
+        "industrial": {
+          "name": "Rudá industrie",
+          "description": "Uhlí z hlubin, ocel a železnice přes poušť. Mars se stává průmyslovou planetou."
+        },
+        "modern": {
+          "name": "Moderní Mars",
+          "description": "Elektrárny, nemocnice a první marťanské mrakodrapy."
+        },
+        "information": {
+          "name": "Meziplanetární síť",
+          "description": "Počítače, jaderná energie a zprávy ze Země s 20minutovým zpožděním."
+        },
+        "future": {
+          "name": "Terraformace",
+          "description": "Fúze a umělá inteligence. Meziplanetární přístav pošle kolonisty ještě dál."
+        }
+      },
+      "events": {
+        "drought": {
+          "name": "Prachová bouře",
+          "description": "Prach zakryl slunce — skleníky vyrábějí méně potravin."
+        },
+        "epidemic": {
+          "name": "Marťanská chřipka",
+          "description": "Kupolemi se šíří virus. Část kolonistů odletěla zpět a nálada klesla."
+        },
+        "fire": {
+          "name": "Únik kyslíku",
+          "description": "V budově {building} unikal kyslík a vznítil se. Opravíš ji hned, nebo počkáš, až ji kolonisté opraví sami?"
+        },
+        "bumper_harvest": {
+          "name": "Rekordní úroda",
+          "description": "Jasná obloha bez prachu — skleníky vyrábějí více potravin."
+        },
+        "ancient_ruins": {
+          "name": "Záhadný artefakt",
+          "description": "Při stavbě se našel podivný kovový objekt. Nakonec to byl starý rover — i tak měl v paměti cenná data."
+        },
+        "patron": {
+          "name": "Miliardář ze Země",
+          "description": "Pozemský miliardář poslal peníze výměnou za fotku s kolonií."
+        },
+        "caravan": {
+          "name": "Obchodní loď",
+          "description": "Loď ze Země nabízí {amount} × {resource} za {cost} — poloviční cenu."
+        },
+        "immigrants": {
+          "name": "Nová loď kolonistů",
+          "description": "Přistála loď s {amount} kolonisty. Přijmeš je? Chvíli potrvá, než si zvyknou na nízkou gravitaci."
+        },
+        "festival": {
+          "name": "Výročí přistání",
+          "description": "Kolonisté by rádi oslavili výročí přistání. Stojí {cost}, ale měsíc zlepší náladu."
+        }
+      }
+    }
   }
 }

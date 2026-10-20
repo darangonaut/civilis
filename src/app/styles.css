@@ -2432,6 +2432,10 @@ button.danger:hover:not(:disabled),
   background: rgb(99 199 77 / 16%);
 }
 
+.all-done p {
+  margin: 0 0 8px;
+}
+
 /* --- Štatistiky --- */
 .stats-grid {
   display: flex;
@@ -2639,6 +2643,77 @@ button.danger:hover:not(:disabled),
 
 .era-dialog {
   max-width: 540px;
+}
+
+.colony-dialog {
+  max-width: 560px;
+  text-align: left;
+}
+
+.colony-dialog .badge,
+.colony-dialog h2 {
+  text-align: center;
+}
+
+.colony-dialog h3 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.colony-planet {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.colony-planet p {
+  margin: 4px 0 0;
+}
+
+.colony-planet-globe {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #e08a55, #c4653a 45%, #6e3322);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.colony-legacies {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.colony-legacy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--text);
+  background: var(--panel);
+  border: 0;
+  box-shadow: 0 0 0 2px var(--ink);
+  cursor: pointer;
+}
+
+.colony-legacy span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.colony-legacy.selected {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    inset 0 0 0 2px var(--gold);
+}
+
+.colony-block {
+  color: var(--danger, #e43b44);
 }
 
 .era-dialog h3 {

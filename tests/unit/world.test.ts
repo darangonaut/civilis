@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   START_AREA_SIZE,
-  START_RESOURCE_MINIMUM,
+  EARTH_TERRAIN,
   START_RESOURCE_RADIUS,
   countTerrainNear,
   generateWorld,
@@ -53,7 +53,7 @@ describe('generátor mapy', () => {
         }
       }
       const center = getStartCenter(world);
-      for (const [terrain, minimum] of Object.entries(START_RESOURCE_MINIMUM)) {
+      for (const [terrain, minimum] of Object.entries(EARTH_TERRAIN.startMinimum)) {
         expect(
           countTerrainNear(world, center, START_RESOURCE_RADIUS, terrain as TerrainType),
           `seed ${seed} ${terrain}`,

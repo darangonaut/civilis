@@ -582,6 +582,8 @@ export class Bot {
       // Suroviny podľa bilancie
       ['pasture', flow('cloth') < 2 + pop / 800 ? this.count('pasture') + 1 : 4],
       ['coal_mine', flow('coal') < 2 ? this.count('coal_mine') + 1 : 2],
+      // Železo s rezervou na drahé stavby (vesmírny prístav stojí 3000).
+      ['mine', flow('iron') < 20 ? this.count('mine') + 1 : 0],
       ['power_plant', flow('electricity') < 4 ? this.count('power_plant') + 1 : 2],
       ['electronics_factory', flow('electronics') < 2 ? this.count('electronics_factory') + 1 : 2],
       ['solar_park', 6],

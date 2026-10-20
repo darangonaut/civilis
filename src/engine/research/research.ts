@@ -1,3 +1,4 @@
+import { difficultyOf } from '../core/colony';
 import type { CommandResult, GameState } from '@/types';
 import type { CommandFailureReason } from '../core/commandReasons';
 import type { GameData } from '../core/definitions';
@@ -96,10 +97,7 @@ export function advanceResearch(state: GameState, data: GameData): string | null
     ? data.technologiesById.get(research.activeTechnologyId)
     : undefined;
   if (!technology) return null;
-  const cost = scaleAmount(
-    technology.cost,
-    data.balance.difficulties[state.difficulty].researchCost,
-  );
+  const cost = scaleAmount(technology.cost, difficultyOf(state, data).researchCost);
 
   const resources = state.city.economy.resources;
   const invest = Math.min(resources.knowledge, cost - research.investedKnowledge);

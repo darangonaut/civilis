@@ -8,6 +8,17 @@ import type { Position, World } from './world';
 export const DIFFICULTY_IDS = ['easy', 'normal', 'hard'] as const;
 export type DifficultyId = (typeof DIFFICULTY_IDS)[number];
 
+export const PLANET_IDS = ['earth', 'mars'] as const;
+export type PlanetId = (typeof PLANET_IDS)[number];
+
+/** Kolónia: koľké mesto v poradí a výhody zdedené z predošlých miest (schéma v10). */
+export interface ColonyState {
+  generation: number;
+  legacyIds: string[];
+  /** Názov mesta, z ktorého kolonisti prileteli. */
+  originCity: string | null;
+}
+
 export interface HappinessFactors {
   food: number;
   housing: number;
@@ -64,6 +75,9 @@ export interface GameState {
   lastSavedAt: string;
   /** Obtiažnosť zvolená pri založení hry (schéma v9). */
   difficulty: DifficultyId;
+  /** Planéta, na ktorej mesto stojí (schéma v10). */
+  planet: PlanetId;
+  colony: ColonyState;
 
   simulation: {
     day: number;

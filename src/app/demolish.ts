@@ -1,5 +1,5 @@
 import { gameData } from '@/data';
-import { demolishRefund } from '@/engine';
+import { demolishRefund, difficultyOf } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import { RESOURCE_IDS, type Resources } from '@/types';
 import { controller } from './game';
@@ -8,7 +8,7 @@ import { commandReasonLabel, t } from './i18n';
 /** Suroviny, ktoré vráti zbúranie budov (pred orezaním na kapacitu skladu). */
 export function demolishRefundTotal(instanceIds: readonly string[]): Partial<Resources> {
   const total: Partial<Resources> = {};
-  const difficulty = gameData.balance.difficulties[controller.state.difficulty];
+  const difficulty = difficultyOf(controller.state, gameData);
   for (const id of instanceIds) {
     const instance = controller.state.city.buildings.find((b) => b.id === id);
     if (!instance) continue;

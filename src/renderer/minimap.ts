@@ -2,6 +2,7 @@ import type { BuildingCategory, GameState, TerrainType } from '@/types';
 import type { GameData } from '@/engine';
 import type { CameraView } from './GameRenderer';
 import { TILE_HEIGHT, TILE_WIDTH } from './iso';
+import { MARS_MINIMAP } from './pixel/sprites';
 
 const TERRAIN: Record<TerrainType, string> = {
   grass: '#3e8948',
@@ -50,12 +51,13 @@ export function drawMinimap(
   const categoryById = new Map(
     state.city.buildings.map((b) => [b.id, data.buildingsById.get(b.definitionId)?.category]),
   );
+  const terrainColors = state.planet === 'mars' ? MARS_MINIMAP : TERRAIN;
   ctx.clearRect(0, 0, layout.width, layout.height);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const tile = tiles[y * width + x]!;
       const category = tile.buildingId ? categoryById.get(tile.buildingId) : undefined;
-      ctx.fillStyle = category ? BUILDINGS[category] : TERRAIN[tile.terrain];
+      ctx.fillStyle = category ? BUILDINGS[category] : terrainColors[tile.terrain];
       const mx = (x - y + height - 1) * s;
       const my = ((x + y) / 2) * s;
       ctx.fillRect(mx, my, s * 2 + 0.5, s + 0.5);

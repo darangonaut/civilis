@@ -11,6 +11,7 @@ import { DemolishDialog } from '@/components/DemolishDialog';
 import { Notice } from '@/components/Notice';
 import { PanelHost } from '@/components/panels/PanelHost';
 import { VictoryDialog } from '@/components/VictoryDialog';
+import { ColonyDialog } from '@/components/ColonyDialog';
 import { Fragment, useEffect } from 'react';
 import { useLanguageStore } from '@/stores/languageStore';
 import { useUiStore } from '@/stores/uiStore';
@@ -59,6 +60,7 @@ export function App() {
         <EventDialog />
         <DemolishDialog />
         <VictoryDialog />
+        <ColonyDialog />
       </Fragment>
     </div>
   );

@@ -258,7 +258,7 @@ export class GameRenderer {
       },
       {
         sprites: () => this.waterSprites,
-        frames: () => this.atlas.terrain.water.map((t) => t.texture),
+        frames: () => this.atlas.terrain(this.state?.planet ?? 'earth').water.map((t) => t.texture),
       },
       (phase) => this.callbacks.onDayPhase?.(phase),
     );
@@ -311,7 +311,7 @@ export class GameRenderer {
     this.state = state;
     this.syncRevision++;
     if (worldChanged) {
-      this.buildTerrain(state.world);
+      this.buildTerrain(state.world, state.planet);
       this.animateNewBuildings = false;
     }
     this.syncBuildings(state);
@@ -393,7 +393,8 @@ export class GameRenderer {
    * Bloky aj políčka v nich sa kreslia odzadu dopredu (podľa x + y), aby stromy správne
    * prekrývali políčka za sebou.
    */
-  private buildTerrain(world: GameState['world']): void {
+  private buildTerrain(world: GameState['world'], planet: GameState['planet']): void {
+    const terrain = this.atlas.terrain(planet);
     this.terrainLayer.removeChildren().forEach((child) => child.destroy({ children: true }));
     this.waterSprites = [];
     const chunksX = Math.ceil(world.width / TERRAIN_CHUNK);
@@ -415,10 +416,7 @@ export class GameRenderer {
               continue;
             const tile = world.tiles[y * world.width + x]!;
             const sprite = new Sprite();
-            applyTexture(
-              sprite,
-              this.atlas.terrain[tile.terrain][terrainVariant(x, y, world.seed)]!,
-            );
+            applyTexture(sprite, terrain[tile.terrain][terrainVariant(x, y, world.seed)]!);
             placeOnTile(sprite, { x, y });
             container.addChild(sprite);
             if (tile.terrain === 'water') this.waterSprites.push(sprite);
@@ -450,6 +448,7 @@ export class GameRenderer {
         building.definitionId,
         building.level,
         state.research.completedTechnologyIds,
+        state.planet,
       );
       if (ROAD_IDS.has(building.definitionId)) {
         const { x, y } = building.position;
@@ -465,7 +464,7 @@ export class GameRenderer {
       if (
         sprite &&
         sprite.label !== key &&
-        sprite.label.split(/[@+#]/)[0] === building.definitionId
+        sprite.label.replace(/^mars:/, '').split(/[@+#]/)[0] === building.definitionId
       ) {
         sprite.label = key;
         applyTexture(sprite, this.atlas.building(key));
@@ -558,6 +557,7 @@ export class GameRenderer {
             this.buildModeId!,
             this.buildLevel,
             this.state.research.completedTechnologyIds,
+            this.state.planet,
           );
       applyTexture(this.preview, this.atlas.building(previewKey));
       placeOnTile(this.preview, hovered, buildSize);
@@ -650,6 +650,7 @@ export class GameRenderer {
           this.buildModeId,
           this.buildLevel,
           this.state?.research.completedTechnologyIds ?? [],
+          this.state?.planet,
         )
       : null;
     // Cesta: každé políčko náhľadu sa napojí na susedov v ťahanej trase aj na hotové cesty,

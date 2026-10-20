@@ -11,6 +11,7 @@ import {
   maxLevel,
   nextLevel,
   technologiesForLevel,
+  difficultyOf,
 } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
 import {
@@ -100,9 +101,7 @@ export function BuildDock() {
       .map((b) => b.definitionId)
       .join(','),
   );
-  const costFactor = useGameState(
-    (s) => gameData.balance.difficulties[s.difficulty].constructionCost,
-  );
+  const costFactor = useGameState((s) => difficultyOf(s, gameData).constructionCost);
   const tiles = dockTiles(category, eraIndex, completed, new Set(builtKey.split(',')), costFactor);
   const tooltipTile =
     tiles.find((tile) => tile.definition.id === hovered?.id && tile.level === hovered.level) ??
@@ -187,9 +186,7 @@ export function BuildDock() {
 
 function DockTooltip({ tile, stock }: { tile: DockTile; stock: Resources }) {
   const { definition: base, level, locked, cost } = tile;
-  const maintenanceFactor = useGameState(
-    (s) => gameData.balance.difficulties[s.difficulty].maintenance,
-  );
+  const maintenanceFactor = useGameState((s) => difficultyOf(s, gameData).maintenance);
   const definition = effectiveDefinition(base, level);
   const services = level > 1 ? (nextLevel(base, level - 1)?.requiredServices ?? []) : [];
   const tech = locked ? gameData.technologiesById.get(base.requiredTechnologyId!) : undefined;

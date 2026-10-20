@@ -22,6 +22,7 @@ export function TopHud() {
   const population = useGameState((s) => s.city.population);
   const economy = useGameState((s) => s.city.economy);
   const eraIndex = useGameState((s) => currentEraIndex(s, gameData));
+  const planet = useGameState((s) => s.planet);
   const phase = useUiStore((s) => s.dayPhase);
   const era = gameData.eras[eraIndex]!;
   const happy = Math.round(population.happiness);
@@ -46,6 +47,7 @@ export function TopHud() {
           <span className="brand">{t('app.title')}</span>
           <span className="brand-era">
             {t('hud.era', { n: eraIndex + 1, total: gameData.eras.length })}
+            {planet !== 'earth' && ` · ${t(`planet.${planet}`)}`}
           </span>
         </div>
         <div className="hud-divider" />

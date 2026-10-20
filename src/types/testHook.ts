@@ -19,6 +19,10 @@ export interface CivilisTestHook {
     milestones?: string[];
     /** Udalosť čakajúca na rozhodnutie (test karty udalosti). */
     pendingEvent?: PendingEvent;
+    /** Splní všetky míľniky a označí hru za dohranú (test kolonizácie). */
+    finished?: boolean;
+    /** Vloží hotové budovy (bez ceny a technológií). */
+    buildings?: { definitionId: string; position: Position }[];
   }): void;
 }
 

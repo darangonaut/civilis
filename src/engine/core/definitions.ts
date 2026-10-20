@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   BUILDING_CATEGORIES,
+  PLANET_IDS,
   RESOURCE_IDS,
   SERVICE_TYPES,
   TECHNOLOGY_EFFECT_TYPES,
@@ -13,6 +14,7 @@ import {
   type EventEffect,
   type MilestoneCondition,
   type MilestoneDefinition,
+  type PlanetId,
   type Resources,
   type TechnologyDefinition,
   type TerrainType,
@@ -328,6 +330,65 @@ export const balanceSchema = z.strictObject({
 
 export type BalanceConfig = z.infer<typeof balanceSchema>;
 
+const terrainThreshold = z.number().min(0).max(1);
+
+export const planetDefinitionSchema = z.strictObject({
+  id: z.enum(PLANET_IDS),
+  name: z.string().min(1),
+  /** Prahy generovania terénu (percentily šumu); `fertile: null` = žiadna úrodná pôda. */
+  terrain: z.strictObject({
+    water: terrainThreshold,
+    hill: terrainThreshold,
+    rock: terrainThreshold,
+    forest: terrainThreshold,
+    fertile: terrainThreshold.nullable(),
+  }),
+  startMinimum: z.partialRecord(z.enum(TERRAIN_TYPES), positiveInt),
+  /** Úpravy herných dát na tejto planéte (zlúčia sa pred validáciou). */
+  overrides: z
+    .strictObject({
+      buildings: z.record(id, z.record(z.string(), z.unknown())).optional(),
+      eras: z.record(id, z.record(z.string(), z.unknown())).optional(),
+      events: z.record(id, z.record(z.string(), z.unknown())).optional(),
+      balance: z.record(z.string(), z.unknown()).optional(),
+    })
+    .optional(),
+});
+
+/** Dedičstvo kolónie: násobiče ako pri obtiažnosti a štartové bonusy. */
+export const legacyDefinitionSchema = z.strictObject({
+  id,
+  name: z.string().min(1),
+  description: z.string().min(1),
+  constructionCost: z.number().positive().optional(),
+  researchCost: z.number().positive().optional(),
+  maintenance: nonNegative.optional(),
+  startPopulation: positiveInt.optional(),
+  startMoney: positiveInt.optional(),
+  startResources: partialResourcesSchema.optional(),
+});
+
+export const planetsFileSchema = z.strictObject({
+  colony: z.strictObject({
+    requiredBuilding: id,
+    launchCost: partialResourcesSchema,
+  }),
+  legacies: z.array(legacyDefinitionSchema).min(1),
+  planets: z.array(planetDefinitionSchema).min(1),
+});
+
+export type PlanetDefinition = Omit<z.infer<typeof planetDefinitionSchema>, 'overrides'>;
+export type LegacyDefinition = z.infer<typeof legacyDefinitionSchema>;
+export type ColonyConfig = z.infer<typeof planetsFileSchema>['colony'];
+
+/** Zem bez úprav — pre testovacie dáta bez súboru planét. */
+const DEFAULT_PLANET: PlanetDefinition = {
+  id: 'earth',
+  name: 'Zem',
+  terrain: { water: 0.12, hill: 0.93, rock: 0.9, forest: 0.72, fertile: 0.52 },
+  startMinimum: { forest: 8, rock: 4, fertile: 8 },
+};
+
 export interface GameData {
   eras: readonly EraDefinition[];
   buildings: readonly BuildingDefinition[];
@@ -338,6 +399,11 @@ export interface GameData {
   balance: BalanceConfig;
   buildingsById: ReadonlyMap<string, BuildingDefinition>;
   technologiesById: ReadonlyMap<string, TechnologyDefinition>;
+  /** Planéta, pre ktorú sú dáta upravené. */
+  planet: PlanetDefinition;
+  planets: readonly PlanetDefinition[];
+  legacies: readonly LegacyDefinition[];
+  colony: ColonyConfig | null;
 }
 
 export interface RawGameData {
@@ -350,6 +416,8 @@ export interface RawGameData {
   /** Náhodné udalosti (nepovinné). */
   events?: unknown;
   balance: unknown;
+  /** Planéty, dedičstvá a kolonizácia (nepovinné). */
+  planets?: unknown;
 }
 
 export class GameDataError extends Error {
@@ -402,18 +470,84 @@ function findPrerequisiteCycle(technologies: readonly TechnologyDefinition[]): s
   return null;
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * Hlboké zlúčenie úprav planéty: objekty po kľúčoch, polia objektov (úrovne) po indexoch,
+ * ostatné hodnoty (napr. zoznam terénov) sa nahradia.
+ */
+export function mergeOverride(base: unknown, override: unknown): unknown {
+  if (isPlainObject(base) && isPlainObject(override)) {
+    const result: Record<string, unknown> = { ...base };
+    for (const [key, value] of Object.entries(override)) {
+      result[key] = key in base ? mergeOverride(base[key], value) : value;
+    }
+    return result;
+  }
+  if (Array.isArray(base) && Array.isArray(override) && override.every(isPlainObject)) {
+    return base.map((item, i) => (i < override.length ? mergeOverride(item, override[i]) : item));
+  }
+  return override;
+}
+
+function overrideById(list: unknown, overrides: Record<string, unknown> | undefined): unknown {
+  if (!overrides || !Array.isArray(list)) return list;
+  return list.map((item) =>
+    isPlainObject(item) && typeof item.id === 'string' && overrides[item.id]
+      ? mergeOverride(item, overrides[item.id])
+      : item,
+  );
+}
+
 /**
  * Validuje surové herné dáta (schémy + krížové referencie).
  * Pri akejkoľvek chybe vyhodí GameDataError so zoznamom všetkých problémov.
  */
-export function loadGameData(raw: RawGameData): GameData {
-  const eras = z.array(eraDefinitionSchema).min(1).safeParse(raw.eras);
-  const buildings = z.array(buildingDefinitionSchema).safeParse(raw.buildings);
+export function loadGameData(raw: RawGameData, planetId: PlanetId = 'earth'): GameData {
+  const planetsFile =
+    raw.planets === undefined ? undefined : planetsFileSchema.safeParse(raw.planets);
+  if (planetsFile && !planetsFile.success) {
+    throw new GameDataError(formatZodIssues('planets', planetsFile.error));
+  }
+  const planetEntry = planetsFile?.data.planets.find((p) => p.id === planetId);
+  if (planetsFile && !planetEntry)
+    throw new GameDataError([`planets: neznáma planéta "${planetId}"`]);
+  if (!planetsFile && planetId !== 'earth') {
+    throw new GameDataError([`planets: chýbajú dáta planéty "${planetId}"`]);
+  }
+  const overrides = planetEntry?.overrides;
+  for (const [section, list] of [
+    ['buildings', raw.buildings],
+    ['eras', raw.eras],
+    ['events', raw.events],
+  ] as const) {
+    // Nepovinné sekcie (udalosti v testovacích dátach) sa nekontrolujú, ak chýbajú.
+    if (!Array.isArray(list)) continue;
+    const known = new Set(list.map((item: { id?: unknown }) => item.id));
+    for (const overrideId of Object.keys(overrides?.[section] ?? {})) {
+      if (!known.has(overrideId)) {
+        throw new GameDataError([`planets[${planetId}].${section}: neznáme ID "${overrideId}"`]);
+      }
+    }
+  }
+
+  const eras = z
+    .array(eraDefinitionSchema)
+    .min(1)
+    .safeParse(overrideById(raw.eras, overrides?.eras));
+  const buildings = z
+    .array(buildingDefinitionSchema)
+    .safeParse(overrideById(raw.buildings, overrides?.buildings));
   const technologies = z.array(technologyDefinitionSchema).safeParse(raw.technologies);
   const milestones = z.array(milestoneDefinitionSchema).safeParse(raw.milestones);
-  const balance = balanceSchema.safeParse(raw.balance);
+  const balance = balanceSchema.safeParse(
+    overrides?.balance ? mergeOverride(raw.balance, overrides.balance) : raw.balance,
+  );
   const achievements = z.array(achievementDefinitionSchema).safeParse(raw.achievements ?? []);
-  const events = z.array(eventDefinitionSchema).safeParse(raw.events ?? []);
+  const events = z
+    .array(eventDefinitionSchema)
+    .safeParse(overrideById(raw.events ?? [], overrides?.events));
 
   const schemaIssues = [
     ...(eras.success ? [] : formatZodIssues('eras', eras.error)),
@@ -583,7 +717,24 @@ export function loadGameData(raw: RawGameData): GameData {
       issues.push(`balance.difficulties.${id}: vrátenie pri zbúraní nesmie presiahnuť 100 %`);
   }
 
+  if (planetsFile) {
+    const colony = planetsFile.data.colony;
+    if (!buildingIds.has(colony.requiredBuilding))
+      issues.push(`planets.colony: neznáma budova "${colony.requiredBuilding}"`);
+    for (const duplicate of findDuplicates(planetsFile.data.legacies.map((l) => l.id))) {
+      issues.push(`planets.legacies: duplicitné ID "${duplicate}"`);
+    }
+    for (const duplicate of findDuplicates(planetsFile.data.planets.map((p) => p.id))) {
+      issues.push(`planets: duplicitné ID "${duplicate}"`);
+    }
+  }
+
   if (issues.length > 0) throw new GameDataError(issues);
+
+  const stripOverrides = (planet: z.infer<typeof planetDefinitionSchema>): PlanetDefinition => {
+    const { id, name, terrain, startMinimum } = planet;
+    return { id, name, terrain, startMinimum };
+  };
 
   return {
     eras: eras.data,
@@ -595,5 +746,9 @@ export function loadGameData(raw: RawGameData): GameData {
     balance: balance.data,
     buildingsById: new Map(buildings.data.map((b) => [b.id, b])),
     technologiesById: new Map(technologies.data.map((t) => [t.id, t])),
+    planet: planetEntry ? stripOverrides(planetEntry) : DEFAULT_PLANET,
+    planets: planetsFile ? planetsFile.data.planets.map(stripOverrides) : [DEFAULT_PLANET],
+    legacies: planetsFile?.data.legacies ?? [],
+    colony: planetsFile?.data.colony ?? null,
   };
 }

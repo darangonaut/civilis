@@ -29,7 +29,7 @@ type DayListener = (day: number) => void;
  * a po každej zmene stavu upozorní odberateľov.
  */
 export class GameController {
-  private readonly engine: CivilisEngine;
+  private engine: CivilisEngine;
   private readonly listeners = new Set<Listener>();
   private readonly eventListeners = new Set<EventListener>();
   private readonly dayListeners = new Set<DayListener>();
@@ -42,9 +42,14 @@ export class GameController {
   /** Rýchlosť, na ktorú sa vráti medzerník po pauze. */
   private resumeSpeed: Exclude<SimulationSpeed, 0> = 1;
 
+  /**
+   * @param resolveData herné dáta pre planétu načítanej hry (kolónia na Marse má upravené
+   *   budovy); bez neho sa používajú stále tie isté dáta.
+   */
   constructor(
-    private readonly data: GameData,
+    private data: GameData,
     initialState: GameState,
+    private readonly resolveData?: (planet: GameState['planet']) => GameData,
   ) {
     this.engine = createGameEngine(data, initialState);
     this.loop = new GameLoop(
@@ -131,7 +136,13 @@ export class GameController {
 
   /** Nahradí aktuálnu hru iným stavom (načítanie, import, nová hra). */
   load(state: GameState): void {
-    this.engine.load(state);
+    const data = this.resolveData?.(state.planet) ?? this.data;
+    if (data !== this.data) {
+      this.data = data;
+      this.engine = createGameEngine(data, state);
+    } else {
+      this.engine.load(state);
+    }
     this.resumeSpeed = state.simulation.speed === 0 ? this.resumeSpeed : state.simulation.speed;
     this.notify();
   }

@@ -5,7 +5,7 @@ import { useCompact } from '@/app/useCompact';
 import { problemBuildingCount } from '@/app/problems';
 import { useGameState } from '@/app/useGameState';
 import { gameData } from '@/data';
-import { scaleAmount } from '@/engine';
+import { difficultyOf, scaleAmount } from '@/engine';
 import { useUiStore, type PanelId } from '@/stores/uiStore';
 import { Icon, type IconName } from './Icon';
 import { LayerControl } from './LayerControl';
@@ -38,7 +38,7 @@ export function QuickBar() {
           name: techName(tech.id),
           ratio:
             s.research.investedKnowledge /
-            scaleAmount(tech.cost, gameData.balance.difficulties[s.difficulty].researchCost),
+            scaleAmount(tech.cost, difficultyOf(s, gameData).researchCost),
         }
       : null;
   });

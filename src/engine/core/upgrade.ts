@@ -1,3 +1,4 @@
+import { difficultyOf } from './colony';
 import {
   RESOURCE_IDS,
   type BuildingInstance,
@@ -43,10 +44,7 @@ export function upgradeRequirements(
     return { type, met: isBuildingCovered(state, definition, building, grid) };
   });
   const resources = state.city.economy.resources;
-  const cost = scaleCost(
-    next.upgradeCost,
-    data.balance.difficulties[state.difficulty].constructionCost,
-  );
+  const cost = scaleCost(next.upgradeCost, difficultyOf(state, data).constructionCost);
   return {
     next,
     technologyMet:
@@ -85,10 +83,7 @@ export function upgradeBuilding(
   if (!validation.success) return validation;
   const building = state.city.buildings.find((b) => b.id === instanceId)!;
   const next = nextLevel(data.buildingsById.get(building.definitionId)!, building.level)!;
-  const cost = scaleCost(
-    next.upgradeCost,
-    data.balance.difficulties[state.difficulty].constructionCost,
-  );
+  const cost = scaleCost(next.upgradeCost, difficultyOf(state, data).constructionCost);
   for (const id of RESOURCE_IDS) state.city.economy.resources[id] -= cost[id] ?? 0;
   building.level += 1;
   refreshDerivedState(state, data);

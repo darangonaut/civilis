@@ -44,6 +44,8 @@ export function createTestCity(options: TestCityOptions = {}): CivilisEngine {
     createdAt: '2026-01-01T00:00:00.000Z',
     lastSavedAt: '2026-01-01T00:00:00.000Z',
     difficulty: options.difficulty ?? 'normal',
+    planet: 'earth',
+    colony: { generation: 1, legacyIds: [], originCity: null },
     simulation: { day: 0, speed: 1, seed: 1 },
     world: { seed: 1, width, height, tiles },
     city: {

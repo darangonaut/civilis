@@ -1,6 +1,7 @@
 import { AUTOSAVE_SLOT_ID, MANUAL_SLOT_IDS, type SlotId } from '@/persistence/db';
 import { SaveError } from '@/persistence/migrations';
 import { writeUnloadSnapshot } from '@/persistence/unloadSnapshot';
+import { gameData } from '@/data';
 import { useUiStore } from '@/stores/uiStore';
 import type { DifficultyId, GameState } from '@/types';
 import { controller, createFreshGame, saveService } from './game';
@@ -99,6 +100,13 @@ export async function importGameFile(file: File): Promise<void> {
       .getState()
       .showNotice(`${t('save.importFailed')}: ${saveErrorMessage(error)}`, 'warning');
   }
+}
+
+/** Nové mesto kolónie: po načítaní ukáže úvod prvej éry planéty (havarijný tábor). */
+export function startColonyGame(state: GameState, message: string): void {
+  applyLoadedState(state, message);
+  useUiStore.setState({ openPanel: null });
+  useUiStore.getState().setNewEra(gameData.eras[0]?.id ?? null);
 }
 
 export function startNewGame(seed?: number, difficulty?: DifficultyId): void {

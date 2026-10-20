@@ -1,3 +1,4 @@
+import { difficultyOf } from '../core/colony';
 import { RESOURCE_IDS, type GameState, type Resources } from '@/types';
 import type { GameEvent } from '../core/events';
 import type { GameData } from '../core/definitions';
@@ -22,7 +23,7 @@ function addTo(target: Partial<Resources>, source: Partial<Resources>): void {
 export function simulateDay(state: GameState, data: GameData): GameEvent[] {
   const events: GameEvent[] = [];
   const economy = state.city.economy;
-  const difficulty = data.balance.difficulties[state.difficulty];
+  const difficulty = difficultyOf(state, data);
 
   // 1.–4. Pripojenie, pracovníci, kapacita, rezervácia vstupov.
   const analysis = analyzeCity(state, data);

@@ -12,6 +12,20 @@ export const en: VoiceTexts = {
     holonet: 'Holonet',
   },
   topics: {
+    mars: [
+      'Mom asks if I packed enough sweaters. Mom, it is −60 °C here. No.',
+      'A message from Earth arrived with a 20-minute delay. It was spam.',
+      'In low gravity I jump three times higher. I have not noticed the dome ceiling yet.',
+      'On Earth I used to complain about rain. I take it back.',
+      'We found an old rover. Still taking photos of rocks. Respect.',
+      'Sunsets here are blue. Finally something that is not red.',
+      'The first tomato ripened in the greenhouse. The council will not let anyone eat it — it is a monument.',
+      'My colleague says the dust in the dome is "cozy". My colleague has been in quarantine for three days.',
+    ],
+    dustStorm: [
+      'Dust storm. I wiped the window and behind it was more dust.',
+      'The greenhouses cannot see the sun and I cannot see my neighbor. Some things are a bonus.',
+    ],
     hunger: [
       'Dinner is water and hope again. Mayor, where are the farms?',
       'I saw a mouse packing a suitcase. Even it can’t find food here anymore.',
@@ -157,6 +171,8 @@ export const en: VoiceTexts = {
     ],
   ],
   hashtags: {
+    mars: '#mars',
+    dustStorm: '#dust',
     hunger: '#hungry',
     housing: '#housing',
     water: '#water',

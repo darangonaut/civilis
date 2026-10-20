@@ -26,6 +26,8 @@ export const VOICE_TOPICS = [
   'immigrants',
   'harvest',
   'caravan',
+  'mars',
+  'dustStorm',
 ] as const;
 export type VoiceTopic = (typeof VOICE_TOPICS)[number];
 

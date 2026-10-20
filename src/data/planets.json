@@ -1,0 +1,198 @@
+{
+  "colony": {
+    "requiredBuilding": "space_port",
+    "launchCost": {
+      "iron": 500,
+      "electronics": 400,
+      "tools": 400,
+      "food": 300
+    }
+  },
+  "legacies": [
+    {
+      "id": "settlers",
+      "name": "Skúsení osadníci",
+      "description": "Kolónia začne s 10 obyvateľmi navyše a väčšími zásobami jedla.",
+      "startPopulation": 10,
+      "startResources": { "food": 60 }
+    },
+    {
+      "id": "databank",
+      "name": "Zachránená databanka",
+      "description": "Výskum je o 20 % lacnejší.",
+      "researchCost": 0.8
+    },
+    {
+      "id": "cargo",
+      "name": "Plný nákladný priestor",
+      "description": "Viac surovín a peňazí na začiatok.",
+      "startResources": { "wood": 80, "stone": 60, "tools": 30, "bricks": 40 },
+      "startMoney": 500
+    },
+    {
+      "id": "engineers",
+      "name": "Inžinieri z lode",
+      "description": "Stavby a vylepšenia sú o 10 % lacnejšie.",
+      "constructionCost": 0.9
+    },
+    {
+      "id": "thrift",
+      "name": "Úsporná správa",
+      "description": "Údržba budov je o 15 % nižšia.",
+      "maintenance": 0.85
+    }
+  ],
+  "planets": [
+    {
+      "id": "earth",
+      "name": "Zem",
+      "terrain": { "water": 0.12, "hill": 0.93, "rock": 0.9, "forest": 0.72, "fertile": 0.52 },
+      "startMinimum": { "forest": 8, "rock": 4, "fertile": 8 }
+    },
+    {
+      "id": "mars",
+      "name": "Mars",
+      "terrain": { "water": 0.07, "hill": 0.9, "rock": 0.82, "forest": 0.86, "fertile": null },
+      "startMinimum": { "forest": 8, "rock": 6 },
+      "overrides": {
+        "buildings": {
+          "house": {
+            "name": "Obytná kupola",
+            "levels": [
+              { "name": "Regolitová kupola" },
+              { "name": "Dvojkupola" },
+              { "name": "Kráterová vila" },
+              { "name": "Terasová kupola" },
+              { "name": "Kupolový palác" },
+              { "name": "Obytný blok" },
+              { "name": "Marťanský mrakodrap" },
+              { "name": "Inteligentná kupola" },
+              { "name": "Arkológia Olympus" }
+            ]
+          },
+          "bridge": { "name": "Lávka cez ľad" },
+          "lumberjack": {
+            "name": "Šrotovisko",
+            "levels": [{ "name": "Recyklačná linka" }, { "name": "Šrotový kombinát" }]
+          },
+          "farm": {
+            "name": "Skleník",
+            "allowedTerrain": ["grass"],
+            "terrainEfficiency": { "grass": 1 },
+            "constructionCost": { "wood": 10, "stone": 6 },
+            "levels": [{ "name": "Hydroponický skleník" }, { "name": "Automatický skleník" }]
+          },
+          "quarry": {
+            "name": "Regolitový lom",
+            "levels": [{ "name": "Veľký regolitový lom" }, { "name": "Robotický lom" }]
+          },
+          "well": {
+            "name": "Ľadový vrt",
+            "constructionCost": { "wood": 10, "stone": 10 }
+          },
+          "warehouse": { "name": "Zásobovací modul", "levels": [{ "name": "Nákladný hangár" }] },
+          "fishery": {
+            "name": "Riasová farma",
+            "levels": [{ "name": "Riasové nádrže" }, { "name": "Riasový kombinát" }]
+          },
+          "pasture": {
+            "name": "Bioreaktor",
+            "levels": [{ "name": "Veľký bioreaktor" }, { "name": "Genetická stanica" }]
+          },
+          "harbor": { "name": "Ľadový terminál" },
+          "mine": {
+            "name": "Kráterová baňa",
+            "levels": [{ "name": "Hlboká kráterová baňa" }, { "name": "Robotická baňa" }]
+          },
+          "temple": { "name": "Pamätník Zeme" },
+          "park": { "name": "Záhradná kupola" },
+          "fountain": { "name": "Ľadová fontána" },
+          "pyramid": { "name": "Regolitová pyramída" },
+          "great_library": { "name": "Archív Zeme" },
+          "castle": { "name": "Pevnosť Phobos" },
+          "colossus": { "name": "Kolos z Olympu" },
+          "iron_tower": { "name": "Anténa Valles Marineris" },
+          "stadium": { "name": "Nízkogravitačný štadión" },
+          "space_port": { "name": "Medziplanetárny prístav" }
+        },
+        "eras": {
+          "settlement": {
+            "name": "Havarijný tábor",
+            "description": "Loď pri pristátí havarovala a databanky sú preč. Z trosiek a ľadu postav prvú sebestačnú základňu."
+          },
+          "antiquity": {
+            "name": "Prvá základňa",
+            "description": "Tehly z regolitu, prvé pamätníky a vodovody z ľadu. Riasové farmy rastú na ľadových poliach."
+          },
+          "middle_ages": {
+            "name": "Kupolové mestečko",
+            "description": "Bane v kráteroch, huty a univerzity. Kolonisti si stavajú vlastnú katedrálu — pod kupolou."
+          },
+          "renaissance": {
+            "name": "Marťanská renesancia",
+            "description": "Obchod, umenie a veda. Bioreaktory dávajú látky a divadlá hrajú hry o starej Zemi."
+          },
+          "industrial": {
+            "name": "Červená industria",
+            "description": "Uhlie z hlbín, oceľ a železnica cez púšť. Mars sa stáva priemyselnou planétou."
+          },
+          "modern": {
+            "name": "Moderný Mars",
+            "description": "Elektrárne, nemocnice a prvé marťanské mrakodrapy."
+          },
+          "information": {
+            "name": "Medziplanetárna sieť",
+            "description": "Počítače, jadrová energia a správy zo Zeme s 20-minútovým oneskorením."
+          },
+          "future": {
+            "name": "Terraformácia",
+            "description": "Fúzia a umelá inteligencia. Medziplanetárny prístav pošle kolonistov ešte ďalej."
+          }
+        },
+        "events": {
+          "drought": {
+            "name": "Prachová búrka",
+            "description": "Prach zakryl slnko — skleníky vyrábajú menej potravín."
+          },
+          "epidemic": {
+            "name": "Marťanská chrípka",
+            "description": "Kupolami sa šíri vírus. Časť kolonistov odletela späť a nálada klesla."
+          },
+          "fire": {
+            "name": "Únik kyslíka",
+            "description": "V budove {building} unikal kyslík a vznietil sa. Opravíš ju hneď, alebo počkáš, kým ju kolonisti opravia sami?"
+          },
+          "bumper_harvest": {
+            "name": "Rekordná úroda",
+            "description": "Jasné nebo bez prachu — skleníky vyrábajú viac potravín."
+          },
+          "ancient_ruins": {
+            "name": "Záhadný artefakt",
+            "description": "Pri stavbe sa našiel podivný kovový objekt. Napokon to bol starý rover — aj tak mal v pamäti cenné dáta."
+          },
+          "patron": {
+            "name": "Miliardár zo Zeme",
+            "description": "Pozemský miliardár poslal peniaze výmenou za fotku s kolóniou."
+          },
+          "caravan": {
+            "name": "Obchodná loď",
+            "description": "Loď zo Zeme ponúka {amount} × {resource} za {cost} — polovičnú cenu."
+          },
+          "immigrants": {
+            "name": "Nová loď kolonistov",
+            "description": "Pristála loď s {amount} kolonistami. Prijmeš ich? Chvíľu potrvá, kým si zvyknú na nízku gravitáciu."
+          },
+          "festival": {
+            "name": "Výročie pristátia",
+            "description": "Kolonisti by radi oslávili výročie pristátia. Stojí {cost}, ale mesiac zlepší náladu."
+          }
+        },
+        "balance": {
+          "startingState": {
+            "resources": { "food": 120, "wood": 60, "stone": 50, "tools": 20 }
+          }
+        }
+      }
+    }
+  ]
+}

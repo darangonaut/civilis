@@ -57,6 +57,8 @@ interface UiState {
   savesRevision: number;
   /** Obrazovka úspechu po poslednom míľniku prvej éry. */
   victoryOpen: boolean;
+  /** Okno kolonizačnej lode. */
+  colonyOpen: boolean;
   /** Éra, ktorej uvítaciu obrazovku treba zobraziť. */
   newEraId: string | null;
 
@@ -74,6 +76,7 @@ interface UiState {
   setHoveredTile: (position: Position | null) => void;
   showNotice: (text: string, kind?: NoticeKind) => void;
   setVictoryOpen: (open: boolean) => void;
+  setColonyOpen: (open: boolean) => void;
   setNewEra: (eraId: string | null) => void;
   togglePanel: (panel: PanelId | null) => void;
   bumpSavesRevision: () => void;
@@ -101,6 +104,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
   openPanel: null,
   savesRevision: 0,
   victoryOpen: false,
+  colonyOpen: false,
   newEraId: null,
 
   setCatalogCategory: (catalogCategory) => set({ catalogCategory }),
@@ -123,6 +127,7 @@ export const useUiStore = create<UiState>()((set, get) => ({
     set((s) => ({ notices: [...s.notices, { id: ++noticeSeq, text, kind }].slice(-MAX_NOTICES) })),
   dismissNotice: (id) => set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })),
   setVictoryOpen: (victoryOpen) => set({ victoryOpen }),
+  setColonyOpen: (colonyOpen) => set({ colonyOpen }),
   setNewEra: (newEraId) => set({ newEraId }),
   bumpSavesRevision: () => set((s) => ({ savesRevision: s.savesRevision + 1 })),
   togglePanel: (panel) => set((s) => ({ openPanel: s.openPanel === panel ? null : panel })),

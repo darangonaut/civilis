@@ -1,3 +1,4 @@
+import { difficultyOf } from './colony';
 import { resolveEvent, setEventsEnabled } from '../events/randomEvents';
 import { executeTrade, setAutoSell } from '../economy/trade';
 import {
@@ -81,11 +82,7 @@ export function validatePlacement(
     }
   }
   const resources = state.city.economy.resources;
-  const cost = buildCostAtLevel(
-    definition,
-    level,
-    data.balance.difficulties[state.difficulty].constructionCost,
-  );
+  const cost = buildCostAtLevel(definition, level, difficultyOf(state, data).constructionCost);
   if (RESOURCE_IDS.some((id) => (cost[id] ?? 0) > resources[id])) {
     return fail('insufficient_resources');
   }
@@ -114,11 +111,7 @@ function placeBuilding(
 
   const definition = data.buildingsById.get(buildingId)!;
   const resources = state.city.economy.resources;
-  const cost = buildCostAtLevel(
-    definition,
-    level,
-    data.balance.difficulties[state.difficulty].constructionCost,
-  );
+  const cost = buildCostAtLevel(definition, level, difficultyOf(state, data).constructionCost);
   for (const id of RESOURCE_IDS) resources[id] -= cost[id] ?? 0;
 
   const instance = {
@@ -155,7 +148,7 @@ function demolishBuilding(state: GameState, data: GameData, instanceId: string):
   }
   // Recyklácia: časť investovaných surovín sa vráti (do kapacity skladu, vedomosti bez limitu).
   if (definition) {
-    const difficulty = data.balance.difficulties[state.difficulty];
+    const difficulty = difficultyOf(state, data);
     const refund = demolishRefund(
       definition,
       instance.level,
