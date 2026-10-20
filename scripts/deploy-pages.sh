@@ -9,6 +9,11 @@ name="$(git config user.name)"
 revision="$(git rev-parse --short HEAD)"
 
 npm run build
+# Súbory predošlých nasadení zostanú: otvorená stará stránka si ešte môže dotiahnuť svoje
+# súbory (napr. mapu), kým sa obnoví — inak by ostala čierna.
+if git fetch -q "$remote" gh-pages 2>/dev/null; then
+  git archive FETCH_HEAD assets | tar -x -k -C dist 2>/dev/null || true
+fi
 cd dist
 touch .nojekyll # GitHub Pages nemá spracovať súbory cez Jekyll
 git init -q -b gh-pages

@@ -11,6 +11,19 @@ import '@fontsource/atkinson-hyperlegible/400.css';
 import '@fontsource/atkinson-hyperlegible/700.css';
 import '@/app/styles.css';
 
+// Po novom nasadení môže otvorená (alebo z cache načítaná) stará stránka žiadať súbor,
+// ktorý už neexistuje (napr. mapu). Stránka sa vtedy raz obnoví na aktuálnu verziu.
+window.addEventListener('vite:preloadError', (event) => {
+  try {
+    if (sessionStorage.getItem('civilis.reloadedForUpdate')) return;
+    sessionStorage.setItem('civilis.reloadedForUpdate', '1');
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 const root = document.getElementById('root');
 if (!root) throw new Error('Chýba #root element');
 
