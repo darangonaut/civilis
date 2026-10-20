@@ -74,6 +74,10 @@ describe('sprity budov', () => {
       for (let level = 1; level <= 1 + (b.levels?.length ?? 0); level++) {
         keys.add(buildingSpriteKey(b.id, level, []));
         keys.add(buildingSpriteKey(b.id, level, Object.values(TECH_LOOKS)));
+        // Na Marse má každá budova marťanský vzhľad (vlastný alebo pod kyslíkovou kupolou).
+        const mars = buildingSpriteKey(b.id, level, [], 'mars');
+        expect(mars, b.id).toMatch(/^mars[:~]/);
+        keys.add(mars);
       }
     }
     for (const key of keys) expect(isFallback(key), key).toBe(false);

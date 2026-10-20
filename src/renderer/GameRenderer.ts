@@ -464,7 +464,7 @@ export class GameRenderer {
       if (
         sprite &&
         sprite.label !== key &&
-        sprite.label.replace(/^mars:/, '').split(/[@+#]/)[0] === building.definitionId
+        sprite.label.replace(/^mars[:~]/, '').split(/[@+#]/)[0] === building.definitionId
       ) {
         sprite.label = key;
         applyTexture(sprite, this.atlas.building(key));

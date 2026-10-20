@@ -1781,9 +1781,19 @@ export function buildingSpriteKey(
   planet: PlanetId = 'earth',
 ): string {
   if (planet === 'mars') {
-    const mars = marsSpriteKey(definitionId, level);
-    if (mars) return mars;
+    return (
+      marsSpriteKey(definitionId, level) ??
+      `mars~${earthSpriteKey(definitionId, level, completedTechnologyIds)}`
+    );
   }
+  return earthSpriteKey(definitionId, level, completedTechnologyIds);
+}
+
+function earthSpriteKey(
+  definitionId: string,
+  level: number,
+  completedTechnologyIds: readonly string[],
+): string {
   if (level > 1 && PAINTERS[`${definitionId}@${level}`]) return `${definitionId}@${level}`;
   const tech = TECH_LOOKS[definitionId];
   if (tech && completedTechnologyIds.includes(tech)) return `${definitionId}+`;
@@ -1792,6 +1802,7 @@ export function buildingSpriteKey(
 
 export function drawBuilding(key: string): PixelSprite {
   if (key.startsWith('mars:')) return drawMarsBuilding(key);
+  if (key.startsWith('mars~')) return drawMarsRecolored(key.slice('mars~'.length));
   const wonder = WONDER_PAINTERS[key];
   if (wonder) {
     const { pc, cx, cy } = wonderCanvas();
@@ -2454,6 +2465,147 @@ const paintBioreactor: MarsPainter = (pc, cx, cy, level) => {
   if (level >= 3) pc.set(cx + 4, cy - 10, P.glow);
 };
 
+/** Prefarbenie pozemských budov na Marse: omietka → kovové panely, drevo → regolit, strechy → svetlé panely. */
+const MARS_RECOLOR: ReadonlyMap<Rgb, Rgb> = new Map<Rgb, Rgb>([
+  [P.plaster, M.metalLight],
+  [P.plasterShade, M.metal],
+  [P.plasterDark, M.metalDark],
+  [P.wood, M.sand],
+  [P.woodShade, M.sandDark],
+  [P.woodDark, M.sandDeep],
+  [P.roof, 0xe8ecf0],
+  [P.roofShade, M.metal],
+  [P.roofDark, M.metalDark],
+  [P.brick, M.basaltLight],
+  [P.brickShade, M.basalt],
+  [P.grass, M.sandDark],
+  [P.grassDark, M.sandDeep],
+  [P.soilLight, M.sandLight],
+  [P.soilDark, M.sandDeep],
+]);
+
+const mix = (a: Rgb, b: Rgb, t: number): Rgb => {
+  const ch = (shift: number) =>
+    Math.round(((a >> shift) & 0xff) * (1 - t) + ((b >> shift) & 0xff) * t);
+  return (ch(16) << 16) | (ch(8) << 8) | ch(0);
+};
+
+/** Priehľadná kyslíková kupola nad budovou: sklenený plášť od zeme až nad strechu. */
+function oxygenDome(sprite: PixelSprite): void {
+  const { canvas, anchorX: cx, anchorY: cy } = sprite;
+  let top = cy;
+  for (let y = 0; y < cy && top === cy; y++)
+    for (let x = 0; x < canvas.width; x++) if (canvas.isFilled(x, y)) top = y;
+  const r = Math.min(cx - 1, canvas.width - cx - 2);
+  top = Math.max(0, top - 2);
+  const capHeight = Math.min(Math.round(r * 0.8), cy - top);
+  const halfAt = (y: number) => {
+    const dy = y - top;
+    if (dy >= capHeight) return r;
+    const k = (capHeight - dy) / capHeight;
+    return Math.round(r * Math.sqrt(1 - k * k));
+  };
+  for (let y = top; y <= cy; y++) {
+    const half = halfAt(y);
+    for (let x = cx - half; x <= cx + half; x++) {
+      const edge = x === cx - half || x === cx + half || y === top;
+      const color = canvas.get(x, y);
+      if (edge) canvas.set(x, y, M.glassShade, 235);
+      else if (color === null) canvas.set(x, y, M.glass, 60);
+      else if (!LIGHT_SOURCES.has(color)) canvas.set(x, y, mix(color, M.glass, 0.22));
+    }
+  }
+  // Odlesk skla vľavo hore.
+  for (let y = top + 2; y < top + capHeight + 6 && y < cy; y++) {
+    const x = cx - halfAt(y) + 2;
+    if ((y - top) % 3 !== 2) canvas.set(x, y, P.white, 200);
+  }
+}
+
+/** Pozemský sprite v marťanskej palete pod kyslíkovou kupolou (kľúč `mars~<kľúč zo Zeme>`). */
+function drawMarsRecolored(earthKey: string): PixelSprite {
+  const base = drawBuilding(earthKey);
+  const { canvas } = base;
+  for (let y = 0; y < canvas.height; y++) {
+    for (let x = 0; x < canvas.width; x++) {
+      const color = canvas.get(x, y);
+      const mapped = color === null ? undefined : MARS_RECOLOR.get(color);
+      if (mapped !== undefined) canvas.set(x, y, mapped);
+    }
+  }
+  // Cesty, mosty a ploché stavby kupolu nemajú; raketa vesmírneho prístavu musí odletieť.
+  const [baseKey = ''] = earthKey.split('#');
+  if (!earthKey.includes('#') && !FLAT[baseKey] && baseKey !== 'space_port') oxygenDome(base);
+  return base;
+}
+
+const paintBazaar: MarsPainter = (pc, cx, cy) => {
+  pc.fillDiamond(cx, cy, HW - 2, M.sandDark);
+  // Stánky pod spoločnou presklenou kupolou.
+  for (const [ox, oy] of [
+    [-6, 0],
+    [5, 2],
+    [0, -3],
+  ] as const) {
+    isoBox(pc, cx + ox, cy + oy, 4, 3, { top: M.hazard, left: M.metal, right: M.metalDark });
+  }
+  pc.stamp(cx - 2, cy + 3, ['.oo.', 'oYYo', 'oYYo', '.oo.'], { o: M.metalDark, Y: M.algae });
+  const r = 13;
+  const ry = 11;
+  for (let y = -ry; y <= 0; y++) {
+    const half = Math.floor(r * Math.sqrt(1 - (y / ry) ** 2));
+    pc.set(cx - half, cy + y, M.glassShade);
+    pc.set(cx + half, cy + y, M.glassShade);
+    if (y === -ry || (y % 4 === 0 && y < 0)) {
+      for (let x = -half; x <= half; x += 3) pc.set(cx + x, cy + y, M.glass);
+    }
+  }
+  pc.set(cx - 5, cy - 8, P.white);
+};
+
+const paintTrainingCenter: MarsPainter = (pc, cx, cy) => {
+  const hw = 11;
+  isoBox(pc, cx, cy, hw, 8, { top: M.metalLight, left: M.metal, right: M.metalDark });
+  dome(pc, cx, cy - 8, 8, M.metalLight, M.metal);
+  pc.stamp(...leftWall(cx, cy, hw, 3, 6), WINDOW, DETAIL_PAL);
+  pc.stamp(...leftWall(cx, cy, hw, 7, 6), WINDOW, DETAIL_PAL);
+  pc.stamp(...rightWall(cx, cy, hw, 4, 5), DOOR, DETAIL_PAL);
+  // Parabolická anténa.
+  pc.fillRect(cx + 6, cy - 22, 1, 8, M.metalDark);
+  pc.stamp(cx + 3, cy - 26, ['o.....o', '.o...o.', '..ooo..'], { o: M.metalLight });
+  pc.fillRect(cx - 7, cy - 21, 1, 7, M.metalDark);
+  pc.fillRect(cx - 6, cy - 21, 4, 3, M.panel);
+};
+
+const paintEarthMemorial: MarsPainter = (pc, cx, cy) => {
+  pc.fillDiamond(cx, cy, 11, M.metal);
+  pc.fillDiamond(cx, cy - 1, 8, M.metalLight);
+  // Obelisk s modrou Zemou na vrchole.
+  pc.fillPolygon(
+    [
+      [cx - 3, cy - 1],
+      [cx, cy + 1],
+      [cx, cy - 22],
+      [cx - 1, cy - 22],
+    ],
+    M.basaltLight,
+  );
+  pc.fillPolygon(
+    [
+      [cx, cy + 1],
+      [cx + 3, cy - 1],
+      [cx + 1, cy - 22],
+      [cx, cy - 22],
+    ],
+    M.basalt,
+  );
+  pc.stamp(cx - 3, cy - 29, ['.ooo.', 'oBGBo', 'oBBGo', 'oGBBo', '.ooo.'], {
+    o: P.waterDeep,
+    B: P.water,
+    G: P.grassLight,
+  });
+};
+
 /** Budovy s vlastným marťanským vzhľadom; najvyššia úroveň, po ktorú platí (domy). */
 const MARS_PAINTERS: Readonly<Record<string, { painter: MarsPainter; maxLevel?: number }>> = {
   house: { painter: paintHabitat, maxLevel: 4 },
@@ -2463,6 +2615,9 @@ const MARS_PAINTERS: Readonly<Record<string, { painter: MarsPainter; maxLevel?: 
   fishery: { painter: paintAlgaeFarm },
   warehouse: { painter: paintSupplyModule },
   pasture: { painter: paintBioreactor },
+  market: { painter: paintBazaar },
+  school: { painter: paintTrainingCenter },
+  temple: { painter: paintEarthMemorial },
 };
 
 /** Kľúč marťanského sprite-u (`mars:farm@2`) alebo null, ak budova vyzerá ako na Zemi. */

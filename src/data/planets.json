@@ -14,7 +14,9 @@
       "name": "Skúsení osadníci",
       "description": "Kolónia začne s 10 obyvateľmi navyše a väčšími zásobami jedla.",
       "startPopulation": 10,
-      "startResources": { "food": 60 }
+      "startResources": {
+        "food": 60
+      }
     },
     {
       "id": "databank",
@@ -26,7 +28,12 @@
       "id": "cargo",
       "name": "Plný nákladný priestor",
       "description": "Viac surovín a peňazí na začiatok.",
-      "startResources": { "wood": 80, "stone": 60, "tools": 30, "bricks": 40 },
+      "startResources": {
+        "wood": 80,
+        "stone": 60,
+        "tools": 30,
+        "bricks": 40
+      },
       "startMoney": 500
     },
     {
@@ -46,74 +53,324 @@
     {
       "id": "earth",
       "name": "Zem",
-      "terrain": { "water": 0.12, "hill": 0.93, "rock": 0.9, "forest": 0.72, "fertile": 0.52 },
-      "startMinimum": { "forest": 8, "rock": 4, "fertile": 8 }
+      "terrain": {
+        "water": 0.12,
+        "hill": 0.93,
+        "rock": 0.9,
+        "forest": 0.72,
+        "fertile": 0.52
+      },
+      "startMinimum": {
+        "forest": 8,
+        "rock": 4,
+        "fertile": 8
+      }
     },
     {
       "id": "mars",
       "name": "Mars",
-      "terrain": { "water": 0.07, "hill": 0.9, "rock": 0.82, "forest": 0.86, "fertile": null },
-      "startMinimum": { "forest": 8, "rock": 6 },
+      "terrain": {
+        "water": 0.07,
+        "hill": 0.9,
+        "rock": 0.82,
+        "forest": 0.86,
+        "fertile": null
+      },
+      "startMinimum": {
+        "forest": 8,
+        "rock": 6
+      },
       "overrides": {
         "buildings": {
           "house": {
             "name": "Obytná kupola",
             "levels": [
-              { "name": "Regolitová kupola" },
-              { "name": "Dvojkupola" },
-              { "name": "Kráterová vila" },
-              { "name": "Terasová kupola" },
-              { "name": "Kupolový palác" },
-              { "name": "Obytný blok" },
-              { "name": "Marťanský mrakodrap" },
-              { "name": "Inteligentná kupola" },
-              { "name": "Arkológia Olympus" }
+              {
+                "name": "Regolitová kupola"
+              },
+              {
+                "name": "Dvojkupola"
+              },
+              {
+                "name": "Kráterová vila"
+              },
+              {
+                "name": "Terasová kupola"
+              },
+              {
+                "name": "Kupolový palác"
+              },
+              {
+                "name": "Obytný blok"
+              },
+              {
+                "name": "Marťanský mrakodrap"
+              },
+              {
+                "name": "Inteligentná kupola"
+              },
+              {
+                "name": "Arkológia Olympus"
+              }
             ]
           },
-          "bridge": { "name": "Lávka cez ľad" },
+          "bridge": {
+            "name": "Lávka cez ľad"
+          },
           "lumberjack": {
             "name": "Šrotovisko",
-            "levels": [{ "name": "Recyklačná linka" }, { "name": "Šrotový kombinát" }]
+            "levels": [
+              {
+                "name": "Recyklačná linka"
+              },
+              {
+                "name": "Šrotový kombinát"
+              }
+            ]
           },
           "farm": {
             "name": "Skleník",
             "allowedTerrain": ["grass"],
-            "terrainEfficiency": { "grass": 1 },
-            "constructionCost": { "wood": 10, "stone": 6 },
-            "levels": [{ "name": "Hydroponický skleník" }, { "name": "Automatický skleník" }]
+            "terrainEfficiency": {
+              "grass": 1
+            },
+            "constructionCost": {
+              "wood": 10,
+              "stone": 6
+            },
+            "levels": [
+              {
+                "name": "Hydroponický skleník"
+              },
+              {
+                "name": "Automatický skleník"
+              }
+            ]
           },
           "quarry": {
             "name": "Regolitový lom",
-            "levels": [{ "name": "Veľký regolitový lom" }, { "name": "Robotický lom" }]
+            "levels": [
+              {
+                "name": "Veľký regolitový lom"
+              },
+              {
+                "name": "Robotický lom"
+              }
+            ]
           },
           "well": {
             "name": "Ľadový vrt",
-            "constructionCost": { "wood": 10, "stone": 10 }
+            "constructionCost": {
+              "wood": 10,
+              "stone": 10
+            }
           },
-          "warehouse": { "name": "Zásobovací modul", "levels": [{ "name": "Nákladný hangár" }] },
+          "warehouse": {
+            "name": "Zásobovací modul",
+            "levels": [
+              {
+                "name": "Nákladný hangár"
+              }
+            ]
+          },
           "fishery": {
             "name": "Riasová farma",
-            "levels": [{ "name": "Riasové nádrže" }, { "name": "Riasový kombinát" }]
+            "levels": [
+              {
+                "name": "Riasové nádrže"
+              },
+              {
+                "name": "Riasový kombinát"
+              }
+            ]
           },
           "pasture": {
             "name": "Bioreaktor",
-            "levels": [{ "name": "Veľký bioreaktor" }, { "name": "Genetická stanica" }]
+            "levels": [
+              {
+                "name": "Veľký bioreaktor"
+              },
+              {
+                "name": "Genetická stanica"
+              }
+            ]
           },
-          "harbor": { "name": "Ľadový terminál" },
+          "harbor": {
+            "name": "Ľadový terminál"
+          },
           "mine": {
             "name": "Kráterová baňa",
-            "levels": [{ "name": "Hlboká kráterová baňa" }, { "name": "Robotická baňa" }]
+            "levels": [
+              {
+                "name": "Hlboká kráterová baňa"
+              },
+              {
+                "name": "Robotická baňa"
+              }
+            ]
           },
-          "temple": { "name": "Pamätník Zeme" },
-          "park": { "name": "Záhradná kupola" },
-          "fountain": { "name": "Ľadová fontána" },
-          "pyramid": { "name": "Regolitová pyramída" },
-          "great_library": { "name": "Archív Zeme" },
-          "castle": { "name": "Pevnosť Phobos" },
-          "colossus": { "name": "Kolos z Olympu" },
-          "iron_tower": { "name": "Anténa Valles Marineris" },
-          "stadium": { "name": "Nízkogravitačný štadión" },
-          "space_port": { "name": "Medziplanetárny prístav" }
+          "temple": {
+            "name": "Pamätník Zeme"
+          },
+          "park": {
+            "name": "Záhradná kupola"
+          },
+          "fountain": {
+            "name": "Ľadová fontána"
+          },
+          "pyramid": {
+            "name": "Regolitová pyramída"
+          },
+          "great_library": {
+            "name": "Archív Zeme"
+          },
+          "castle": {
+            "name": "Pevnosť Phobos"
+          },
+          "colossus": {
+            "name": "Kolos z Olympu"
+          },
+          "iron_tower": {
+            "name": "Anténa Valles Marineris"
+          },
+          "stadium": {
+            "name": "Nízkogravitačný štadión"
+          },
+          "space_port": {
+            "name": "Medziplanetárny prístav"
+          },
+          "road": {
+            "name": "Regolitová cesta"
+          },
+          "workshop": {
+            "name": "Výrobný modul",
+            "levels": [
+              {
+                "name": "3D tlačiareň"
+              },
+              {
+                "name": "Robotická dielňa"
+              }
+            ]
+          },
+          "school": {
+            "name": "Výcvikové stredisko"
+          },
+          "market": {
+            "name": "Výmenný bazár"
+          },
+          "brickworks": {
+            "name": "Spekáreň regolitu",
+            "levels": [
+              {
+                "name": "Mikrovlnná spekáreň"
+              },
+              {
+                "name": "Automatická spekáreň"
+              }
+            ]
+          },
+          "aqueduct": {
+            "name": "Ľadovod"
+          },
+          "smelter": {
+            "name": "Taviaca pec"
+          },
+          "university": {
+            "name": "Akadémia Marsu"
+          },
+          "cathedral": {
+            "name": "Veľká kupola"
+          },
+          "printing_house": {
+            "name": "Dátový archív"
+          },
+          "observatory": {
+            "name": "Observatórium Tharsis"
+          },
+          "theater": {
+            "name": "Hologramové divadlo"
+          },
+          "coal_mine": {
+            "name": "Ťažba karbonátov",
+            "levels": [
+              {
+                "name": "Hlboká ťažba karbonátov"
+              },
+              {
+                "name": "Automatická ťažba"
+              }
+            ]
+          },
+          "steelworks": {
+            "name": "Oceliareň Tharsis"
+          },
+          "textile_factory": {
+            "name": "Továreň na vlákna"
+          },
+          "railway_station": {
+            "name": "Stanica magnetovlaku"
+          },
+          "waterworks": {
+            "name": "Ľadová úpravňa"
+          },
+          "exhibition_palace": {
+            "name": "Palác kolonistov"
+          },
+          "power_plant": {
+            "name": "Metánová elektráreň"
+          },
+          "hospital": {
+            "name": "Lekárska kupola"
+          },
+          "cold_storage": {
+            "name": "Kryosklad"
+          },
+          "assembly_plant": {
+            "name": "Montážna hala"
+          },
+          "radio_station": {
+            "name": "Anténa Zem–Mars"
+          },
+          "department_store": {
+            "name": "Obchodná kupola"
+          },
+          "electronics_factory": {
+            "name": "Továreň na čipy"
+          },
+          "nuclear_plant": {
+            "name": "Jadrový reaktor Kilopower"
+          },
+          "data_center": {
+            "name": "Dátové centrum v kráteri"
+          },
+          "solar_park": {
+            "name": "Solárne pole"
+          },
+          "vertical_farm": {
+            "name": "Vertikálny skleník"
+          },
+          "robot_factory": {
+            "name": "Továreň na rovery"
+          },
+          "fusion_reactor": {
+            "name": "Fúzny reaktor Olympus"
+          },
+          "ai_center": {
+            "name": "Centrum UI Elysium"
+          },
+          "nano_foundry": {
+            "name": "Nanotováreň Deimos"
+          },
+          "plaza": {
+            "name": "Námestie pristátia"
+          },
+          "statue": {
+            "name": "Socha prvého kolonistu"
+          },
+          "botanical_garden": {
+            "name": "Pozemská záhrada"
+          }
         },
         "eras": {
           "settlement": {
@@ -189,7 +446,12 @@
         },
         "balance": {
           "startingState": {
-            "resources": { "food": 120, "wood": 60, "stone": 50, "tools": 20 }
+            "resources": {
+              "food": 120,
+              "wood": 60,
+              "stone": 50,
+              "tools": 20
+            }
           }
         }
       }

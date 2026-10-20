@@ -305,7 +305,7 @@ export class CityEffects {
     if (this.smokeTimer < SMOKE_INTERVAL_MS) return;
     this.smokeTimer = 0;
     for (const [id, building] of this.buildings) {
-      const chimneys = CHIMNEYS[building.key];
+      const chimneys = CHIMNEYS[building.key.replace(/^mars~/, '')];
       if (!chimneys) continue;
       const active = (this.activity.occupancy.get(id) ?? 0) > 0 || this.activity.working.has(id);
       if (!active || Math.random() < 0.35) continue;

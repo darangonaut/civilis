@@ -256,4 +256,8 @@ Blízka budúcnosť. Každá éra má 7–8 technológií (časť voliteľná) a
   drahší o kameň), drevorubač šrotovisko, studňa ľadový vrt, rybárska chata riasová farma,
   pastvina bioreaktor, domy kupoly; éry, udalosti (prachová búrka, únik kyslíka, záhadný
   artefakt…), divy a Hlas ulice majú marťanskú podobu. Štart s viac kameňom a nástrojmi.
+- Marťanský názov má každá budova. Vlastný vzhľad majú kupoly, skleník, šrotovisko, ľadový vrt,
+  riasová farma, zásobovací modul, bioreaktor, výmenný bazár, výcvikové stredisko a pamätník Zeme;
+  ostatné budovy sú v marťanskej palete pod priehľadnou kyslíkovou kupolou (okrem ciest
+  a vesmírneho prístavu).
 - Rovnaké ID budov ako na Zemi, takže míľniky, technológie aj bot platia bez zmeny.

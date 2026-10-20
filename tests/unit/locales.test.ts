@@ -81,6 +81,15 @@ describe('preklady', () => {
     }
   });
 
+  it('Mars premenúva každú budovu', () => {
+    const mars = planets.planets.find((p) => p.id === 'mars')!;
+    const overrides = (mars as { overrides: { buildings: Record<string, { name?: string }> } })
+      .overrides.buildings;
+    for (const building of gameData.buildings) {
+      expect(overrides[building.id]?.name, building.id).toBeTruthy();
+    }
+  });
+
   it('texty planéty (mars:…) existujú len ako úprava existujúceho kľúča', () => {
     for (const key of Object.keys(sk).filter((k) => k.startsWith('mars:'))) {
       expect(sk, key).toHaveProperty([key.slice('mars:'.length)]);
