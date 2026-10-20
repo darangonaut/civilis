@@ -74,6 +74,19 @@ technológie a nároky míľnikov sú doplnené na želanie a vyladené simulova
 | Dom → Arkológia        | 10     | 200 železo, 150 elektronika, 200 elektrina, 200 nástroje | Arkológie           | voda, vzdelanie, kultúra, zdravotníctvo | bývanie 150         |
 | Sklad → Veľký sklad    | 2      | 30 drevo, 30 kameň, 5 nástroje                           | Organizácia práce   | —                                       | sklad 450, údržba 1 |
 
+### Potreby domov (`needs`, na obyvateľa za deň)
+
+| Úroveň | Dom              | Nástroje | Látky  | Uhlie  | Elektrina | Elektronika |
+| ------ | ---------------- | -------- | ------ | ------ | --------- | ----------- |
+| 3      | Meštiansky dom   | 0,002    | —      | —      | —         | —           |
+| 4      | Vila             | 0,003    | —      | —      | —         | —           |
+| 5      | Patricijský dom  | 0,004    | —      | —      | —         | —           |
+| 6      | Renesančný palác | 0,004    | 0,01   | —      | —         | —           |
+| 7      | Mestský činžiak  | 0,004    | 0,0075 | 0,005  | —         | —           |
+| 8      | Mrakodrap        | 0,004    | 0,0075 | 0,0025 | 0,05      | —           |
+| 9      | Inteligentný dom | 0,004    | 0,0075 | —      | 0,08      | 0,005       |
+| 10     | Arkológia        | 0,004    | 0,0075 | —      | 0,1       | 0,008       |
+
 ## Technológie (`technologies.json`)
 
 Neskoré míľniky vyžadujú **počet** technológií s rezervou (napr. 48 z 58), takže časť výskumu je
@@ -222,5 +235,6 @@ Rýchly test F overuje prvé tri éry na 4 mapách; celú hru `npm run test:full
 
 ## Otvorené body
 
-- Neskoré éry nechávajú veľké prebytky základných surovín — priestor pre ďalšie spotrebiče alebo obchod.
+- Neskoré éry nechávajú veľké prebytky základných surovín a nástrojov — priestor pre ďalšie spotrebiče alebo obchod.
+- Prebytok elektriny v neskorej hre zostáva (jadrová a fúzna elektráreň); látky, uhlie a elektroniku odoberajú domy.
 - Populácia v sandboxe po splnení cieľov rastie ďalej (strop rastu je podiel populácie).

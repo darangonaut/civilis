@@ -5,7 +5,7 @@ import { def, economyTestData } from '../helpers/gameData';
 
 const balance = economyTestData.balance;
 
-/** Mesto s jedným mrakodrapom (úroveň 8 potrebuje látky a elektrinu). */
+/** Mesto s jedným mrakodrapom (úroveň 8 potrebuje látky, uhlie, elektrinu a nástroje). */
 function cityWithSkyscraper(resources: Record<string, number>) {
   const engine = createTestCity({ population: 80, resources: { food: 1000, ...resources } });
   const id = build(engine, 'house', { x: 3, y: 3 });
@@ -20,10 +20,15 @@ describe('potreby obyvateľov', () => {
     const house = def('house');
     expect(effectiveDefinition(house, 1).needs).toBeUndefined();
     expect(effectiveDefinition(house, 8).needs).toMatchObject({ electricity: expect.any(Number) });
+    expect(effectiveDefinition(house, 7).needs).toMatchObject({ coal: expect.any(Number) });
+    expect(effectiveDefinition(house, 10).needs).toMatchObject({
+      cloth: expect.any(Number),
+      tools: expect.any(Number),
+    });
   });
 
   it('obyvatelia spotrebujú tovar zo skladu a pri dostatku je zložka tovar 100', () => {
-    const { engine } = cityWithSkyscraper({ cloth: 100, electricity: 100 });
+    const { engine } = cityWithSkyscraper({ cloth: 100, coal: 100, electricity: 100, tools: 100 });
     engine.tick();
     const state = engine.getState();
     expect(state.city.economy.resources.electricity).toBeLessThan(100);
