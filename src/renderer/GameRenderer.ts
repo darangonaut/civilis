@@ -2,7 +2,7 @@ import { Application, Container, CullerPlugin, Graphics, Sprite, extensions } fr
 import type { GameState, Position } from '@/types';
 import { TILE_HEIGHT, TILE_WIDTH, tileToWorld, worldBounds, worldToTile } from './iso';
 import type { DayPhase } from './dayNight';
-import { dragPositions, dragShapeFor } from './dragPath';
+import { buildingsInArea, dragPositions, dragShapeFor } from './dragPath';
 import { CityEffects, type BuildingVisual, type CityActivity } from './effects';
 import {
   buildingSpriteKey,
@@ -35,6 +35,8 @@ const DRAG_THRESHOLD = 5;
 const PREVIEW_VALID = 0x8cff8c;
 const PREVIEW_INVALID = 0xff6b6b;
 const SELECTION_COLOR = 0xffd75e;
+/** Režim búrania: vybrané políčka a tón budov na zbúranie. */
+const DEMOLISH_COLOR = 0xe43b44;
 /** Strana bloku terénu pre culling. */
 const TERRAIN_CHUNK = 16;
 /** Výška výstražnej značky nad stredom políčka (logické pixely). */
@@ -52,6 +54,8 @@ export interface RendererCallbacks {
   onTileClick(position: Position): void;
   /** Ťahanie v režime stavby: postaviť budovu na všetky políčka (v poradí). */
   onPlaceMany(buildingId: string, positions: Position[]): void;
+  /** Ťahanie (alebo klik) v režime búrania: budovy vo vybranom obdĺžniku. */
+  onDemolishMany(instanceIds: string[]): void;
   /** Či sa dá budova na políčko postaviť — pre farbu náhľadu. */
   canPlace(buildingId: string, position: Position): boolean;
   /** Zmena výhľadu kamery (svetové súradnice) — minimapa. */
@@ -84,6 +88,23 @@ const ROAD_IDS = new Set(['road', 'bridge']);
 
 /** Poradie kreslenia: podľa predného rohu pôdorysu. */
 const depthOf = (position: Position, size = 1) => position.x + position.y + 2 * (size - 1);
+
+/** Kosoštvorec políčka (svetové súradnice) pre `Graphics.poly`. */
+function tileDiamond(x: number, y: number): number[] {
+  const center = tileToWorld(x, y);
+  const hw = TILE_WIDTH / 2;
+  const hh = TILE_HEIGHT / 2;
+  return [
+    center.x,
+    center.y - hh,
+    center.x + hw,
+    center.y,
+    center.x,
+    center.y + hh,
+    center.x - hw,
+    center.y,
+  ];
+}
 
 /** Typ budovy pre renderer: ID a veľkosť pôdorysu (divy 2 × 2). */
 export interface RendererBuilding {
@@ -137,6 +158,7 @@ export class GameRenderer {
   private buildModeId: string | null = null;
   private buildLevel = 1;
   private selectedInstanceId: string | null = null;
+  private demolishMode = false;
 
   /** Ťahanie v režime stavby: začiatočné a aktuálne políčko. */
   private dragBuild: { start: Position; end: Position } | null = null;
@@ -182,9 +204,17 @@ export class GameRenderer {
   /** Vrstva pokrytia službou (pod budovami) a náhľad dosahu stavanej služby. */
   private coverageLayer = new Graphics();
   private rangeLayer = new Graphics();
+  private demolishLayer = new Graphics();
   private missingBuildings: ReadonlySet<string> = new Set();
+  private demolishIds: ReadonlySet<string> = new Set();
   private sizeOf(buildingId: string): number {
     return this.sizes.get(buildingId) ?? 1;
+  }
+
+  /** Tón spritu budovy: na zbúranie > bez služby (vrstva) > bez tónu. */
+  private tintOf(id: string): number {
+    if (this.demolishIds.has(id)) return DEMOLISH_COLOR;
+    return this.missingBuildings.has(id) ? MISSING_TINT : 0xffffff;
   }
 
   /** Políčka stavby z ťahania; veľká budova (div) sa stavia iba raz, na mieste pustenia. */
@@ -245,6 +275,7 @@ export class GameRenderer {
     this.groundOverlay.addChild(
       this.coverageLayer,
       this.rangeLayer,
+      this.demolishLayer,
       this.hoverOutline,
       this.selectionOutline,
     );
@@ -317,31 +348,22 @@ export class GameRenderer {
     this.refreshOverlay();
   }
 
+  setDemolishMode(on: boolean): void {
+    this.demolishMode = on;
+    this.refreshOverlay();
+  }
+
   /** Zafarbí políčka v dosahu služby a domy bez nej (null = vrstva vypnutá). */
   setCoverage(overlay: CoverageOverlay | null): void {
     const g = this.coverageLayer;
     g.clear();
     this.missingBuildings = overlay?.missingBuildings ?? new Set();
     for (const [id, sprite] of this.buildingSprites) {
-      sprite.tint = this.missingBuildings.has(id) ? MISSING_TINT : 0xffffff;
+      sprite.tint = this.tintOf(id);
     }
     if (!overlay || !this.state) return;
     const width = this.state.world.width;
-    const diamond = (index: number) => {
-      const center = tileToWorld(index % width, Math.floor(index / width));
-      const hw = TILE_WIDTH / 2;
-      const hh = TILE_HEIGHT / 2;
-      return [
-        center.x,
-        center.y - hh,
-        center.x + hw,
-        center.y,
-        center.x,
-        center.y + hh,
-        center.x - hw,
-        center.y,
-      ];
-    };
+    const diamond = (index: number) => tileDiamond(index % width, Math.floor(index / width));
     for (let i = 0; i < overlay.covered.length; i++) {
       if (overlay.covered[i]) g.poly(diamond(i));
     }
@@ -466,7 +488,7 @@ export class GameRenderer {
       const size = this.sizeOf(building.definitionId);
       placeOnTile(sprite, building.position, size);
       sprite.zIndex = depthOf(building.position, size);
-      sprite.tint = this.missingBuildings.has(building.id) ? MISSING_TINT : 0xffffff;
+      sprite.tint = this.tintOf(building.id);
     }
     for (const [id, sprite] of this.buildingSprites) {
       if (!present.has(id)) {
@@ -525,6 +547,7 @@ export class GameRenderer {
 
     this.refreshDragPreview();
     this.refreshRange(hovered);
+    this.refreshDemolishPreview(hovered);
     const showPreview = this.buildModeId !== null && hovered !== null && this.dragBuild === null;
     this.preview.visible = showPreview;
     if (showPreview) {
@@ -542,7 +565,7 @@ export class GameRenderer {
       this.preview.tint = valid ? PREVIEW_VALID : PREVIEW_INVALID;
       this.hoverOutline.tint = valid ? PREVIEW_VALID : PREVIEW_INVALID;
     } else {
-      this.hoverOutline.tint = 0xffffff;
+      this.hoverOutline.tint = this.demolishMode ? DEMOLISH_COLOR : 0xffffff;
     }
   }
 
@@ -648,6 +671,26 @@ export class GameRenderer {
         ? PREVIEW_VALID
         : PREVIEW_INVALID;
     });
+  }
+
+  /** Režim búrania: políčka výberu (ťahanie, inak políčko pod kurzorom) a budovy na nich načerveno. */
+  private refreshDemolishPreview(hovered: Position | null): void {
+    const g = this.demolishLayer;
+    g.clear();
+    const area = !this.demolishMode
+      ? null
+      : (this.dragBuild ?? (hovered ? { start: hovered, end: hovered } : null));
+    const previous = this.demolishIds;
+    this.demolishIds = new Set(
+      area ? buildingsInArea(this.state!.world, area.start, area.end) : [],
+    );
+    for (const id of new Set([...previous, ...this.demolishIds])) {
+      const sprite = this.buildingSprites.get(id);
+      if (sprite) sprite.tint = this.tintOf(id);
+    }
+    if (!area) return;
+    for (const p of dragPositions('area', area.start, area.end)) g.poly(tileDiamond(p.x, p.y));
+    g.fill({ color: DEMOLISH_COLOR, alpha: 0.35 });
   }
 
   // --- Kamera a vstup ---
@@ -762,8 +805,9 @@ export class GameRenderer {
         if (this.touches.size > 2 || this.pinch) return;
       }
       if (this.pointer || e.button > 2) return;
-      // Ľavé tlačidlo v režime stavby kreslí, inak (a pravé/stredné vždy) posúva mapu.
-      const mode: 'pan' | 'build' = e.button === 0 && this.buildModeId ? 'build' : 'pan';
+      // Ľavé tlačidlo v režime stavby/búrania ťahá výber, inak (a pravé/stredné vždy) posúva mapu.
+      const mode: 'pan' | 'build' =
+        e.button === 0 && (this.buildModeId || this.demolishMode) ? 'build' : 'pan';
       try {
         canvas.setPointerCapture(e.pointerId);
       } catch {
@@ -852,6 +896,8 @@ export class GameRenderer {
         this.dragBuild = null;
         if (drag && this.buildModeId) {
           this.callbacks.onPlaceMany(this.buildModeId, this.dragTiles(drag));
+        } else if (drag && this.demolishMode && this.state) {
+          this.callbacks.onDemolishMany(buildingsInArea(this.state.world, drag.start, drag.end));
         }
         this.refreshOverlay();
       } else if (!p.dragging && e.button === 0) {

@@ -25,6 +25,8 @@ const PANELS: { id: PanelId; label: TranslationKey; icon: IconName }[] = [
 export function QuickBar() {
   const openPanel = useUiStore((s) => s.openPanel);
   const togglePanel = useUiStore((s) => s.togglePanel);
+  const demolishMode = useUiStore((s) => s.demolishMode);
+  const setDemolishMode = useUiStore((s) => s.setDemolishMode);
   const compact = useCompact();
   const problems = useGameState(() => problemBuildingCount());
   const research = useGameState((s) => {
@@ -76,6 +78,16 @@ export function QuickBar() {
         })}
       </nav>
       <div className="map-tools">
+        <button
+          className={`quick-button small${demolishMode ? ' active' : ''}`}
+          onClick={() => setDemolishMode(!demolishMode)}
+          aria-pressed={demolishMode}
+          aria-label={t('hud.demolishMode')}
+          title={t('hud.demolishHint')}
+          data-testid="demolish-mode"
+        >
+          <Icon name="demolish" size={18} />
+        </button>
         <LayerControl />
         <div className="zoom-buttons">
           <button

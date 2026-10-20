@@ -36,6 +36,10 @@ interface UiState {
   buildModeId: string | null;
   /** Úroveň, na ktorej sa budova postaví (vyššie úrovne domov rovno). */
   buildLevel: number;
+  /** Režim búrania: ťahanie vyberie budovy na zbúranie (vylučuje sa s režimom výstavby). */
+  demolishMode: boolean;
+  /** Budovy z ťahania v režime búrania, ktoré čakajú na potvrdenie v dialógu. */
+  pendingDemolish: string[] | null;
   /** Dlaždica doku pod kurzorom (karta s detailom). */
   hoveredDockTile: { id: string; level: number } | null;
   log: LogEntry[];
@@ -58,6 +62,8 @@ interface UiState {
 
   setCatalogCategory: (category: BuildingCategory) => void;
   setBuildMode: (id: string | null, level?: number) => void;
+  setDemolishMode: (on: boolean) => void;
+  setPendingDemolish: (ids: string[] | null) => void;
   setHoveredDockTile: (tile: { id: string; level: number } | null) => void;
   addLog: (entry: Omit<LogEntry, 'id'>) => void;
   clearLog: () => void;
@@ -72,7 +78,7 @@ interface UiState {
   togglePanel: (panel: PanelId | null) => void;
   bumpSavesRevision: () => void;
   dismissNotice: (id: number) => void;
-  /** Escape: postupne zruší režim výstavby, panel a výber. */
+  /** Escape: postupne zruší potvrdenie búrania, režim výstavby/búrania, panel a výber. */
   cancel: () => void;
 }
 
@@ -82,6 +88,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   catalogCategory: 'housing',
   buildModeId: null,
   buildLevel: 1,
+  demolishMode: false,
+  pendingDemolish: null,
   hoveredDockTile: null,
   log: [],
   dayPhase: null,
@@ -97,7 +105,10 @@ export const useUiStore = create<UiState>()((set, get) => ({
 
   setCatalogCategory: (catalogCategory) => set({ catalogCategory }),
   setBuildMode: (buildModeId, buildLevel = 1) =>
-    set({ buildModeId, buildLevel, selectedInstanceId: null }),
+    set({ buildModeId, buildLevel, selectedInstanceId: null, demolishMode: false }),
+  setDemolishMode: (demolishMode) =>
+    set({ demolishMode, buildModeId: null, selectedInstanceId: null, pendingDemolish: null }),
+  setPendingDemolish: (pendingDemolish) => set({ pendingDemolish }),
   setHoveredDockTile: (hoveredDockTile) => set({ hoveredDockTile }),
   addLog: (entry) =>
     set((s) => ({ log: [{ ...entry, id: ++noticeSeq }, ...s.log].slice(0, MAX_LOG) })),
@@ -105,7 +116,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   setDayPhase: (dayPhase) => set({ dayPhase }),
   setCameraView: (cameraView) => set({ cameraView }),
   setMapLayer: (mapLayer) => set({ mapLayer }),
-  selectInstance: (selectedInstanceId) => set({ selectedInstanceId, buildModeId: null }),
+  selectInstance: (selectedInstanceId) =>
+    set({ selectedInstanceId, buildModeId: null, demolishMode: false }),
   setHoveredTile: (hoveredTile) => set({ hoveredTile }),
   showNotice: (text, kind = 'info') =>
     set((s) => ({ notices: [...s.notices, { id: ++noticeSeq, text, kind }].slice(-MAX_NOTICES) })),
@@ -115,8 +127,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
   bumpSavesRevision: () => set((s) => ({ savesRevision: s.savesRevision + 1 })),
   togglePanel: (panel) => set((s) => ({ openPanel: s.openPanel === panel ? null : panel })),
   cancel: () => {
-    const { buildModeId, openPanel, selectedInstanceId } = get();
-    if (buildModeId) set({ buildModeId: null });
+    const { pendingDemolish, buildModeId, demolishMode, openPanel, selectedInstanceId } = get();
+    if (pendingDemolish) set({ pendingDemolish: null });
+    else if (buildModeId || demolishMode) set({ buildModeId: null, demolishMode: false });
     else if (openPanel) set({ openPanel: null });
     else if (selectedInstanceId) set({ selectedInstanceId: null });
   },

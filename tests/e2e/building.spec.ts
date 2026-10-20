@@ -29,6 +29,14 @@ async function findPlaceableTile(page: Page, buildingId: string) {
 const buildingCount = (page: Page) =>
   page.evaluate(() => window.__civilis!.getState().city.buildings.length);
 
+/** Ťahanie ľavým tlačidlom myši z jedného bodu okna do druhého. */
+async function drag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 8 });
+  await page.mouse.up();
+}
+
 test('postaví dom kliknutím na mapu a odpočíta drevo', async ({ page }) => {
   await openGame(page);
   const before = await buildingCount(page);
@@ -290,4 +298,85 @@ test('cesta ťahaná cez vodu sa nad vodou postaví ako most', async ({ page }) 
       window.__civilis!.getState().city.buildings.filter((b) => b.definitionId === 'bridge').length,
   );
   expect(bridges).toBe(line.water);
+});
+
+test('režim búrania: ťahaním sa po potvrdení zbúra obdĺžnik budov, Escape dialóg zruší', async ({
+  page,
+}) => {
+  // Štyri ťahania myšou — pri plnom paralelnom behu Chromium nestíha štandardný limit.
+  test.slow();
+  await openGame(page);
+  const area = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const s = hook.getState();
+    const w = s.city.buildings.find((b) => b.definitionId === 'warehouse')!.position;
+    for (let y = w.y - 8; y <= w.y + 6; y++) {
+      for (let x = w.x - 8; x <= w.x + 6; x++) {
+        const tiles = [0, 1].flatMap((dy) => [0, 1].map((dx) => ({ x: x + dx, y: y + dy })));
+        if (tiles.every((t) => hook.canPlace('house', t))) {
+          return { from: hook.tileToClient(tiles[0]!), to: hook.tileToClient(tiles[3]!) };
+        }
+      }
+    }
+    throw new Error('Žiadna voľná plocha 2 × 2');
+  });
+  const before = await buildingCount(page);
+  await pickBuilding(page, 'house');
+  await drag(page, area.from, area.to);
+  expect(await buildingCount(page)).toBe(before + 4);
+  await expect(page.getByTestId('resource-wood')).toContainText('40');
+
+  const toggle = page.getByTestId('demolish-mode');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+  const dialog = page.getByTestId('demolish-dialog');
+  await drag(page, area.from, area.to);
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText('(4)');
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  expect(await buildingCount(page)).toBe(before + 4);
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+  await drag(page, area.from, area.to);
+  await page.getByTestId('demolish-confirm').click();
+  expect(await buildingCount(page)).toBe(before);
+  await expect(page.getByTestId('notice').filter({ hasText: 'Zbúrané budovy: 4' })).toBeVisible();
+  // Vráti sa polovica stavby: 4 × 5 dreva.
+  await expect(page.getByTestId('resource-wood')).toContainText('60');
+});
+
+test('režim búrania: klik zbúra jednu budovu bez potvrdenia, posledný sklad nie', async ({
+  page,
+}) => {
+  await openGame(page);
+  const { house, warehouse } = await page.evaluate(() => {
+    const hook = window.__civilis!;
+    const buildings = hook.getState().city.buildings;
+    const h = buildings.find((b) => b.definitionId === 'house')!;
+    const w = buildings.find((b) => b.definitionId === 'warehouse')!;
+    return {
+      house: { id: h.id, client: hook.tileToClient(h.position) },
+      warehouse: { id: w.id, client: hook.tileToClient(w.position) },
+    };
+  });
+  const exists = (id: string) =>
+    page.evaluate((i) => window.__civilis!.getState().city.buildings.some((b) => b.id === i), id);
+  const toggle = page.getByTestId('demolish-mode');
+
+  await toggle.click();
+  await page.mouse.click(house.client.x, house.client.y);
+  await expect(page.getByTestId('demolish-dialog')).toBeHidden();
+  expect(await exists(house.id)).toBe(false);
+
+  await page.mouse.click(warehouse.client.x, warehouse.client.y);
+  await expect(
+    page.getByTestId('notice').filter({ hasText: 'Mesto musí mať aspoň jeden sklad.' }),
+  ).toBeVisible();
+  expect(await exists(warehouse.id)).toBe(true);
+
+  await page.keyboard.press('Escape');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 });

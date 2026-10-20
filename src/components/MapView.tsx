@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { commandReasonLabel, t } from '@/app/i18n';
 import { controller } from '@/app/game';
+import { demolishBuildings } from '@/app/demolish';
 import { currentMarkers } from '@/app/markers';
 import { installTestHook } from '@/app/testHook';
 import { registerCameraTarget } from '@/app/camera';
@@ -57,6 +58,12 @@ function handlePlaceMany(buildingId: string, positions: Position[]): void {
   }
 }
 
+/** Režim búrania: jednu budovu zbúra hneď, viac naraz až po potvrdení v dialógu. */
+function handleDemolishMany(instanceIds: string[]): void {
+  if (instanceIds.length === 1) demolishBuildings(instanceIds);
+  else if (instanceIds.length > 1) useUiStore.getState().setPendingDemolish(instanceIds);
+}
+
 export function MapView() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
@@ -83,6 +90,7 @@ export function MapView() {
             onTileHover: (position) => useUiStore.getState().setHoveredTile(position),
             onTileClick: handleTileClick,
             onPlaceMany: handlePlaceMany,
+            onDemolishMany: handleDemolishMany,
             canPlace: (buildingId, position) =>
               controller.canPlace(
                 roadOrBridge(buildingId, position),
@@ -106,6 +114,7 @@ export function MapView() {
         renderer.setEffectsOptions({ animations: display.animations, dayNight: display.dayNight });
         const ui = useUiStore.getState();
         renderer.setBuildMode(ui.buildModeId, ui.buildLevel);
+        renderer.setDemolishMode(ui.demolishMode);
         registerCameraTarget({
           centerOnWorld: (wx, wy) => created.centerOnWorld(wx, wy),
           zoomStep: (direction) => created.zoomStep(direction),
@@ -135,6 +144,7 @@ export function MapView() {
           useUiStore.subscribe((s, prev) => {
             if (s.buildModeId !== prev.buildModeId || s.buildLevel !== prev.buildLevel)
               created.setBuildMode(s.buildModeId, s.buildLevel);
+            if (s.demolishMode !== prev.demolishMode) created.setDemolishMode(s.demolishMode);
             if (s.mapLayer !== prev.mapLayer || s.buildModeId !== prev.buildModeId)
               refreshCoverage();
             if (s.selectedInstanceId !== prev.selectedInstanceId)

@@ -1,4 +1,4 @@
-import type { Position } from '@/types';
+import type { Position, Tile } from '@/types';
 
 /** Najviac toľko políčok naraz (ochrana pred omylom cez celú mapu). */
 export const MAX_DRAG_TILES = 256;
@@ -29,4 +29,18 @@ export function dragPositions(shape: DragShape, start: Position, end: Position):
     }
   }
   return positions.slice(0, MAX_DRAG_TILES);
+}
+
+/** Budovy (ID inštancií) na políčkach obdĺžnika — po riadkoch od začiatku, každá raz. */
+export function buildingsInArea(
+  world: { width: number; tiles: readonly Pick<Tile, 'buildingId'>[] },
+  start: Position,
+  end: Position,
+): string[] {
+  const ids = new Set<string>();
+  for (const { x, y } of dragPositions('area', start, end)) {
+    const id = world.tiles[y * world.width + x]?.buildingId;
+    if (id) ids.add(id);
+  }
+  return [...ids];
 }
