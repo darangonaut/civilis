@@ -17,6 +17,56 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Hlásenie chyby priamo na obrazovke (namiesto čiernej plochy) — na diagnostiku.
+      (function () {
+        var box;
+        function show(message) {
+          if (/ResizeObserver/.test(message)) return;
+          if (!box) {
+            box = document.createElement('pre');
+            box.id = 'error-report';
+            box.style.cssText =
+              'position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;max-height:45vh;overflow:auto;margin:0;padding:10px;font:12px/1.4 monospace;white-space:pre-wrap;color:#fff;background:#6e1a2a;border:2px solid #fff';
+            box.onclick = function () {
+              box.remove();
+              box = null;
+            };
+            box.textContent =
+              'Chyba (ťukni pre zatvorenie, pošli screenshot):\n' + navigator.userAgent;
+            document.body.appendChild(box);
+          }
+          box.textContent += '\n\n' + message;
+        }
+        window.addEventListener(
+          'error',
+          function (e) {
+            var target = e.target;
+            if (target && target !== window && (target.src || target.href)) {
+              show('Nepodarilo sa načítať: ' + (target.src || target.href));
+              return;
+            }
+            show(String(e.message) + (e.error && e.error.stack ? '\n' + e.error.stack : ''));
+          },
+          true,
+        );
+        var consoleError = console.error;
+        console.error = function () {
+          consoleError.apply(console, arguments);
+          show(
+            Array.prototype.map
+              .call(arguments, function (a) {
+                return a && a.stack ? a.stack : String(a);
+              })
+              .join(' '),
+          );
+        };
+        window.addEventListener('unhandledrejection', function (e) {
+          var r = e.reason;
+          show('Promise: ' + (r && r.stack ? r.stack : String(r)));
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
