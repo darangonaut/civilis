@@ -2164,6 +2164,122 @@ export function drawPuff(color: Rgb): PixelCanvas {
   return pc;
 }
 
+/** Loďka s plachtou (rybári a prístav); na Proxime ružová plachta. */
+export function drawBoat(planet: PlanetId): PixelCanvas {
+  const pc = new PixelCanvas(11, 9);
+  pc.stamp(
+    1,
+    0,
+    ['....s....', '...ss....', '..sss....', '.ssss....', '....m....', 'hhhhhhhhh', '.hHHHHHh.'],
+    {
+      s: planet === 'proxima' ? 0xff7ac2 : P.white,
+      m: P.woodDark,
+      h: planet === 'proxima' ? 0x8a4aa0 : P.wood,
+      H: planet === 'proxima' ? 0x6a3a80 : P.woodShade,
+    },
+  );
+  pc.outline(P.ink);
+  return pc;
+}
+
+/** Lietajúci tvor v dvoch fázach mávania: vták (Zem), dron (Mars), lietajúca medúza (Proxima). */
+export function drawFlyer(planet: PlanetId, frame: number): PixelCanvas {
+  const pc = new PixelCanvas(7, 5);
+  if (planet === 'mars') {
+    pc.stamp(0, 1, frame ? ['ooo.ooo', '..ooo..', '...r...'] : ['.oo.oo.', '..ooo..', '...r...'], {
+      o: 0x5d6670,
+      r: frame ? P.roof : P.glow,
+    });
+  } else if (planet === 'proxima') {
+    pc.stamp(1, 0, frame ? ['.ccc.', 'cLLLc', 'g.g.g'] : ['.ccc.', 'cLLLc', '.g.g.'], {
+      c: 0xd2449a,
+      L: 0xff7ac2,
+      g: 0x5ff2d8,
+    });
+  } else {
+    pc.stamp(0, 1, frame ? ['o.....o', '.o...o.', '..ooo..'] : ['.......', 'ooo.ooo', '...o...'], {
+      o: P.ink,
+    });
+  }
+  return pc;
+}
+
+/** Pasúce sa zviera: ovca (Zem) alebo šesťnožec (Proxima). */
+export function drawGrazer(planet: PlanetId): PixelCanvas {
+  const pc = new PixelCanvas(8, 6);
+  if (planet === 'proxima') {
+    pc.stamp(1, 0, ['.a..a.', '.wwww.', 'wwwwww', 'k.k.k.', '.k.k.k'], {
+      w: 0xe8dcf0,
+      k: 0x45265a,
+      a: 0xff7ac2,
+    });
+  } else {
+    pc.stamp(1, 1, ['.www..', 'wwwwwk', 'wwwwww', '.k..k.'], { w: P.white, k: P.ink });
+  }
+  pc.outline(P.ink);
+  return pc;
+}
+
+/** Rover na marťanských cestách (namiesto áut). */
+export function drawRover(variant: number): PixelCanvas {
+  const pc = new PixelCanvas(10, 8);
+  pc.stamp(1, 0, ['......a.', '.ssssss.', 'cccccccc', 'cccccccc', 'o.o..o.o'], {
+    a: 0xd0d6dc,
+    s: 0x2c4a7a,
+    c: [0xd0d6dc, 0x9aa3ad, 0xfeae34][variant % 3]!,
+    o: P.ink,
+  });
+  pc.outline(P.ink);
+  return pc;
+}
+
+/** Ryba (alebo medúza na Proxime), ktorá vyskočí z vody. */
+export function drawFish(planet: PlanetId): PixelCanvas {
+  const pc = new PixelCanvas(6, 4);
+  if (planet === 'proxima')
+    pc.stamp(1, 0, ['.cc.', 'cLLc', 'g.g.'], { c: 0xd2449a, L: 0xff7ac2, g: 0x5ff2d8 });
+  else pc.stamp(0, 1, ['.ss.s', 'sSsss', '.ss.s'], { s: P.stoneLight, S: P.ink });
+  return pc;
+}
+
+/** Iskra ohňostroja (krížik 3 × 3 px so svetlým stredom). */
+export function drawSpark(color: Rgb): PixelCanvas {
+  const pc = new PixelCanvas(3, 3);
+  pc.stamp(0, 0, ['.c.', 'cwc', '.c.'], { c: color, w: P.white });
+  return pc;
+}
+
+export const FIREWORK_COLORS: readonly Rgb[] = [
+  P.roof,
+  P.wheatLight,
+  P.waterLight,
+  P.grassLight,
+  0xff7ac2,
+  P.white,
+];
+export const FLAME_COLOR = 0xfe8c34;
+
+const boundsCache = new Map<string, { top: number; bottom: number }>();
+
+/** Zvislý rozsah nepriehľadných pixelov sprite-u budovy voči kotve (pre animáciu stavby). */
+export function spriteBounds(key: string): { top: number; bottom: number } {
+  let bounds = boundsCache.get(key);
+  if (!bounds) {
+    const { canvas, anchorY } = drawBuilding(key);
+    let top = canvas.height;
+    let bottom = 0;
+    for (let y = 0; y < canvas.height; y++)
+      for (let x = 0; x < canvas.width; x++)
+        if (canvas.isFilled(x, y)) {
+          top = Math.min(top, y);
+          bottom = Math.max(bottom, y);
+        }
+    bounds = { top: top - anchorY, bottom: bottom + 1 - anchorY };
+    boundsCache.set(key, bounds);
+  }
+  return bounds;
+}
+
 export const SMOKE_COLOR = 0xe4e9f0;
 export const DUST_COLOR = P.soilLight;
 export const WATER_KEY_COUNT = 4;

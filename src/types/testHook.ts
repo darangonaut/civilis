@@ -9,7 +9,17 @@ export interface CivilisTestHook {
   canPlace(buildingId: string, position: Position): boolean;
   tileToClient(position: Position): { x: number; y: number };
   /** Počty vizuálnych efektov (chodci, častice, svetlá, tma 0–1). */
-  effectsStats(): { walkers: number; particles: number; lights: number; night: number };
+  effectsStats(): {
+    walkers: number;
+    particles: number;
+    lights: number;
+    night: number;
+    boats: number;
+    grazers: number;
+    constructions: number;
+  };
+  /** Spustí ohňostroj (ako pri novej ére). */
+  celebrate(): void;
   /** Odsimuluje zadaný počet dní naraz. */
   advanceDays(days: number): void;
   /** Pridá technológie a suroviny (príprava scenára v teste). */

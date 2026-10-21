@@ -338,6 +338,11 @@ export class GameRenderer {
     this.refreshOverlay();
   }
 
+  /** Ohňostroj nad mestom (nová éra, míľnik). */
+  celebrate(): void {
+    this.effects.celebrate();
+  }
+
   effectsStats() {
     return this.effects.stats();
   }
@@ -483,6 +488,9 @@ export class GameRenderer {
       ) {
         sprite.label = key;
         applyTexture(sprite, this.atlas.building(key));
+        // Vylepšenie alebo nový vzhľad: krátke „vyskočenie“.
+        if (this.animateNewBuildings && !ROAD_IDS.has(building.definitionId))
+          this.effects.pop(sprite, building.position);
       }
       if (!sprite || sprite.label !== key) {
         sprite?.destroy();
@@ -496,7 +504,12 @@ export class GameRenderer {
         this.buildingSprites.set(building.id, sprite);
         placeOnTile(sprite, building.position, this.sizeOf(building.definitionId));
         if (this.animateNewBuildings && !ROAD_IDS.has(building.definitionId)) {
-          this.effects.pop(sprite, building.position);
+          this.effects.construct(
+            sprite,
+            building.position,
+            this.sizeOf(building.definitionId),
+            key,
+          );
         }
       }
       const size = this.sizeOf(building.definitionId);

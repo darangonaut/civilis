@@ -380,3 +380,19 @@ test('režim búrania: klik zbúra jednu budovu bez potvrdenia, posledný sklad 
   await page.keyboard.press('Escape');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 });
+
+test('nová budova sa stavia za lešením a ohňostroj pridá iskry', async ({ page }) => {
+  await page.goto('/?seed=7&e2e');
+  await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
+  const { client } = await findPlaceableTile(page, 'house');
+  await pickBuilding(page, 'house');
+  await page.mouse.click(client.x, client.y);
+  const stats = () => page.evaluate(() => window.__civilis!.effectsStats());
+  expect((await stats()).constructions).toBe(1);
+  await expect.poll(async () => (await stats()).constructions, { timeout: 5000 }).toBe(0);
+  const before = (await stats()).particles;
+  await page.evaluate(() => window.__civilis!.celebrate());
+  await expect
+    .poll(async () => (await stats()).particles, { timeout: 3000 })
+    .toBeGreaterThan(before + 10);
+});

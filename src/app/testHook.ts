@@ -11,6 +11,7 @@ export function installTestHook(renderer: GameRenderer): () => void {
     canPlace: (buildingId, position) => controller.canPlace(buildingId, position).success,
     tileToClient: (position) => renderer.tileToClient(position),
     effectsStats: () => renderer.effectsStats(),
+    celebrate: () => renderer.celebrate(),
     advanceDays: (days) => {
       for (let i = 0; i < days; i++) controller.tick();
     },

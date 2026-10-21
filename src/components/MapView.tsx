@@ -136,6 +136,11 @@ export function MapView() {
           () => {
             if (coverageFrame !== null) cancelAnimationFrame(coverageFrame);
           },
+          // Nová éra alebo míľnik: ohňostroj nad mestom.
+          controller.onEvents((events) => {
+            if (events.some((e) => e.type === 'era_reached' || e.type === 'milestone_completed'))
+              created.celebrate();
+          }),
           controller.subscribe(() => {
             created.sync(controller.state, currentMarkers(), controller.activity);
             if (effectiveLayer(useUiStore.getState().buildModeId, useUiStore.getState().mapLayer))
