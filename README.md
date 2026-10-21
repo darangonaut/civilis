@@ -10,6 +10,12 @@ TypeScript · React · Vite · PixiJS 8 · Zustand · Dexie · Zod · Vitest · 
 
 **Hrať online:** https://darangonaut.github.io/civilis/
 
+![Mesto na Zemi v priemyselnej ére](docs/screenshots/earth.png)
+
+| Kolónia na Marse                                         | Proxima b                                           |
+| -------------------------------------------------------- | --------------------------------------------------- |
+| ![Kupolové mestečko na Marse](docs/screenshots/mars.png) | ![Mesto na Proxime b](docs/screenshots/proxima.png) |
+
 ## Spustenie
 
 ```sh
