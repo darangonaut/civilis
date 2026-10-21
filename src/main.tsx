@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from '@/app/App';
-import { initializeGame } from '@/app/game';
+import { controller, initializeGame } from '@/app/game';
 import { t } from '@/app/i18n';
 import { useUiStore } from '@/stores/uiStore';
 import '@fontsource/pixelify-sans/400.css';
@@ -31,6 +31,11 @@ if (!root) throw new Error('Chýba #root element');
 const init = await initializeGame();
 if (init === 'restored') useUiStore.getState().showNotice(t('save.restored'), 'info');
 if (init === 'restore_failed') useUiStore.getState().showNotice(t('save.restoreFailed'), 'warning');
+// Úvodná obrazovka (E2E testy ju preskočia); hra kým je otvorená stojí.
+if (!new URLSearchParams(window.location.search).has('e2e')) {
+  controller.setSpeed(0);
+  useUiStore.getState().openStartScreen(init === 'restored');
+}
 
 createRoot(root).render(
   <StrictMode>

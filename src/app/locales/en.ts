@@ -467,4 +467,14 @@ export const en: Record<keyof typeof sk, string> = {
   'proxima:terrain.forest': 'alien forest',
   'proxima:terrain.rock': 'crystal rocks',
   'proxima:terrain.water': 'lake',
+  'start.tagline': 'From a hut to the stars',
+  'start.continue': 'Continue',
+  'start.start': 'Start',
+  'start.newGame': 'New game',
+  'start.saved': '{city} · day {day} · {era}',
+  'start.chooseDifficulty': 'Choose difficulty',
+  'start.overwrite':
+    'Your current game will be replaced. Save it to a slot first if you want to come back to it.',
+  'start.back': 'Back',
+  'start.language': 'Language',
 };

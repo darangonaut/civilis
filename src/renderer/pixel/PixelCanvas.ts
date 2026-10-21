@@ -89,6 +89,18 @@ export class PixelCanvas {
     });
   }
 
+  /** Nakreslí iné plátno (jeho nepriehľadné pixely) s ľavým horným rohom v (x, y). */
+  blit(source: PixelCanvas, x: number, y: number): void {
+    for (let sy = 0; sy < source.height; sy++) {
+      for (let sx = 0; sx < source.width; sx++) {
+        const i = (sy * source.width + sx) * 4;
+        if (source.data[i + 3]! === 0) continue;
+        const color = (source.data[i]! << 16) | (source.data[i + 1]! << 8) | source.data[i + 2]!;
+        this.set(x + sx, y + sy, color, source.data[i + 3]!);
+      }
+    }
+  }
+
   /** Obrys: priehľadné pixely susediace (4-okolie) s vyplnenými dostanú farbu `color`. */
   outline(color: Rgb): void {
     const edge: number[] = [];

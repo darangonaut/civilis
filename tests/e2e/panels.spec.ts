@@ -352,3 +352,17 @@ test('finále ságy: na Proxime b sa loď neponúka, kronika ukáže všetky mes
   await expect(page.getByTestId('victory')).toContainText('Koniec ságy');
   await expect(page.getByTestId('victory-colony')).toHaveCount(0);
 });
+
+test('úvodná obrazovka: voľba jazyka a štart hry', async ({ page }) => {
+  await page.goto('/?seed=7');
+  const screen = page.getByTestId('start-screen');
+  await expect(screen).toBeVisible();
+  await expect(page.getByTestId('start-play')).toHaveText(/Štart/i);
+  await page.getByTestId('start-language-en').click();
+  await expect(page.getByTestId('start-play')).toHaveText(/Start/i);
+  await expect(page.getByTestId('start-language-en')).toHaveAttribute('aria-checked', 'true');
+  await page.getByTestId('start-play').click();
+  await expect(screen).toBeHidden();
+  await expect(page.getByTestId('map-view')).toHaveAttribute('data-ready', 'true');
+  await expect(page.getByTestId('top-bar')).toContainText('Settlement');
+});

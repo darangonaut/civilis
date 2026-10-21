@@ -59,6 +59,10 @@ interface UiState {
   victoryOpen: boolean;
   /** Okno kolonizačnej lode. */
   colonyOpen: boolean;
+  /** Úvodná obrazovka (pri štarte aplikácie, okrem E2E testov). */
+  startScreen: boolean;
+  /** Pri štarte sa obnovila rozohraná hra (tlačidlo Pokračovať). */
+  hasSavedGame: boolean;
   /** Éra, ktorej uvítaciu obrazovku treba zobraziť. */
   newEraId: string | null;
 
@@ -77,6 +81,8 @@ interface UiState {
   showNotice: (text: string, kind?: NoticeKind) => void;
   setVictoryOpen: (open: boolean) => void;
   setColonyOpen: (open: boolean) => void;
+  openStartScreen: (hasSavedGame: boolean) => void;
+  closeStartScreen: () => void;
   setNewEra: (eraId: string | null) => void;
   togglePanel: (panel: PanelId | null) => void;
   bumpSavesRevision: () => void;
@@ -105,6 +111,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   savesRevision: 0,
   victoryOpen: false,
   colonyOpen: false,
+  startScreen: false,
+  hasSavedGame: false,
   newEraId: null,
 
   setCatalogCategory: (catalogCategory) => set({ catalogCategory }),
@@ -128,6 +136,8 @@ export const useUiStore = create<UiState>()((set, get) => ({
   dismissNotice: (id) => set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })),
   setVictoryOpen: (victoryOpen) => set({ victoryOpen }),
   setColonyOpen: (colonyOpen) => set({ colonyOpen }),
+  openStartScreen: (hasSavedGame) => set({ startScreen: true, hasSavedGame }),
+  closeStartScreen: () => set({ startScreen: false }),
   setNewEra: (newEraId) => set({ newEraId }),
   bumpSavesRevision: () => set((s) => ({ savesRevision: s.savesRevision + 1 })),
   togglePanel: (panel) => set((s) => ({ openPanel: s.openPanel === panel ? null : panel })),

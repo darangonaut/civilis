@@ -466,4 +466,14 @@ export const cs: Record<keyof typeof sk, string> = {
   'proxima:terrain.forest': 'mimozemský les',
   'proxima:terrain.rock': 'krystalové skály',
   'proxima:terrain.water': 'jezero',
+  'start.tagline': 'Od chatrče ke hvězdám',
+  'start.continue': 'Pokračovat',
+  'start.start': 'Start',
+  'start.newGame': 'Nová hra',
+  'start.saved': '{city} · den {day} · {era}',
+  'start.chooseDifficulty': 'Zvol obtížnost',
+  'start.overwrite':
+    'Rozehraná hra se přepíše. Pokud se k ní chceš vrátit, nejprve ji ulož do pozice.',
+  'start.back': 'Zpět',
+  'start.language': 'Jazyk',
 };

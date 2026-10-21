@@ -466,4 +466,14 @@ export const sk = {
   'proxima:terrain.forest': 'mimozemský les',
   'proxima:terrain.rock': 'kryštálové skaly',
   'proxima:terrain.water': 'jazero',
+  'start.tagline': 'Od chatrče ku hviezdam',
+  'start.continue': 'Pokračovať',
+  'start.start': 'Štart',
+  'start.newGame': 'Nová hra',
+  'start.saved': '{city} · deň {day} · {era}',
+  'start.chooseDifficulty': 'Zvoľ obťažnosť',
+  'start.overwrite':
+    'Rozohraná hra sa prepíše. Ak sa k nej chceš vrátiť, najprv ju ulož do pozície.',
+  'start.back': 'Späť',
+  'start.language': 'Jazyk',
 } as const;

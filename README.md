@@ -32,6 +32,8 @@ Náhľad buildu: `npm run preview`.
 
 ## Ako hrať
 
+Na úvodnej obrazovke si vyber jazyk a stlač **Štart** (alebo **Pokračovať** v rozohranej hre).
+
 1. **Drevo a jedlo.** Postav drevorubača na les a farmu na úrodnú pôdu — vedľa cesty napojenej na sklad.
 2. **Bývanie a voda.** Domy zvyšujú kapacitu, studňa v dosahu domov zvyšuje spokojnosť. Pri spokojnosti
    aspoň 60, voľnom bývaní a dostatku jedla mesto rastie.
