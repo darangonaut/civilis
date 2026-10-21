@@ -12,9 +12,9 @@ TypeScript · React · Vite · PixiJS 8 · Zustand · Dexie · Zod · Vitest · 
 
 ![Mesto na Zemi v priemyselnej ére](docs/screenshots/earth.png)
 
-| Kolónia na Marse                                         | Proxima b                                           |
-| -------------------------------------------------------- | --------------------------------------------------- |
-| ![Kupolové mestečko na Marse](docs/screenshots/mars.png) | ![Mesto na Proxime b](docs/screenshots/proxima.png) |
+| Noc v meste                                       | Kolónia na Marse                                         | Proxima b                                           |
+| ------------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------- |
+| ![Mesto v noci](docs/screenshots/earth-night.png) | ![Kupolové mestečko na Marse](docs/screenshots/mars.png) | ![Mesto na Proxime b](docs/screenshots/proxima.png) |
 
 ## Spustenie
 
