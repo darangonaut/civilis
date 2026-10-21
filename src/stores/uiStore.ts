@@ -59,6 +59,11 @@ interface UiState {
   victoryOpen: boolean;
   /** Okno kolonizačnej lode. */
   colonyOpen: boolean;
+  /** Dotyková stavba: počet políčok čakajúcich na potvrdenie. */
+  pendingBuild: number | null;
+  /** Mobil: otvorený stavebný dok / menu panelov. */
+  dockOpen: boolean;
+  menuOpen: boolean;
   /** Úvodná obrazovka (pri štarte aplikácie, okrem E2E testov). */
   startScreen: boolean;
   /** Pri štarte sa obnovila rozohraná hra (tlačidlo Pokračovať). */
@@ -81,6 +86,9 @@ interface UiState {
   showNotice: (text: string, kind?: NoticeKind) => void;
   setVictoryOpen: (open: boolean) => void;
   setColonyOpen: (open: boolean) => void;
+  setPendingBuild: (count: number | null) => void;
+  setDockOpen: (open: boolean) => void;
+  setMenuOpen: (open: boolean) => void;
   openStartScreen: (hasSavedGame: boolean) => void;
   closeStartScreen: () => void;
   setNewEra: (eraId: string | null) => void;
@@ -111,6 +119,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
   savesRevision: 0,
   victoryOpen: false,
   colonyOpen: false,
+  pendingBuild: null,
+  dockOpen: false,
+  menuOpen: false,
   startScreen: false,
   hasSavedGame: false,
   newEraId: null,
@@ -136,6 +147,9 @@ export const useUiStore = create<UiState>()((set, get) => ({
   dismissNotice: (id) => set((s) => ({ notices: s.notices.filter((n) => n.id !== id) })),
   setVictoryOpen: (victoryOpen) => set({ victoryOpen }),
   setColonyOpen: (colonyOpen) => set({ colonyOpen }),
+  setPendingBuild: (pendingBuild) => set({ pendingBuild }),
+  setDockOpen: (dockOpen) => set({ dockOpen }),
+  setMenuOpen: (menuOpen) => set({ menuOpen }),
   openStartScreen: (hasSavedGame) => set({ startScreen: true, hasSavedGame }),
   closeStartScreen: () => set({ startScreen: false }),
   setNewEra: (newEraId) => set({ newEraId }),

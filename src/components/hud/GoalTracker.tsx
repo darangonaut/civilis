@@ -38,6 +38,8 @@ export function GoalTracker() {
       <section
         className={`hud-panel goal-tracker${isCollapsed ? ' collapsed' : ''}`}
         data-testid="goal-tracker"
+        // Zbalený cieľ (mobil) sa rozbalí ťuknutím kamkoľvek.
+        onClick={isCollapsed && compact ? () => setCollapsed(false) : undefined}
       >
         <button
           className="goal-head"

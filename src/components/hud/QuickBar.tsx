@@ -9,6 +9,7 @@ import { difficultyOf, scaleAmount } from '@/engine';
 import { useUiStore, type PanelId } from '@/stores/uiStore';
 import { Icon, type IconName } from './Icon';
 import { LayerControl } from './LayerControl';
+import { cssColor, LAYER_COLORS, layerName, MAP_LAYERS } from '@/app/coverage';
 import { MiniMap } from './MiniMap';
 
 const PANELS: { id: PanelId; label: TranslationKey; icon: IconName }[] = [
@@ -42,6 +43,8 @@ export function QuickBar() {
         }
       : null;
   });
+
+  if (compact) return <CompactBar problems={problems} researchIdle={!research} />;
 
   return (
     <div className="hud-right-bottom">
@@ -108,7 +111,158 @@ export function QuickBar() {
           </button>
         </div>
       </div>
-      {!compact && <MiniMap />}
+      <MiniMap />
+    </div>
+  );
+}
+
+/**
+ * Mobil: namiesto stĺpca tlačidiel tri plávajúce — Stavať, Menu (panely, vrstvy, zoom)
+ * a Búrať. Kým sa stavia alebo je otvorený dok, tlačidlá ustúpia.
+ */
+function CompactBar({ problems, researchIdle }: { problems: number; researchIdle: boolean }) {
+  const dockOpen = useUiStore((s) => s.dockOpen);
+  const setDockOpen = useUiStore((s) => s.setDockOpen);
+  const building = useUiStore((s) => s.buildModeId !== null);
+  const menuOpen = useUiStore((s) => s.menuOpen);
+  const setMenuOpen = useUiStore((s) => s.setMenuOpen);
+  const demolishMode = useUiStore((s) => s.demolishMode);
+  const setDemolishMode = useUiStore((s) => s.setDemolishMode);
+
+  return (
+    <>
+      {!dockOpen && !building && (
+        <div className="compact-bar">
+          <button
+            className={`quick-button small${demolishMode ? ' active' : ''}`}
+            onClick={() => setDemolishMode(!demolishMode)}
+            aria-pressed={demolishMode}
+            aria-label={t('hud.demolishMode')}
+            data-testid="demolish-mode"
+          >
+            <Icon name="demolish" size={18} />
+          </button>
+          <button
+            className="quick-button"
+            onClick={() => setMenuOpen(true)}
+            aria-label={t('hud.menu')}
+            data-testid="open-menu"
+          >
+            <Icon name="menu" size={22} />
+            {(problems > 0 || researchIdle) && (
+              <span className="quick-badge" data-testid="menu-badge">
+                {problems > 0 ? (problems > 99 ? '99+' : problems) : '!'}
+              </span>
+            )}
+          </button>
+          <button
+            className="quick-button build-button"
+            onClick={() => {
+              setDemolishMode(false);
+              setDockOpen(true);
+            }}
+            aria-label={t('hud.build')}
+            data-testid="open-dock"
+          >
+            <Icon name="hammer" size={22} />
+            <span>{t('hud.build')}</span>
+          </button>
+        </div>
+      )}
+      {menuOpen && (
+        <MenuSheet
+          problems={problems}
+          researchIdle={researchIdle}
+          onClose={() => setMenuOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function MenuSheet({
+  problems,
+  researchIdle,
+  onClose,
+}: {
+  problems: number;
+  researchIdle: boolean;
+  onClose: () => void;
+}) {
+  const togglePanel = useUiStore((s) => s.togglePanel);
+  const layer = useUiStore((s) => s.mapLayer);
+  const setLayer = useUiStore((s) => s.setMapLayer);
+
+  return (
+    <div className="menu-backdrop" onClick={onClose}>
+      <section
+        className="hud-panel menu-sheet"
+        data-testid="menu-sheet"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="menu-grid">
+          {PANELS.map((panel) => (
+            <button
+              key={panel.id}
+              className={`menu-item${panel.id === 'research' && researchIdle ? ' attention' : ''}`}
+              data-testid={`open-${panel.id}`}
+              onClick={() => {
+                onClose();
+                togglePanel(panel.id);
+              }}
+            >
+              <Icon name={panel.icon} size={24} />
+              <span>{t(panel.label)}</span>
+              {panel.id === 'problems' && problems > 0 && (
+                <span className="quick-badge" data-testid="problem-count">
+                  {problems > 99 ? '99+' : problems}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <span className="hud-caption">{t('layers.title')}</span>
+        <div className="menu-layers">
+          {[null, ...MAP_LAYERS].map((type) => (
+            <button
+              key={type ?? 'none'}
+              aria-pressed={layer === type}
+              className={layer === type ? 'active' : ''}
+              data-testid={`layer-${type ?? 'none'}`}
+              onClick={() => {
+                setLayer(type);
+                onClose();
+              }}
+            >
+              <span
+                className="layer-swatch"
+                style={{ background: type ? cssColor(LAYER_COLORS[type]) : 'transparent' }}
+              />
+              <span className="capitalize">{type ? layerName(type) : t('layers.none')}</span>
+            </button>
+          ))}
+        </div>
+        <div className="menu-footer">
+          <span className="hud-caption">{t('hud.zoom')}</span>
+          <button
+            className="quick-button small"
+            onClick={() => zoomCamera(-1)}
+            aria-label={t('hud.zoomOut')}
+          >
+            −
+          </button>
+          <button
+            className="quick-button small"
+            onClick={() => zoomCamera(1)}
+            aria-label={t('hud.zoomIn')}
+          >
+            +
+          </button>
+          <button className="btn menu-close" onClick={onClose} data-testid="close-menu">
+            <Icon name="close" size={14} /> {t('hud.closeDock')}
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

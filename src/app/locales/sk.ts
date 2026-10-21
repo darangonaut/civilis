@@ -275,7 +275,8 @@ export const sk = {
   'hud.demolishMode': 'Búranie',
   'hud.demolishHint': 'Ťahaním vyber budovy na zbúranie · Esc zruší',
   'hud.zoomIn': 'Priblížiť',
-  'hud.touchBuildHint': 'Ťuknutím postavíš, ťahaním prsta viac naraz. Mapu posúvaš dvoma prstami.',
+  'hud.touchBuildHint':
+    'Ťukni na miesto stavby a potvrď tlačidlom Postaviť. Druhým ťuknutím vyznačíš rad alebo plochu, mapu posúvaš prstom.',
   'hud.zoomOut': 'Oddialiť',
   'phase.dawn': 'ráno',
   'phase.day': 'deň',
@@ -476,4 +477,10 @@ export const sk = {
     'Rozohraná hra sa prepíše. Ak sa k nej chceš vrátiť, najprv ju ulož do pozície.',
   'start.back': 'Späť',
   'start.language': 'Jazyk',
+  'hud.build': 'Stavať',
+  'hud.menu': 'Menu',
+  'hud.confirmBuild': 'Postaviť',
+  'hud.tapToPlace': 'Ťukni na miesto stavby.',
+  'hud.closeDock': 'Zavrieť',
+  'hud.zoom': 'Priblíženie',
 } as const;

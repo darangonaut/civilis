@@ -70,6 +70,8 @@ export interface RendererCallbacks {
   onCameraChange?(view: CameraView): void;
   /** Zmena fázy dňa (null = deň a noc vypnuté). */
   onDayPhase?(phase: DayPhase | null): void;
+  /** Dotyková stavba: počet políčok čakajúcich na potvrdenie (null = nič nečaká). */
+  onPendingBuild?(count: number | null): void;
 }
 
 /** Pseudonáhodný, ale stabilný variant textúry terénu pre políčko. */
@@ -363,9 +365,46 @@ export class GameRenderer {
   }
 
   setBuildMode(buildingId: string | null, level = 1): void {
+    if (buildingId !== this.buildModeId || level !== this.buildLevel) this.setPending(null);
     this.buildModeId = buildingId;
     this.buildLevel = level;
     this.refreshOverlay();
+  }
+
+  /**
+   * Dotyková stavba (mobil): ťuknutie označí políčko, druhé ťuknutie inde vyznačí rad
+   * alebo obdĺžnik, stavba sa potvrdí tlačidlom. Jeden prst tak môže vždy posúvať mapu.
+   */
+  private pendingBuild: { start: Position; end: Position } | null = null;
+
+  private setPending(pending: { start: Position; end: Position } | null): void {
+    this.pendingBuild = pending;
+    this.callbacks.onPendingBuild?.(pending ? this.dragTiles(pending).length : null);
+    this.refreshOverlay();
+  }
+
+  private tapPending(tile: Position): void {
+    const p = this.pendingBuild;
+    const multi = this.buildModeId !== null && this.sizeOf(this.buildModeId) === 1;
+    if (p && multi && p.start.x === p.end.x && p.start.y === p.end.y) {
+      // Druhé ťuknutie: rovnaké políčko zruší výber, iné vyznačí rad / obdĺžnik.
+      if (p.start.x === tile.x && p.start.y === tile.y) this.setPending(null);
+      else this.setPending({ start: p.start, end: tile });
+      return;
+    }
+    this.setPending({ start: tile, end: tile });
+  }
+
+  /** Postaví čakajúce políčka dotykovej stavby. */
+  confirmPending(): void {
+    const p = this.pendingBuild;
+    if (!p || !this.buildModeId) return;
+    this.callbacks.onPlaceMany(this.buildModeId, this.dragTiles(p));
+    this.setPending(null);
+  }
+
+  clearPending(): void {
+    this.setPending(null);
   }
 
   setDemolishMode(on: boolean): void {
@@ -575,7 +614,11 @@ export class GameRenderer {
     this.refreshDragPreview();
     this.refreshRange(hovered);
     this.refreshDemolishPreview(hovered);
-    const showPreview = this.buildModeId !== null && hovered !== null && this.dragBuild === null;
+    const showPreview =
+      this.buildModeId !== null &&
+      hovered !== null &&
+      this.dragBuild === null &&
+      this.pendingBuild === null;
     this.preview.visible = showPreview;
     if (showPreview) {
       const valid = this.callbacks.canPlace(this.buildModeId!, hovered);
@@ -664,7 +707,7 @@ export class GameRenderer {
 
   /** Náhľad všetkých políčok ťahania (zelené = dá sa postaviť, červené = nie). */
   private refreshDragPreview(): void {
-    const drag = this.dragBuild;
+    const drag = this.dragBuild ?? this.pendingBuild;
     const positions = drag ? this.dragTiles(drag) : [];
     const dragSize = this.buildModeId ? this.sizeOf(this.buildModeId) : 1;
     while (this.dragPreview.length < positions.length) {
@@ -835,8 +878,10 @@ export class GameRenderer {
       }
       if (this.pointer || e.button > 2) return;
       // Ľavé tlačidlo v režime stavby/búrania ťahá výber, inak (a pravé/stredné vždy) posúva mapu.
+      // Dotyk v režime stavby posúva mapu; stavia sa ťuknutím a potvrdením (pendingBuild).
+      const touchBuild = e.pointerType === 'touch' && this.buildModeId !== null;
       const mode: 'pan' | 'build' =
-        e.button === 0 && (this.buildModeId || this.demolishMode) ? 'build' : 'pan';
+        e.button === 0 && !touchBuild && (this.buildModeId || this.demolishMode) ? 'build' : 'pan';
       try {
         canvas.setPointerCapture(e.pointerId);
       } catch {
@@ -931,7 +976,8 @@ export class GameRenderer {
         this.refreshOverlay();
       } else if (!p.dragging && e.button === 0) {
         const tile = this.tileAt(e.clientX, e.clientY);
-        if (tile) this.callbacks.onTileClick(tile);
+        if (tile && e.pointerType === 'touch' && this.buildModeId) this.tapPending(tile);
+        else if (tile) this.callbacks.onTileClick(tile);
       }
     };
 

@@ -70,15 +70,15 @@ legenda značiek je v Nastaveniach.
 
 ### Ovládanie
 
-| Akcia                              | Myš a klávesnica                      | Dotyk                         |
-| ---------------------------------- | ------------------------------------- | ----------------------------- |
-| Posun mapy                         | ťahanie, pravé tlačidlo, šípky / WASD | jeden prst (pri stavbe dva)   |
-| Priblíženie                        | koliesko, tlačidlá + / −              | roztiahnutie dvoch prstov     |
-| Výber / stavba                     | ľavé tlačidlo, ťahanie = viac naraz   | ťuknutie, ťahanie prstom      |
-| Búranie viac budov                 | tlačidlo koša, ťahanie ľavým          | tlačidlo koša, ťahanie prstom |
-| Zrušenie stavby, zatvorenie panelu | Escape                                | tlačidlo „Zrušiť stavbu“ / ✕  |
-| Pauza / rýchlosť 1× 2× 4×          | medzerník / 1 2 3                     | tlačidlá v hornej lište       |
-| Uloženie                           | Ctrl/Cmd + S                          | panel Uložiť                  |
+| Akcia                              | Myš a klávesnica                      | Dotyk                                   |
+| ---------------------------------- | ------------------------------------- | --------------------------------------- |
+| Posun mapy                         | ťahanie, pravé tlačidlo, šípky / WASD | jeden prst                              |
+| Priblíženie                        | koliesko, tlačidlá + / −              | roztiahnutie dvoch prstov               |
+| Výber / stavba                     | ľavé tlačidlo, ťahanie = viac naraz   | ťuknutie a Postaviť (2. ťuknutie = rad) |
+| Búranie viac budov                 | tlačidlo koša, ťahanie ľavým          | tlačidlo koša, ťahanie prstom           |
+| Zrušenie stavby, zatvorenie panelu | Escape                                | tlačidlo „Zrušiť stavbu“ / ✕            |
+| Pauza / rýchlosť 1× 2× 4×          | medzerník / 1 2 3                     | tlačidlá v hornej lište                 |
+| Uloženie                           | Ctrl/Cmd + S                          | panel Uložiť                            |
 
 Na mobile sa dá hra pridať na plochu („Pridať na plochu“) a spúšťa sa potom na celú obrazovku.
 

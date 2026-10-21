@@ -59,9 +59,15 @@ export function StreetVoice() {
   const isCollapsed = collapsed ?? compact;
   const medium = mediumFor(eraIndex);
   const visible = posts.slice(0, isCollapsed ? 1 : 3);
+  // Mobil: zbalený Hlas ulice je jeden riadok s posledným príspevkom (prázdny sa neukazuje).
+  if (compact && isCollapsed && visible.length === 0) return null;
 
   return (
-    <section className={`hud-panel street-voice medium-${medium}`} data-testid="street-voice">
+    <section
+      className={`hud-panel street-voice medium-${medium}${isCollapsed ? ' collapsed' : ''}`}
+      data-testid="street-voice"
+      onClick={compact && isCollapsed ? () => setCollapsed(false) : undefined}
+    >
       <button
         className="voice-head"
         onClick={() => setCollapsed(!isCollapsed)}

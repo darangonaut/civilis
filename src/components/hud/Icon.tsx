@@ -18,6 +18,9 @@ const PATHS = {
     'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1',
   lock: 'M5 11h14v10H5zM8 11V8a4 4 0 0 1 8 0v3',
   close: 'M6 6l12 12M18 6L6 18',
+  menu: 'M4 6h16M4 12h16M4 18h16',
+  hammer: 'M13 3l8 8-3 3-8-8zM10 6l-7 7v3h3l7-7M15 8l-2-2',
+  check: 'M5 12l5 5 9-10',
   pause: 'M8 5v14M16 5v14',
   demolish: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
 } as const;

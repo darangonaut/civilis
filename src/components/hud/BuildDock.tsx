@@ -14,6 +14,8 @@ import {
   difficultyOf,
 } from '@/engine';
 import { useUiStore } from '@/stores/uiStore';
+import { useCompact } from '@/app/useCompact';
+import { clearPendingBuild, confirmPendingBuild } from '@/app/camera';
 import {
   BUILDING_CATEGORIES,
   RESOURCE_IDS,
@@ -106,6 +108,52 @@ export function BuildDock() {
   const tooltipTile =
     tiles.find((tile) => tile.definition.id === hovered?.id && tile.level === hovered.level) ??
     tiles.find((tile) => tile.definition.id === buildModeId && tile.level === buildLevel);
+  const compact = useCompact();
+  const dockOpen = useUiStore((s) => s.dockOpen);
+  const setDockOpen = useUiStore((s) => s.setDockOpen);
+  const pending = useUiStore((s) => s.pendingBuild);
+
+  // Mobil: dok sa otvára tlačidlom Stavať; počas stavby je z neho úzky pruh s potvrdením.
+  if (compact && buildModeId) {
+    const tile = tooltipTile;
+    return (
+      <div className="build-dock-wrap">
+        <section className="hud-panel build-bar" data-testid="build-bar">
+          <span className="build-bar-icon">
+            <BuildingIcon
+              spriteKey={buildLevel > 1 ? `${buildModeId}@${buildLevel}` : buildModeId}
+            />
+          </span>
+          <div className="build-bar-text">
+            <strong>{buildingName(buildModeId, buildLevel)}</strong>
+            {tile && <Cost cost={tile.cost} stock={resources} limit={3} />}
+            {pending === null && <span className="muted">{t('hud.tapToPlace')}</span>}
+          </div>
+          <button
+            className="btn primary build-confirm"
+            disabled={pending === null}
+            onClick={confirmPendingBuild}
+            data-testid="confirm-build"
+          >
+            <Icon name="check" size={16} /> {t('hud.confirmBuild')}
+            {pending !== null && pending > 1 && ` (${pending})`}
+          </button>
+          <button
+            className="icon-button"
+            onClick={() => {
+              if (pending !== null) clearPendingBuild();
+              else setBuildMode(null);
+            }}
+            aria-label={t('hud.cancelBuild')}
+            data-testid="cancel-build"
+          >
+            <Icon name="close" size={16} />
+          </button>
+        </section>
+      </div>
+    );
+  }
+  if (compact && !dockOpen) return null;
 
   return (
     <div className="build-dock-wrap">
@@ -133,6 +181,16 @@ export function BuildDock() {
               title={t('hud.cancelBuild')}
             >
               <Icon name="close" size={14} /> {t('hud.cancelBuild')}
+            </button>
+          )}
+          {compact && !buildModeId && (
+            <button
+              className="dock-cancel"
+              onClick={() => setDockOpen(false)}
+              data-testid="close-dock"
+              aria-label={t('hud.closeDock')}
+            >
+              <Icon name="close" size={14} />
             </button>
           )}
         </div>

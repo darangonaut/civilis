@@ -275,7 +275,7 @@ export const en: Record<keyof typeof sk, string> = {
   'hud.demolishHint': 'Drag to select buildings to demolish · Esc cancels',
   'hud.zoomIn': 'Zoom in',
   'hud.touchBuildHint':
-    'Tap to build, drag a finger to build several. Pan the map with two fingers.',
+    'Tap where to build and confirm with Build. A second tap marks a row or an area; drag a finger to move the map.',
   'hud.zoomOut': 'Zoom out',
   'phase.dawn': 'morning',
   'phase.day': 'day',
@@ -477,4 +477,10 @@ export const en: Record<keyof typeof sk, string> = {
     'Your current game will be replaced. Save it to a slot first if you want to come back to it.',
   'start.back': 'Back',
   'start.language': 'Language',
+  'hud.build': 'Build',
+  'hud.menu': 'Menu',
+  'hud.confirmBuild': 'Build',
+  'hud.tapToPlace': 'Tap where to build.',
+  'hud.closeDock': 'Close',
+  'hud.zoom': 'Zoom',
 };

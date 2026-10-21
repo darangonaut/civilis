@@ -275,7 +275,7 @@ export const cs: Record<keyof typeof sk, string> = {
   'hud.demolishHint': 'Tažením vyber budovy ke zbourání · Esc zruší',
   'hud.zoomIn': 'Přiblížit',
   'hud.touchBuildHint':
-    'Klepnutím postavíš, tažením prstu víc najednou. Mapu posouváš dvěma prsty.',
+    'Ťukni na místo stavby a potvrď tlačítkem Postavit. Druhým ťuknutím vyznačíš řadu nebo plochu, mapu posouváš prstem.',
   'hud.zoomOut': 'Oddálit',
   'phase.dawn': 'ráno',
   'phase.day': 'den',
@@ -476,4 +476,10 @@ export const cs: Record<keyof typeof sk, string> = {
     'Rozehraná hra se přepíše. Pokud se k ní chceš vrátit, nejprve ji ulož do pozice.',
   'start.back': 'Zpět',
   'start.language': 'Jazyk',
+  'hud.build': 'Stavět',
+  'hud.menu': 'Menu',
+  'hud.confirmBuild': 'Postavit',
+  'hud.tapToPlace': 'Ťukni na místo stavby.',
+  'hud.closeDock': 'Zavřít',
+  'hud.zoom': 'Přiblížení',
 };

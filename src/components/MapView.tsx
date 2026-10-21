@@ -99,6 +99,7 @@ export function MapView() {
               ).success,
             onCameraChange: (view) => useUiStore.getState().setCameraView(view),
             onDayPhase: (phase) => useUiStore.getState().setDayPhase(phase),
+            onPendingBuild: (count) => useUiStore.getState().setPendingBuild(count),
           },
         ),
       )
@@ -118,6 +119,8 @@ export function MapView() {
         registerCameraTarget({
           centerOnWorld: (wx, wy) => created.centerOnWorld(wx, wy),
           zoomStep: (direction) => created.zoomStep(direction),
+          confirmBuild: () => created.confirmPending(),
+          clearPendingBuild: () => created.clearPending(),
         });
         renderer.setSelectedInstance(ui.selectedInstanceId);
 

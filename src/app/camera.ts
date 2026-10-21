@@ -3,6 +3,9 @@ import { tileToWorld } from '@/renderer/iso';
 export interface CameraTarget {
   centerOnWorld(wx: number, wy: number): void;
   zoomStep(direction: 1 | -1): void;
+  /** Dotyková stavba: postaviť / zrušiť označené políčka. */
+  confirmBuild(): void;
+  clearPendingBuild(): void;
 }
 
 let target: CameraTarget | null = null;
@@ -17,6 +20,14 @@ export function centerCamera(wx: number, wy: number): void {
 
 export function zoomCamera(direction: 1 | -1): void {
   target?.zoomStep(direction);
+}
+
+export function confirmPendingBuild(): void {
+  target?.confirmBuild();
+}
+
+export function clearPendingBuild(): void {
+  target?.clearPendingBuild();
 }
 
 /** Presunie kameru na stred budovy (pôdorys `size` × `size` od `position`). */
