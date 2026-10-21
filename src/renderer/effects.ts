@@ -262,6 +262,8 @@ export class CityEffects {
       sprite.cullable = true;
       const world = tileToWorld(building.position.x, building.position.y);
       sprite.position.set(world.x, world.y);
+      // Hneď nad vlastnou budovou, pod budovami vpredu.
+      sprite.zIndex = building.sprite.zIndex + 0.01;
       this.layers.lights.addChild(sprite);
       this.lights.set(id, sprite);
     }

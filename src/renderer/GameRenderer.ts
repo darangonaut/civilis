@@ -1,4 +1,12 @@
-import { Application, Container, CullerPlugin, Graphics, Sprite, extensions } from 'pixi.js';
+import {
+  Application,
+  Container,
+  CullerPlugin,
+  Graphics,
+  RenderLayer,
+  Sprite,
+  extensions,
+} from 'pixi.js';
 import type { GameState, Position } from '@/types';
 import { TILE_HEIGHT, TILE_WIDTH, tileToWorld, worldBounds, worldToTile } from './iso';
 import type { DayPhase } from './dayNight';
@@ -238,12 +246,19 @@ export class GameRenderer {
     this.host.appendChild(this.app.canvas);
     this.atlas = createTextureAtlas(buildingIds);
 
+    // Budovy, postavičky a nočné svetlá sa kreslia spolu podľa hĺbky: okná zadnej budovy
+    // nepresvitajú cez prednú. Svetlá ostávajú v netónovanej vrstve (noc ich nestmavuje).
+    const depthLayer = new RenderLayer({ sortableChildren: true });
+    for (const layer of [this.buildingLayer, this.lightLayer]) {
+      layer.on('childAdded', (child) => depthLayer.attach(child));
+    }
     this.camera.addChild(
       this.terrainLayer,
       this.roadLayer,
       this.groundOverlay,
       this.buildingLayer,
       this.lightLayer,
+      depthLayer,
       this.particleLayer,
       this.markerLayer,
     );
